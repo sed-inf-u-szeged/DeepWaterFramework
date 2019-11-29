@@ -1,0 +1,135 @@
+{%- extends "base.j2" -%}
+{% from 'time_macros.j2' import format_time_stamp %}
+{%- block content -%}
+    {%- if worker -%}
+        <div class="container">
+            <div class="jumbotron">
+                <h1 class="text-center" style="padding-bottom:30px;">
+                    Worker details:
+                </h1>
+            </div>
+            <table class="table" style="border: 1px solid black;">
+                <caption style="border: 2px solid black;text-align: center">
+                    <h4><b>Worker config</b></h4>
+                </caption>
+                <colgroup>
+                    <col span="1" style="width: 25%;">
+                    <col span="1" style="width: 75%;">
+                </colgroup>
+                <tr>
+                    <td>Name</td>
+                    <td>{{ worker.platform_info.node }}</td>
+                </tr>
+                <tr>
+                    <td>OS</td>
+                    <td>{{ worker.platform_info.os }}</td>
+                </tr>
+                <tr>
+                    <td>CPU</td>
+                    <td>{{ worker.platform_info.cpu.brand }} - {{ worker.platform_info.cpu.clock_speed }} - {{ worker.platform_info.cpu.cores }} cores</td>
+                </tr>
+                <tr>
+                    <td>GPU</td>
+                    <td>{{ worker.platform_info.gpu_json_str }}</td>
+                </tr>
+                <tr>
+                    <td>Memory</td>
+                    <td>{{ worker.platform_info.memory }}</td>
+                </tr>
+            </table>
+            <hr/>
+            {% if worker.environment %}
+            <table class="table" style="border: 1px solid black;">
+                <caption style="border: 2px solid black;text-align: center">
+                    <h4><b>Environment info</b></h4>
+                </caption>
+                <colgroup>
+                    <col span="1" style="width: 25%;">
+                    <col span="1" style="width: 75%;">
+                </colgroup>
+                {% for k, v in worker.environment.items() %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {%- endif %}
+            {% if worker.blocked_by_error %}
+                <div class="row text-center">
+                    <h3 style="color: red;">An error occurred!</h3>
+                </div>
+                <div class="row">
+                    <div class="col-md-12" style="padding-left: 2em;"><h3>Error logs:</h3></div>
+                    {% for l in worker.error_logs -%}
+                        <div class="col-md-12" style="padding-left: 4em;">
+                            {{ format_time_stamp(l.timestamp) }} : {{ l.message }}
+                        </div>
+                    {% else %}
+                        <div class="col-md-11 col-md-offset-1">no messages yet...</div>
+                    {% endfor -%}
+                </div>
+                <hr/>
+                <div class="row text-center">
+                    <a href="{{ request.url_root + 'worker_fixed/' + worker_id }}"><h3>Worker fixed, continue.</h3></a>
+                </div>
+            {% endif %}
+            {% if worker.current_task_id -%}
+                <div class="row">
+                    <div class="col-md-4" style="padding-left: 2em;">
+                        <h3>
+                            Working on
+                            {% if worker.is_assembling %}Assembling{% else %}Learning{% endif %} for
+                            {% if worker.is_working_on_multiple_tasks %}Tasks{% else %}Task{% endif %}:
+                        </h3>
+                    </div>
+                    <div class="col-md-8">
+                        {% for task_id in worker.task_ids %}
+                            <h3>
+                                <a href="{{ request.url_root + 'task/' + task_id }}">
+                                    {{ task_id }}
+                                </a>
+                            </h3>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4" style="padding-left: 2em;">
+                        <h3>Working on current job since:</h3>
+                    </div>
+                    <div class="col-md-8"><h3>{{ format_time_stamp(worker.job_started_ts) }}</h3></div>
+                </div>
+            {%- else -%}
+                <div class="col-md-12"><h2>No task assigned to this worker.</h2></div>
+            {%- endif %}
+            {% if worker.logs %}
+                <div>
+                    <div style="padding-left: 2em;"><h3>Messages:</h3></div>
+                    {% for l in worker.log -%}
+                        <div style="padding-left: 4em;">
+                            {{ format_time_stamp(l.timestamp) }} : {{ l.message }}
+                        </div>
+                    {% else %}
+                        <div style="padding-left: 4em;">no messages yet...</div>
+                    {% endfor -%}
+                </div>
+            {% endif %}
+            <hr/>
+            <div class="row">
+                <div class="col-md-4" style="padding-left: 2em;">
+                    <h3>Registered at:</h3>
+                </div>
+                <div class="col-md-8"><h3>{{ format_time_stamp(worker.register_ts) }}</h3></div>
+            </div>
+            <hr/>
+            <div class="row">
+                <div class="col-md-4" style="padding-left: 2em;">
+                    <h3>Most recent request time:</h3>
+                </div>
+                <div class="col-md-8"><h3>{{ format_time_stamp(worker.communication_ts) }}</h3></div>
+            </div>
+        </div>
+    {%- else -%}
+        <div class="col-md-12"><h2>Unknown worker id!</h2></div>
+    {%- endif -%}
+{%- endblock -%}

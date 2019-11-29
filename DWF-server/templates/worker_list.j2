@@ -1,0 +1,67 @@
+{% extends "base.j2" %}
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center" style="padding-bottom:30px;">
+                Worker List
+            </h1>
+        </div>
+        {% if workers %}
+            <table class="table">
+                <colgroup>
+                    <col span="1" style="width: 50%;">
+                    <col span="1" style="width: 50%;">
+                </colgroup>
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                </tr>
+                {% for worker_id, worker in workers %}
+                    <tr>
+                        <td class="align-middle">
+                            <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker_id|e }}</b></a>
+                        </td>
+                        {% if worker.is_working() %}
+                            <td class="align-middle">
+                                <b style="color: green;">Working</b>
+                            </td>
+                        {% elif worker.blocked_by_error %}
+                            <td class="align-middle">
+                                <b style="color: red;">ERROR!</b>
+                            </td>
+                        {% else %}
+                            <td class="align-middle">
+                                <b class="worker_status" id="{{ worker.communication_ts }}"> . . . </b>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <h2 class="text-center">No workers yet.</h2>
+        {% endif %}
+    </div>
+    <script>
+        let statusTexts = document.getElementsByClassName("worker_status");
+
+        function setWorkersStatus() {
+            for (let i = 0; i < statusTexts.length; i++) {
+                let timeDiff = (new Date().getTime() - +statusTexts[i].id) / 1000;
+                if (timeDiff < 40) {
+                    statusTexts[i].style.color = 'green';
+                    statusTexts[i].innerHTML = 'Active';
+                } else if (timeDiff < 70) {
+                    statusTexts[i].style.color = 'yellow';
+                    statusTexts[i].innerHTML = 'Active';
+                } else {
+                    statusTexts[i].style.color = 'red';
+                    statusTexts[i].innerHTML = 'Inactive';
+                }
+            }
+        }
+
+        window.addEventListener('load', function () {
+            setWorkersStatus();
+        });
+    </script>
+{%- endblock %}

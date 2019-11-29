@@ -1,0 +1,6 @@
+{%- extends "experiment/config_form.j2" %}
+{% from 'form_macros.j2' import input_field %}
+
+{% block shared_parameters -%}
+    {{ input_field(id="label", label="Label column", type="text", default_value=default_label, required=True) }}
+{%- endblock %}

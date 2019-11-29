@@ -1,0 +1,13 @@
+requests
+py-cpuinfo
+nvgpu
+psutil
+hurry.filesize
+paramiko
+
+tensorflow==1.15
+sklearn
+numpy
+pandas
+
+gensim

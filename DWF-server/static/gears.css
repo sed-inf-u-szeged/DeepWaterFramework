@@ -1,0 +1,40 @@
+#gear1 {
+    filter: invert(41%) sepia(82%) saturate(1833%) hue-rotate(193deg) brightness(101%) contrast(103%);
+    animation-name: cw;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    transform-origin: 50% 50%;
+    display: inline-block;
+    animation-timing-function: linear;
+}
+
+#gear2 {
+    filter: invert(41%) sepia(82%) saturate(1833%) hue-rotate(193deg) brightness(101%) contrast(103%);
+    animation-name: ccw;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    transform-origin: 50% 50%;
+    display: inline-block;
+    animation-timing-function: linear;
+    position: absolute;
+    top: 10px;
+    left: 15.5px;
+}
+
+@keyframes cw {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes ccw {
+    0% {
+        transform: rotate(360deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}

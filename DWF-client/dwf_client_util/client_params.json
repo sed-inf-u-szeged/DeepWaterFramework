@@ -1,0 +1,17 @@
+{
+    "DBH": {
+      "output": "output",
+      "clean": false,
+      "device": "/device:CPU:0",
+      "log_device": false,
+      "calc_completeness": true
+    },
+    "calc_features": {
+      "output": "output",
+      "clean": false
+    },
+    "environment": {
+      "PYTHON_SEED": 12345,
+      "TEST": "test"
+    }
+  }

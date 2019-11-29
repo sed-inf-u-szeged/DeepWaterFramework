@@ -1,0 +1,54 @@
+version: "3"
+services:
+  dwf-server:
+    image: viszkoktamas93/dwf-server
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - sedstorvol:/Deep-Water
+    environment:
+        - DWF_INIT_DB
+    ports:
+      - "4000:12345"
+    networks:
+      - dwf-network
+  elasticsearch:
+    image: elasticsearch:7.3.1
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - dwf-network
+  kibana:
+    image: kibana:7.3.1
+    ports:
+      - "5601:5601"
+    networks:
+      - dwf-network
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dwf-network
+volumes:
+  esdata:
+    driver: local
+  sedstorvol:
+    driver: local
+    driver_opts:
+      type: cifs
+      device: ${SMB_VOL}
+      o: username=${SMB_USER},domain=${SMB_DOMAIN},password=${SMB_PASSWD}
+networks:
+  dwf-network:

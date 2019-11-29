@@ -1,0 +1,31 @@
+{%- extends "base2.html" -%}
+{%- block title -%}DWF{%- endblock -%}
+{% macro nav_menu(path, name) %}<a {{ 'class="active"' if request.path == '/' + path else '' }} href="{{ request.url_root + path }}">{{ name }}</a>{% endmacro %}
+{% macro nav_menu_port(path, port, name) %}<a href="{{ ':'.join(request.url_root.split(':')[:2]) + ':' + port + '/' + path }}" target="_blank">{{ name }}</a>{% endmacro %}
+{%- block styles -%}
+    {{super()}}
+    {% if reload or (experiment and experiment.state) %}
+        <meta http-equiv="refresh" content="5" >
+    {% endif %}
+    <link rel='stylesheet' type="text/css" href='https://fonts.googleapis.com/css?family=Poppins'>
+	<link rel='stylesheet' type="text/css" href='https://fonts.googleapis.com/css?family=Roboto'>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='app.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='gears.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.min.css')}}">
+    <link href="{{bootstrap_find_resource('css/bootstrap.css', cdn='bootstrap')}}" rel="stylesheet">
+    <script type="text/javascript" src="{{url_for('static', filename='moment.min.js')}}"></script>    
+	<script type="text/javascript" src="{{url_for('static', filename='jquery.js')}}"></script> 
+    <script type="text/javascript" src="{{url_for('static', filename='jstree.js')}}"></script>
+    <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>         
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+{%- endblock -%}
+{% block navbar %}
+	<ul id="menu" class="header" style="width:100%;overflow:hidden;position: fixed;">
+		<li><my_tag><img src="{{ url_for('static', filename='favicon.ico') }}" height="20em" width="20em" /> DWF</my_tag></li>
+        <li>{{ nav_menu('workers', 'Workers') }}</li>
+        <li>{{ nav_menu('experiment/list', 'Experiments') }}</li>
+        <li>{{ nav_menu('experiment/new', 'New Experiment') }}</li>
+        <li>{{ nav_menu_port('app/kibana#/dashboard/982628a0-06e0-11ea-924f-fb7ec4deb748?_g=(filters:!())&_a=(fullScreenMode:!t)', '5601', 'Results Dashboard') }}</li>        
+	</ul>
+{% endblock %}

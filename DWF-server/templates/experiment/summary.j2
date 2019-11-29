@@ -1,0 +1,107 @@
+{%- extends "base.j2" -%}
+{%- block content -%}
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center" style="padding-bottom:30px;">Experiment summary</h1>
+        </div>
+        <div class="text-center">
+            {%- if experiment -%}
+
+                <table id="results_table" class="table" style="border: 1px solid black;">
+                    <caption style="border: 2px solid black;text-align: center">
+                        <h4><b>Task results</b></h4>
+                    </caption>
+                    <colgroup>
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                        <col span="1" style="width: 10%;">
+                    </colgroup>
+                    <tr>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(0)">task</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(1)">tp</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(2)">tn</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(3, true)">fp</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(4, true)">fn</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(5)">accuracy</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(6)">precision</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(7)">recall</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(8)">fmes</th>
+                    </tr>
+                    {% for task in experiment.tasks %}
+                        <tr>
+                            <td>
+                                <a href="{{ request.url_root + 'task/' + task.id }}"><b>{{ task.name }}</b></a>
+                            </td>
+                            {% for k in ['tp', 'tn', 'fp', 'fn'] %}
+                                <td>{{ task.result.test[k] }}</td>
+                            {% endfor %}
+                            {% for k in ['accuracy', 'precision', 'recall', 'fmes'] %}
+                                <td>{{ "{0:.3f}".format(task.result.test[k]*100) }}%</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <script>
+                    let results_table = document.getElementById("results_table");
+
+                    markBestResults(1, true);
+                    markBestResults(2, true);
+                    markBestResults(3, false);
+                    markBestResults(4, false);
+                    markBestResults(5, true);
+                    markBestResults(6, true);
+                    markBestResults(7, true);
+                    markBestResults(8, true);
+
+                    function markBestResults(n, desc) {
+                        let rows = results_table.rows;
+                        let maxIs = [1], maxVal = parseFloat(rows[1].getElementsByTagName("TD")[n].innerHTML);
+                        for (let i = 2; i < rows.length; i++) {
+                            let value = parseFloat(rows[i].getElementsByTagName("TD")[n].innerHTML);
+                            if ((desc && value > maxVal) || (!desc && value < maxVal)) {
+                                maxIs = [i];
+                                maxVal = value;
+                            } else if (Math.abs(value - maxVal) < 0.000001) {
+                                maxIs.push(i);
+                            }
+                        }
+                        for (let i = 0; i < maxIs.length; i++)
+                            rows[maxIs[i]].getElementsByTagName("TD")[n].style.backgroundColor = "#b3f5bc";
+                    }
+
+                    function sortTable(n, asc) {
+                        let rows, switching = true, i, x, y, shouldSwitch, dir = (asc ? "asc" : "desc"), switchCount = 0;
+                        while (switching) {
+                            switching = false;
+                            rows = results_table.rows;
+                            for (i = 1, shouldSwitch = false; i < (rows.length - 1) && !shouldSwitch; i++) {
+                                x = rows[i].getElementsByTagName("TD")[n];
+                                y = rows[i + 1].getElementsByTagName("TD")[n];
+                                if ((dir === "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) ||
+                                    (dir === "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase())) {
+                                    shouldSwitch = true;
+                                }
+                            }
+                            if (shouldSwitch) {
+                                rows[i - 1].parentNode.insertBefore(rows[i], rows[i - 1]);
+                                switching = true;
+                                switchCount++;
+                            } else if (switchCount === 0 && dir === (asc ? "asc" : "desc")) {
+                                dir = (!asc ? "asc" : "desc");
+                                switching = true;
+                            }
+                        }
+                    }
+                </script>
+            {%- else -%}
+                <div class="col-md-11 col-md-offset-1"><h2>{{ error_msg or "Experiment not found!" }}</h2></div>
+            {%- endif -%}
+        </div>
+    </div>
+{%- endblock -%}

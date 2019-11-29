@@ -1,0 +1,49 @@
+.jumbotron {
+    margin-top: 1em;
+}
+
+body {
+    font-family: 'Roboto', serif;
+    padding-bottom: 30px;
+}
+
+.progress {
+    margin: 0;
+}
+
+ul.header {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #666;
+}
+
+ul.header li {
+    float: left;
+}
+
+ul.header li a {
+    display: block;
+    color: #cccccc;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+ul.header li my_tag {
+    display: block;
+    color: #cccccc;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+ul.header li a:hover {
+    background-color: #111;
+}
+
+ul.header li a.active {
+    background-color: #1E88E5;
+    color: white;
+}

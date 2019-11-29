@@ -1,0 +1,95 @@
+{% from 'animation_macros.j2' import gears, wait, done %}
+
+{% macro initAjax() %}
+    <script>
+        let ajaxRequest;
+        try {
+            ajaxRequest = new XMLHttpRequest();
+        } catch (e) {
+            try {
+                ajaxRequest = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+
+        function sendPost(url, json) {
+            ajaxRequest.open("POST", url);
+            ajaxRequest.setRequestHeader("Content-Type", "application/json");
+            ajaxRequest.send(JSON.stringify(json));
+        }
+    </script>
+{% endmacro %}
+
+{% macro experiment_config_row(state, route, type, id, elem) %}
+    <tr id="{{ id }}_row">
+        <td><b>{{ elem.strategy_name|e }}</b></td>
+        <td>{{ type|e }}</td>
+        <td><b>{{ elem.strategy_id }}</b> -
+            {% for k, v in elem.strategy_parameters.items() %}
+                <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
+            {% endfor %}
+        </td>
+        {% if state == "configuration" %}
+            <td>
+                <input type="image" onclick="deleteConfig('{{ id }}')"
+                       src="{{ url_for('static', filename='delete.svg') }}" height="24" width="24" alt="delete button"/>
+            </td>
+        {% endif %}
+    </tr>
+{% endmacro %}
+
+{% macro experiment_task_row(task, state) %}
+    <tr>
+        <td>
+            {% with need_link = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
+                {% if need_link %}
+                    <a href="{{ request.url_root + 'task/' + task.id }}">
+                {% endif %}
+                <b>{{ task.assemble_config.strategy_name }}{%- if task.learn_config %} + {{ task.learn_config.strategy_name }}{% endif %}</b>
+                {% if need_link %}
+                    </a>
+                {% endif %}
+            {% endwith %}
+        </td>
+        <td><b>{{ task.assemble_config.strategy_id }}</b> -
+            {% for k, v in task.assemble_config.strategy_parameters.items() %}
+                <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
+            {% endfor %}
+            <br/>
+            {% if task.learn_config %}
+                <b>{{ task.learn_config.strategy_id }}</b> -
+                {% for k, v in task.learn_config.strategy_parameters.items() %}
+                    <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
+                {% else %}
+                    <b>no hyperparameters</b>
+                {% endfor %}
+            {% endif %}
+        </td>
+        <td>
+            {% if task.state == "generated" %}
+                <input type="image" onclick="runTask('{{ task.id }}')"
+                       src="{{ url_for('static', filename='run-button.svg') }}" height="24" width="24"
+                       alt="run button"/>
+            {% elif task.state == "completed" %}
+                {{ done(32) }}
+            {% elif task.state == "running" %}
+                <div style="margin-top:-7px;position:relative;">{{ gears(25) }}</div>
+            {% else %}
+                {{ wait(32) }}
+            {% endif %}
+        </td>
+        <td>{{ task.status_info }}</td>
+        <td>
+            {% if task.state == "completed" %}
+                <input type="image" onclick="rerunTask('{{ task.id }}')"
+                       src="{{ url_for('static', filename='restart.png') }}" height="24" width="24"
+                       alt="run button"/>
+            {% endif %}
+        </td>
+    </tr>
+{% endmacro %}

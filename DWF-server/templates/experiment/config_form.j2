@@ -1,0 +1,134 @@
+{%- extends "base.j2" %}
+{% from 'form_macros.j2' import generate_strategies, select_input, tuple_option_builder, input_field %}
+
+{% block content -%}
+    {%- with form_id = "config_form" -%}
+        <div class="container">
+            <div class="jumbotron">
+                <h1 class="text-center">{{ title }}</h1>
+            </div>
+            <script>
+                function hideField(d, e, cond) {
+                    if (d)
+                        d.style.display = cond ? 'none' : '';
+                    for (let i = 0; i < e.length; i++) {
+                        if (e[i])
+                            e[i].disabled = cond;
+                    }
+                }
+
+                function checkFieldValue(fieldValue, checkValue) {
+                    return fieldValue === checkValue;
+                }
+            </script>
+            <div class="col-md-12">
+                <h3><b id="generated_config_count">1</b> config will be generated</h3>
+                <script>
+                    let generated_config_count = document.getElementById("generated_config_count");
+                    let ajaxRequest;
+                    try {
+                        ajaxRequest = new XMLHttpRequest();
+                    } catch (e) {
+                        try {
+                            ajaxRequest = new ActiveXObject("Msxml2.XMLHTTP");
+                        } catch (e) {
+                            try {
+                                ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                            } catch (e) {
+                                console.log(e);
+                            }
+                        }
+                    }
+                    ajaxRequest.onreadystatechange = function () {
+                        if (ajaxRequest.readyState === 4 && Number.isInteger(parseInt(ajaxRequest.responseText) || null)) {
+                            generated_config_count.innerHTML = ajaxRequest.responseText;
+                        }
+                    };
+
+                    let formParameters = {};
+
+                    function addParameters(keyValues) {
+                        for (let i = 0; i < keyValues.length; i++) {
+                            delete formParameters[keyValues[i].key];
+                            if (keyValues[i].value) formParameters[keyValues[i].key] = keyValues[i].value;
+                        }
+                        countConfigs();
+                    }
+
+                    function addParameter(key, value) {
+                        delete formParameters[key];
+                        if (value) formParameters[key] = value;
+                        countConfigs();
+                    }
+
+                    function countConfigs() {
+                        ajaxRequest.open("POST", "{{ request.url_root + "count_generated_configs" }}");
+                        ajaxRequest.setRequestHeader("Content-Type", "application/json");
+                        ajaxRequest.send(JSON.stringify({
+                            selected_strategy: strategySelect.value,
+                            strategy_type: "{{ strategy_type }}",
+                            ...formParameters
+                        }));
+                    }
+                </script>
+                <form id="{{ form_id }}" class="form" method="post" style="display:none;" autocomplete="off">
+                    <label><b>Shared parameters</b></label>
+                    <div style="margin-left: 10px;">
+                        {% block shared_parameters %}
+                        {% endblock shared_parameters %}
+                    </div>
+                    <label><b>Strategy parameters</b></label>
+                    {% if strategies %}
+                        <div style="margin-left: 10px;">
+                            {{ generate_strategies(strategies) }}
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    {% else %}
+                        <div style="margin-left: 10px;">
+                            <h4>Strategies are not found.</h4>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        {%- block shared_parameters_script %}{% endblock %}
+        <script>
+            function getSelectValue(select) {
+                if (!select) return;
+                let values = Array.prototype.map.apply(select.selectedOptions, [e => e.value]);
+                return values.join('_||_||_');
+            }
+
+            let form = document.getElementById("{{ form_id }}");
+            form.addEventListener('submit', function () {
+                let allInputs = form.querySelectorAll('input,select');
+
+                for (let i = 0; i < allInputs.length; i++) {
+                    let input = allInputs[i];
+
+                    if (input.name && !input.value) {
+                        input.name = '';
+                    }
+                }
+
+                let selects = form.querySelectorAll("select");
+
+                for (let i = 0; i < selects.length; i++) {
+                    let select = selects[i];
+                    if (select && select.name && select.selectedOptions) {
+                        let value = getSelectValue(select);
+                        let input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = select.name;
+                        input.value = value;
+                        form.appendChild(input);
+                        select.parentNode.removeChild(select);
+                    }
+                }
+            });
+            window.addEventListener('load', function () {
+                document.getElementById("{{ form_id }}").style.display = '';
+            });
+        </script>
+    {%- endwith -%}
+{%- endblock %}

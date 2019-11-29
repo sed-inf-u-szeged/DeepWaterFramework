@@ -1,0 +1,31 @@
+------------------------  /ping  ------------------------
+
+{
+    "hash": "932d750894c449a8876305a0603edf56",
+    "task": {
+        "type": "learning",
+        "parameters": {
+            "shared": {
+                "csv": "//sedstor/csv_files/dataset_H45HC0D31234.csv",
+                "label": "BUG",
+                "resample": "up",
+                "resample_amount": 50,
+                "seed": 1337
+            },
+            "strategy": [["keras", "--layers 5 --neurons 200 --batch 4096"]]
+            "preprocess": [["features", "standardize"], ["labels", "binarize"]],
+        },
+    }
+}
+
+{
+    "hash": "932d750894c449a8876305a0603edf56",
+    "task": {
+        "type": "feature_assembling",
+        "parameters": {
+            "strategy": ["strategy_id", "--param1 value1 --param2 value2"],
+        }
+    }
+}
+
+------------------------  /ping  ------------------------

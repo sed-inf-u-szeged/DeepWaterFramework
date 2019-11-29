@@ -1,0 +1,63 @@
+{% extends "base.j2" %}
+{% from 'form_macros.j2' import input_field %}
+{% from 'animation_macros.j2' import img %}
+{% from 'experiment/experiment_macros.j2' import initAjax %}
+
+{% block styles %}
+    {{ super() }}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Converter.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Editor.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Sanitizer.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='wmd.css') }}">
+{% endblock %}
+{% block content %}
+        {{ initAjax() }}
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center" style="padding-bottom:30px;">New Experiment</h1>
+        </div>
+        <form id="new_experiment_form" class="form" method="post" autocomplete="off">
+            {{ input_field(id="experiment_name", label="Experiment Name", type="text", required=True) }}
+            <div id="checkName"></div>
+            <div class="form-group required">
+                <label for="markdown">Markdown</label>
+                <div id="wmd-button-bar"></div>
+                <textarea id="wmd-input" name="markdown" style="width: 100%;height: 100px;resize: vertical;"></textarea>
+                <div id="wmd-preview" style="margin-bottom: 20px;background-color: #efefef;"></div>
+            </div>
+            <script type="text/javascript">
+                var converter = Markdown.getSanitizingConverter();
+                var editor = new Markdown.Editor(converter);
+                editor.run();
+            </script>
+            <button id="submitBtn" type="submit" class="btn btn-default">Submit</button>
+        </form>
+    </div>
+        <script>
+            let submitBtn = document.getElementById("submitBtn");
+            let checkName = document.getElementById("checkName");
+            let experimentName = document.getElementById("experiment_name");
+
+            let checkingName = "";
+
+            ajaxRequest.onreadystatechange = function () {
+                if (ajaxRequest.readyState === 4) {
+                    if (ajaxRequest.responseText === checkingName) {
+                        submitBtn.disabled = false;
+                        checkName.innerHTML = "{{ img('checked.svg', 30) }} name is available";
+                    } else if (ajaxRequest.responseText === "no") {
+                        checkName.innerHTML = "{{ img('cancel.svg', 30) }} name is not available";
+                    }
+                }
+            };
+
+            function checkNameFunc(name) {
+                submitBtn.disabled = true;
+                checkingName = name;
+                checkName.innerHTML = "Checking name...";
+                sendPost("{{ request.url_root + "check_name" }}", {name});
+            }
+
+            experimentName.onchange = (() => {checkNameFunc(experimentName.value)});
+        </script>
+{%- endblock %}

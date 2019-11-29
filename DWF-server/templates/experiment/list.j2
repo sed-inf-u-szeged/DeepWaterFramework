@@ -1,0 +1,50 @@
+{% extends "base.j2" %}
+{% from 'time_macros.j2' import format_time_stamp %}
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center" style="padding-bottom:30px;">Experiments</h1>
+        </div>
+        {% if experiments %}
+            <table class="table">
+                <colgroup>
+                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 19%;">
+                    <col span="1" style="width: 7%;">
+                    <col span="1" style="width: 7%;">
+                    <col span="1" style="width: 7%;">
+                </colgroup>
+                <tr>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>Progress</th>
+                    <th>Tasks</th>
+                    <th>Running</th>
+                    <th>Completed</th>
+                </tr>
+                {% for id, exp in experiments %}
+                    <tr>
+                        <td><a href="{{ request.url_root + 'experiment/' + id }}"><b>{{ exp.name|e }}</b></a></td>
+                        <td><b>{{ format_time_stamp(exp.created_ts) }}</b></td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated active"
+                                     role="progressbar"
+                                     aria-valuenow="{{ exp.progress }}" aria-valuemin="0" aria-valuemax="100"
+                                     style="width:{{ exp.progress }}%">
+                                    {{ exp.progress }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td><b>{{ exp.tasks_total|e }}</b></td>
+                        <td><b>{{ exp.tasks_running|e }}</b></td>
+                        <td><b>{{ exp.tasks_completed|e }}</b></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <h2 class="text-center">No experiments created yet.</h2>
+        {% endif %}
+    </div>
+{%- endblock %}

@@ -1,0 +1,285 @@
+{% macro input_field(id, label, type, default_value, options, required) %}
+    <div class="form-group{% if required %} required{% endif %}" id="{{ id }}_div">
+        <label for="{{ id }}">{{ label }}</label>
+        {% if options is defined and options is iterable and options is not string -%}
+            <select onchange="addParameter('{{ id }}', getSelectValue(this));" class="form_field" id="{{ id }}"
+                    name="{{ id }}" multiple{% if required %} required{% endif %}>
+                {% if default_value is defined and default_value in options -%}
+                    {% for value in options -%}
+                        <option value='{{ value }}'{% if default_value == value %}
+                                selected{% endif %}>{{ value }}</option>
+                    {%- endfor %}
+                {%- else -%}
+                    <option hidden disabled selected value> -- select an option --</option>
+                    {%- for value in options %}
+                        <option value='{{ value }}'>{{ value }}</option>
+                    {%- endfor %}
+                {%- endif %}
+            </select>
+        {%- else -%}
+            <input class="form-control form_field" id="{{ id }}" name="{{ id }}"
+                    {% if type == "int" or type == "double" or type == "float" %}
+                   onchange="setRangeBordersAndRequired('{{ id }}');addParameter(this.id, this.value);"
+                    {% endif %}
+                    {%- if type == "int" -%}
+                   step="1" type="number"
+                    {%- elif type == "double" or type == "float" -%}
+                   step=any type="number"
+                    {%- else -%}
+                   type="text"
+                    {%- endif -%}
+                    {% if default_value %} value="{{ default_value }}"{% endif %}{% if required %} required{% endif %}>
+            {%- if type == "path" -%}
+                <a id="open_tree_{{ id }}" style="cursor: pointer;">Browse...</a>
+                <div id="browse_tree_{{ id }}" style="display: block; max-height: 170px; overflow: auto;">
+                </div>
+                <script>
+                    $("#open_tree_{{ id }}").click(function () {
+                        if (!$.trim($('#browse_tree_{{ id }}').html()).length) {
+                            console.log('build');
+                            $('#browse_tree_{{ id }}').jstree({
+                                'core': {
+                                    'data': {
+                                        "url": "/browse_files.json",
+                                        "dataType": "json" // needed only if you do not supply JSON headers
+                                    }
+                                },
+                                'types': {
+                                    "csv": {
+                                        "icon": "/static/csv.png"
+                                    }
+                                },
+                                'plugins': ["sort", "types"],
+                                'sort': function (a, b) {
+                                    a1 = this.get_node(a);
+                                    b1 = this.get_node(b);
+                                    if (a1.icon === b1.icon
+                                        || a1.icon === "jstree-file" && b1.icon === "/static/csv.png"
+                                        || b1.icon === "jstree-file" && a1.icon === "/static/csv.png") {
+                                        return (a1.text > b1.text) ? 1 : -1;
+                                    } else {
+                                        return (a1.icon < b1.icon) ? 1 : -1;
+                                    }
+                                }
+                            }).on("select_node.jstree",
+                                function (evt, data) {
+                                    $('#{{ id }}').val(data.node.a_attr.label);
+                                    $(this).hide()
+                                }
+                            );
+                        } else {
+                            $('#browse_tree_{{ id }}').show();
+                        }
+                    });
+                </script>
+            {%- elif type == "int" or type == "double" or type == "float"-%}
+                <script>
+                    function setRangeBordersAndRequired(input_id) {
+                        let input = document.getElementById(`${input_id}`);
+                        let from = document.getElementById(`${input_id}_from`);
+                        let to = document.getElementById(`${input_id}_to`);
+                        let step = document.getElementById(`${input_id}_step`);
+                        input.required = {% if not required %}false && {% endif %}!from.value && !to.value && !step.value;
+                        from.required = {% if not required %}false && {% endif %}!input.value || to.value || step.value;
+                        to.required = {% if not required %}false && {% endif %}!input.value || from.value || step.value;
+                        step.required = {% if not required %}false && {% endif %}!input.value || from.value || to.value;
+                        if (!from.value || !to.value) {
+                            return;
+                        }
+                        if (+from.value > +to.value) {
+                            let tmp = from.value;
+                            from.value = to.value;
+                            to.value = tmp;
+                        }
+                    }
+                </script>
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="{{ id }}_from">From</label>
+                        <input onchange="setRangeBordersAndRequired('{{ id }}');addParameter(this.id, this.value);"
+                               class="form-control form_field" id="{{ id }}_from" name="{{ id }}_from"
+                                {%- if type == "int" -%}
+                               step="1" type="number"
+                                {%- else -%}
+                               step=any type="number"
+                                {%- endif -%}
+                                {% if required %} required{% endif %}>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="{{ id }}_to">To</label>
+                        <input onchange="setRangeBordersAndRequired('{{ id }}');addParameter(this.id, this.value);"
+                               class="form-control form_field" id="{{ id }}_to" name="{{ id }}_to"
+                                {%- if type == "int" -%}
+                               step="1" type="number"
+                                {%- else -%}
+                               step=any type="number"
+                                {%- endif -%}
+                                {% if required %} required{% endif %}>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="{{ id }}_step">Step</label>
+                        <input onchange="setRangeBordersAndRequired('{{ id }}');addParameter(this.id, this.value);"
+                               class="form-control form_field" id="{{ id }}_step" name="{{ id }}_step"
+                                {%- if type == "int" -%}
+                               step="1" type="number"
+                                {%- else -%}
+                               step=any type="number"
+                                {%- endif -%}
+                                {% if required %} required{% endif %}>
+                    </div>
+                </div>
+                <script>
+                    setRangeBordersAndRequired("{{ id }}");
+                </script>
+            {% endif %}
+        {%- endif %}
+    </div>
+{% endmacro %}
+
+{% macro int_input(id, label, default_value, required) %}
+    <div class="form-group{% if required %} required{% endif %}" id="{{ id }}_div">
+        <label for="{{ id }}">{{ label }}</label>
+        <input class="form-control form_field" id="{{ id }}" name="{{ id }}" step="1" type="number"
+                {%- if default_value %} value="{{ default_value }}"{% endif %}{% if required %} required{% endif %}>
+    </div>
+{% endmacro %}
+
+{% macro select_input(id, label, options, option_builder, required=True) %}
+    <div class="form-group required" id="{{ id }}_div">
+        <label for="{{ id }}">{{ label }}</label>
+        <select onchange="addParameter(this.id, this.value);" class="form_field" id="{{ id }}" name="{{ id }}"{% if required %} required{% endif %}>
+            <option hidden disabled selected value> -- select an option --</option>
+            {%- for option in options -%}
+                {{ option_builder(option) }}
+            {%- endfor -%}
+        </select>
+    </div>
+{% endmacro %}
+
+{% macro tuple_option_builder(tuple_obj) %}
+    <option value='{{ tuple_obj[0] }}'>{{ tuple_obj[1] }}</option>
+{% endmacro %}
+
+{% macro triple_option_builder(tuple_obj) %}
+    <option {% if tuple_obj[2] %}selected {% endif %}value='{{ tuple_obj[0] }}'>{{ tuple_obj[1] }}</option>
+{% endmacro %}
+
+{% macro strategy_option_builder(strategy_obj) %}
+    <option value='{{ strategy_obj.strategy_id }}'>{{ strategy_obj.name }}</option>
+{% endmacro %}
+
+{% macro file_option_builder(file_obj) %}
+    <option value='{{ file_obj[0] }}'>{{ file_obj[1].name }}</option>
+{% endmacro %}
+
+{% macro checkbox(id, label, required=False) %}
+    <div class="form-group{% if required %} required{% endif %}" id="{{ id }}_div">
+        <label for="{{ id }}">{{ label }}</label>
+        <input class="form_field" id="{{ id }}" name="{{ id }}" type="checkbox"{% if required %} required{% endif %}>
+    </div>
+{% endmacro %}
+
+{% macro generate_strategies(strategies) %}
+    {{ select_input("selected_strategy", "Select strategy", strategies, strategy_option_builder) }}
+    <script>
+        let strategySelect = document.getElementById("selected_strategy");
+
+        function selectPresetCheckBox(grid_id, cb) {
+            if (!cb.checked) {
+                addParameter(cb.id);
+                return;
+            }
+            let checkboxes = document.getElementById(`${grid_id}_div`).getElementsByTagName("input");
+            let parameters = [];
+            for (let i = 0; i < checkboxes.length; i++) {
+                let parameter = {key: checkboxes[i].id};
+                if (checkboxes[i].id !== cb.id) checkboxes[i].checked = false;
+                else parameter['value'] = 'on';
+                parameters.push(parameter);
+            }
+            addParameters(parameters);
+        }
+
+        function setCheckBoxesVisibility(grid_id, strategy_id) {
+            let paramDiv = document.getElementById(`${grid_id}_div`);
+            let paramFields = [`${grid_id}_small`, `${grid_id}_medium`, `${grid_id}_large`].map(id => document.getElementById(id));
+            hideField(paramDiv, paramFields, strategySelect.value !== strategy_id);
+        }
+    </script>
+    {% for strategy in strategies -%}
+        {% if strategy.grid_search %}
+            {%- set grid_id = strategy.strategy_id + '_grid_search' -%}
+            <div class="form-group" id="{{ grid_id }}_div">
+                <label>Configuration presets</label><br/>
+                <div id="{{ grid_id }}_checkboxes">
+                    <label for="{{ grid_id }}_small">Small</label>
+                    <input onclick='selectPresetCheckBox("{{ grid_id }}", this);'
+                           class="form_field" id="{{ grid_id }}_small" name="{{ grid_id }}_small" type="checkbox">
+                    <label for="{{ grid_id }}_medium">Medium</label>
+                    <input onclick='selectPresetCheckBox("{{ grid_id }}", this);'
+                           class="form_field" id="{{ grid_id }}_medium" name="{{ grid_id }}_medium"
+                           type="checkbox">
+                    <label for="{{ grid_id }}_large">Large</label>
+                    <input onclick='selectPresetCheckBox("{{ grid_id }}", this);'
+                           class="form_field" id="{{ grid_id }}_large" name="{{ grid_id }}_large" type="checkbox">
+                </div>
+            </div>
+            <script>
+                setCheckBoxesVisibility("{{ grid_id }}", "{{ strategy.strategy_id }}");
+                strategySelect.addEventListener('change', () => setCheckBoxesVisibility("{{ grid_id }}", "{{ strategy.strategy_id }}"));
+            </script>
+        {% endif %}
+        {%- if strategy['parameters'] -%}
+            <div class="form-group required" id="{{ strategy['strategy_id'] }}_div">
+                {%- if 'parameters' in strategy -%}
+                    {%- for parameter in strategy['parameters'] -%}
+                        {%- set param_id = strategy['strategy_id'] + '_' + parameter['parameter_id'] -%}
+                        {{ input_field(param_id, parameter['label'], parameter['type'], parameter['default_value'], parameter['selection_values'], parameter['required']) }}
+                        <script>
+                            function {{ param_id.replace("-", "_") }}_setVisibility(event, firstRun) {
+                                let conditions = [strategySelect.value === "{{ strategy.strategy_id }}"];
+                                {% if strategy.grid_search %}
+                                    let gridFields = ["{{ grid_id }}_small", "{{ grid_id }}_medium", "{{ grid_id }}_large"].map(id => document.getElementById(id));
+                                    for (let i = 0; i < gridFields.length; i++) {
+                                        if (firstRun)
+                                            gridFields[i].addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+
+                                        conditions.push(!gridFields[i].checked);
+                                    }
+                                {% endif %}
+                                {%- if 'visibility_rules' in parameter %}
+                                    {% for rule in parameter['visibility_rules'] -%}
+                                        {%- with field_id = strategy['strategy_id'] + '_' + rule['field'] -%}
+                                            var field = document.getElementById("{{ field_id }}");
+                                            if (field) {
+                                                if (field.selectedOptions) {
+                                                    let values = Array.prototype.map.apply(field.selectedOptions, [e => e.value]);
+                                                    let condition = false;
+                                                    for (let i = 0; i < values.length; i++) {
+                                                        condition = condition || {% for value in rule['values'] %}checkFieldValue("" + values[i], "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %};
+                                                    }
+                                                    conditions.push(condition);
+                                                } else {
+                                                    conditions.push({% for value in rule['values'] %}checkFieldValue("" + field.value, "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %});
+                                                }
+                                                field.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                                            }
+                                        {%- endwith -%}
+                                    {%- endfor %}
+                                {%- endif %}
+                                let paramDiv = document.getElementById("{{ param_id + '_div' }}");
+                                let paramFields = ["{{ param_id }}", "{{ param_id }}_from", "{{ param_id }}_to", "{{ param_id }}_step"].map(id => document.getElementById(id));
+                                hideField(paramDiv, paramFields, (conditions.length > conditions.reduce((x, y) => x + y)));
+                            }
+
+                            {{ param_id.replace("-", "_") }}_setVisibility(null, true);
+                            strategySelect.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                        </script>
+                    {%- endfor -%}
+                {% endif -%}
+            </div>
+        {% endif -%}
+    {%- else -%}
+        <h4>Strategies are empty.</h4>
+    {%- endfor %}
+{% endmacro %}

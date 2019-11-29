@@ -1,0 +1,220 @@
+{% from 'form_macros.j2' import int_input, float_input, select_input, text_input %}
+
+{% macro base_dnn(name_tag) %}
+{{ int_input(name_tag + "_layers", "Number of layers", 5) }}
+{{ int_input(name_tag + "_neurons", "Number of neurons per layer", 200) }}
+{{ int_input(name_tag + "_batch", "Batch isze", 512) }}
+{{ float_input(name_tag + "_lr", "Starting learning rate", 0.001) }}
+{{ float_input(name_tag + "_beta", "L2 regularization bias", 0.001) }}
+{% endmacro %}
+
+{% macro sdnnc() %}
+<div id="sdnnc_div">
+  {{ base_dnn("sdnnc") }}
+  {{ int_input("sdnnc_epochs", "Number of epochs", 10) }}
+</div>
+{% endmacro %}
+
+{% macro keras() %}
+<div id="keras_div">
+  {{ base_dnn("keras") }}
+  {{ int_input("keras_epochs", "Number of epochs", 10) }}
+</div>
+{% endmacro %}
+
+{% macro cdnnc() %}
+<div id="cdnnc_div">
+  {{ base_dnn("cdnnc") }}
+  {{ int_input("cdnnc_max-misses", "Maximum consecutive misses before early stopping", 4) }}
+</div>
+{% endmacro %}
+
+{% macro tree() %}
+<div id="tree_div">
+  {{ int_input("tree_max-depth", "Max decision tree depth", 5) }}
+  {{ select_input("tree_criterion", "Split quality criterion", [("gini", "gini"), ("entropy", "entropy")]) }}
+</div>
+{% endmacro %}
+
+{% macro forest() %}
+<div id="forest_div">
+  {{ int_input("forest_n-estimators", "The number of trees int he forest", 10) }}
+  {{ int_input("forest_max-depth", "Max decision tree depth", 5) }}
+  {{ select_input("forest_criterion", "Split quality criterion", [("gini", "gini"), ("entropy", "entropy")]) }}
+</div>
+{% endmacro %}
+
+{% macro knn() %}
+<div id="knn_div">
+  {{ int_input("knn_n_neighbors", "Number of neighbors", 5) }}
+  {{ select_input("knn_weights", "Weighting method", [("uniform", "uniform"), ("distance", "distance")]) }}
+</div>
+{% endmacro %}
+
+{% macro svm() %}
+<div id="svm_div">
+  {{ float_input("svm_C", "C - error term weight", 1.0) }}
+  {{ select_input("svm_kernel", "Kernel function", [("linear", "linear"), ("poly", "poly"), ("sigmoid", "sigmoid"), ("rbf", "rbf")]) }}
+  {{ int_input("svm_degree", "Polynom degree", 3) }}
+  {{ text_input("svm_gamma", "Gamma coefficent for rbf, poly and sigmoid kernels ('auto' or float)", "auto") }}
+  {{ float_input("svm_coef0", "Independent term in poly and sigmoid kernels (coef0)", 0.0) }}
+</div>
+<script>
+  let kernel = document.getElementById("svm_kernel");
+  let degree_div = document.getElementById("svm_degree_div");
+  let gamma_div = document.getElementById("svm_gamma_div");
+  let coef0_div = document.getElementById("svm_coef0_div");
+
+  window.addEventListener('load', function() {
+    showHideForKernels();
+  });
+
+  kernel.onchange = function() {
+    showHideForKernels();
+  }
+
+  function showHideForKernels() {
+    switch(kernel.value) {
+      case "linear":
+        setHiddens([degree_div, gamma_div, coef0_div]);
+        break;
+      case "poly":
+        setHiddens([], [degree_div, gamma_div, coef0_div]);
+        break;
+      case "sigmoid":
+        setHiddens([degree_div], [gamma_div, coef0_div]);
+        break;
+      case "rbf":
+        setHiddens([degree_div, coef0_div], [gamma_div]);
+        break;
+    }
+  }
+
+  function setRequired(parent, required){
+    let elem_list = parent.getElementsByClassName("form_field");
+    for (let i = 0; i < elem_list.length; i++) {
+      elem_list[i].required = required
+      elem_list[i].disabled = !required
+    }
+  }
+
+  function hideAll(parent, required) {
+    if (parent) {
+      parent.forEach(e => {
+        e.style.display = required ? "": "none";
+        setRequired(e, required);
+      })
+    }
+  }
+
+  function setHiddens(hide, show) {
+    hideAll(hide, false)
+    hideAll(show, true)
+  }
+</script>
+{% endmacro %}
+
+{% macro logistic() %}
+<div id="logistic_div">
+  {{ select_input("logistic_solver", "Solver algorithm", [("liblinear", "liblinear"), ("newton-cg", "newton-cg"), ("libfgs", "libfgs"), ("sag", "sag"), ("saga", "saga")]) }}
+  {{ select_input("logistic_penalty", "Penalty", [("l2", "L2"), ("l1", "L1")]) }}
+  {{ float_input("logistic_C", "C - Inverse of regularization strength", 1.0) }}
+  {{ float_input("logistic_tol", "Tolerance for stopping criteria", 0.0001) }}
+</div>
+{% endmacro %}
+
+{% macro no_params() %}
+<div id="no_params_div">
+  <h5>No hyperparameters for this model.</h5>
+</div>
+{% endmacro %}
+
+{% macro select_model(model_type_list) %}
+{{ select_input("model_type", "Model type", model_type_list) }}
+<div class="form-group required" id="hyperparameters_div">
+  <label>Hyperparameters</label>
+  {{ keras() }}
+  {{ sdnnc() }}
+  {{ cdnnc() }}
+  {{ tree() }}
+  {{ forest() }}
+  {{ knn() }}
+  {{ svm() }}
+  {{ logistic() }}
+  {{ no_params() }}
+</div>
+<script>
+  let model_type = document.getElementById("model_type");
+  let keras_div = document.getElementById("keras_div");
+  let sdnnc_div = document.getElementById("sdnnc_div");
+  let cdnnc_div = document.getElementById("cdnnc_div");
+  let tree_div = document.getElementById("tree_div");
+  let forest_div = document.getElementById("forest_div");
+  let knn_div = document.getElementById("knn_div");
+  let svm_div = document.getElementById("svm_div");
+  let logistic_div = document.getElementById("logistic_div");
+  let no_params_div = document.getElementById("no_params_div");
+
+  window.addEventListener('load', function() {
+    showHideForModels();
+  });
+
+  model_type.onchange = function() {
+    showHideForModels();
+  }
+
+  function showHideForModels() {
+    switch(model_type.value) {
+      case "keras":
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, forest_div, knn_div, svm_div, logistic_div, no_params_div], [keras_div]);
+        break;
+      case "sdnnc":
+        setHiddens([keras_div, cdnnc_div, tree_div, forest_div, knn_div, svm_div, logistic_div, no_params_div], [sdnnc_div]);
+        break;
+      case "cdnnc":
+        setHiddens([sdnnc_div, keras_div, tree_div, forest_div, knn_div, svm_div, logistic_div, no_params_div], [cdnnc_div]);
+        break;
+      case "tree":
+        setHiddens([sdnnc_div, cdnnc_div, keras_div, forest_div, knn_div, svm_div, logistic_div, no_params_div], [tree_div]);
+        break;
+      case "forest":
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, keras_div, knn_div, svm_div, logistic_div, no_params_div], [forest_div]);
+        break;
+      case "knn":
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, forest_div, keras_div, svm_div, logistic_div, no_params_div], [knn_div]);
+        break;
+      case "svm":
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, forest_div, knn_div, keras_div, logistic_div, no_params_div], [svm_div]);
+        break;
+      case "logistic":
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, forest_div, knn_div, svm_div, keras_div, no_params_div], [logistic_div]);
+        break;
+      default:
+        setHiddens([sdnnc_div, cdnnc_div, tree_div, forest_div, knn_div, svm_div, keras_div, logistic_div], [no_params_div]);
+        break;
+    }
+  }
+
+  function setRequired(parent, required){
+    let elem_list = parent.getElementsByClassName("form_field");
+    for (let i = 0; i < elem_list.length; i++) {
+      elem_list[i].required = required
+      elem_list[i].disabled = !required
+    }
+  }
+
+  function hideAll(elements, required) {
+    if (elements) {
+      elements.forEach(e => {
+        e.style.display = required ? "": "none";
+        setRequired(e, required);
+      })
+    }
+  }
+
+  function setHiddens(hide, show) {
+    hideAll(hide, false)
+    hideAll(show, true)
+  }
+  </script>
+{% endmacro %}

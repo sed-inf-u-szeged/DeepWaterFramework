@@ -1,0 +1,32 @@
+{%- extends "experiment/config_form.j2" %}
+{% from 'form_macros.j2' import select_input, triple_option_builder, int_input %}
+
+{% block shared_parameters -%}
+    {{ select_input("resample", "Resample Type", resample_types, triple_option_builder, False) }}
+    {{ int_input("resample_amount", "Resample Amount", default_resample_amount, True) }}
+    {{ int_input(id="seed", label="Random Seed", default_value=1337) }}
+    {{ select_input("preprocess_features", "Preprocess Features", feature_preprocess_types, triple_option_builder, False) }}
+    {{ select_input("preprocess_labels", "Preprocess Labels", label_preprocess_types, triple_option_builder, False) }}
+{% endblock %}
+{% block shared_parameters_script %}
+    <script>
+        let resample_type = document.getElementById("resample");
+
+        let resample_amount_div = document.getElementById("resample_amount_div");
+        let resample_amount = document.getElementById("resample_amount");
+        let resample_amount_from = document.getElementById("resample_amount_from");
+        let resample_amount_to = document.getElementById("resample_amount_to");
+        let resample_amount_step = document.getElementById("resample_amount_step");
+
+        function resample_type_visibility() {
+            hideField(
+                resample_amount_div,
+                [resample_amount, resample_amount_from, resample_amount_to, resample_amount_step],
+                checkFieldValue(resample_type.value, "none") || checkFieldValue(resample_type.value, "")
+            );
+        }
+
+        resample_type_visibility();
+        resample_type.addEventListener('change', resample_type_visibility);
+    </script>
+{% endblock %}

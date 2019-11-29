@@ -1,0 +1,3 @@
+[submodule "DeepBugHunter"]
+	path = DeepBugHunter
+	url = https://github.com/sed-inf-u-szeged/DeepBugHunter.git
