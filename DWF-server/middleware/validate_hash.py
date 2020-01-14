@@ -8,19 +8,17 @@ from controller import worker_store as ws
 def validate_hash(f):
     @wraps(f)
     def func_wrapper(*args, **kwargs):
-        json = request.get_json()
-        if not json or 'hash' not in json or (json['hash'] and not ws.is_worker(json['hash'])):
-            abort(400, message="Unknown worker id.")
+        try:
+            worker = ws.get_worker(request.json['hash'])
+            if worker:
+                g.worker = worker
+                g.hash = request.json['hash']
+                return f(*args, **kwargs)
 
-        if not json['hash']:
-            if not json['platform_info'] or not json['environment']:
-                abort(403, message="Platform info is missing.")
+        except Exception as e:
+            pass
 
-            g.hash = ws.register_worker(json['platform_info'], json['environment'])
-
-        else:
-            g.hash = json['hash']
-
-        return f(*args, **kwargs)
+        abort(400, message="Unknown worker id.")
+        return None
 
     return func_wrapper

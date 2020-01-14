@@ -42,7 +42,7 @@ class Summary(Resource):
                 return None, 'No learning task in experiment.'
 
             if tasks:
-                return {'tasks': tasks}, ''
+                return {'name': exp.name, 'tasks': tasks}, ''
 
             return None, 'No task completed yet.'
 

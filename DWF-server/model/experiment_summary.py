@@ -2,14 +2,15 @@ from model.experiment_summary_task import ExperimentSummaryTask
 
 
 class ExperimentSummary:
-    def __init__(self, name, markdown, tasks):
+    def __init__(self, name, markdown, tasks, created_ts):
         self.name = name
         self.markdown = markdown
         self.tasks = tasks
+        self.created_ts = created_ts
 
     @classmethod
     def from_es_data(cls, exp):
-        res = cls(exp['name'], exp['markdown'], {t_id: ExperimentSummaryTask.from_es_data(t) for t_id, t in exp['tasks'].items()})
+        res = cls(exp['name'], exp['markdown'], {t_id: ExperimentSummaryTask.from_es_data(t) for t_id, t in exp['tasks'].items()}, exp['created_ts'])
         return res
 
     def update_task(self, task_id, task):

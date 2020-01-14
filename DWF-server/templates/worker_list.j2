@@ -21,13 +21,13 @@
                         <td class="align-middle">
                             <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker_id|e }}</b></a>
                         </td>
-                        {% if worker.is_working() %}
-                            <td class="align-middle">
-                                <b style="color: green;">Working</b>
-                            </td>
-                        {% elif worker.blocked_by_error %}
+                        {% if worker.blocked_by_error %}
                             <td class="align-middle">
                                 <b style="color: red;">ERROR!</b>
+                            </td>
+                        {% elif worker.is_working() %}
+                            <td class="align-middle">
+                                <b style="color: green;">Working</b>
                             </td>
                         {% else %}
                             <td class="align-middle">

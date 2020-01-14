@@ -102,7 +102,7 @@
             {%- else -%}
                 <div class="col-md-12"><h2>No task assigned to this worker.</h2></div>
             {%- endif %}
-            {% if worker.logs %}
+            {% if worker.log %}
                 <div>
                     <div style="padding-left: 2em;"><h3>Messages:</h3></div>
                     {% for l in worker.log -%}

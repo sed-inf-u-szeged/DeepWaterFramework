@@ -1,4 +1,6 @@
 from routes.ping import Ping
+from routes.get_task import GetTask
+from routes.register import Register
 from routes.status import Status
 from routes.result import Result
 from routes.worker_list import WorkerList

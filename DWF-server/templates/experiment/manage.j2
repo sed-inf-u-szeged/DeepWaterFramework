@@ -82,10 +82,13 @@
             ajaxRequest.onreadystatechange = function () {
                 if (ajaxRequest.readyState === 4) {
                     if (ajaxRequest.responseText === "generate_tasks_success" ||
+                        ajaxRequest.responseText === "stop_success" ||
                         ajaxRequest.responseText === "run_success") {
                         location.reload(true);
                     } else if (ajaxRequest.responseText === "run_failed") {
                         alert("Run failed!");
+                    } else if (ajaxRequest.responseText === "stop_failed") {
+                        alert("Stop failed!");
                     } else if (ajaxRequest.responseText === "generate_tasks_need_assembling") {
                         alert("At least one Feature Assembling method is required!");
                     } else if (ajaxRequest.responseText) {
@@ -120,27 +123,39 @@
             function rerunTask(id) {
                 sendPost("{{ request.url }}", {command: 'rerun_task', hash: "{{ hash }}", id});
             }
+
+            function stopAllTasks() {
+                sendPost("{{ request.url }}", {command: 'stop_all', hash: "{{ hash }}"});
+            }
+
+            function stopTask(id) {
+                sendPost("{{ request.url }}", {command: 'stop_task', hash: "{{ hash }}", id});
+            }
         </script>
         <table class="table" style="border: 1px solid black;">
             <caption style="border: 2px solid black;text-align: center"><h4><b>Configuration</b></h4></caption>
             {% if experiment.state == "configuration" %}
                 <colgroup>
-                    <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 26%;">
                     <col span="1" style="width: 5%;">
+                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 3%;">
+                    <col span="1" style="width: 3%;">
+                    <col span="1" style="width: 3%;">
                 </colgroup>
                 <tr style="border: 2px solid black;">
                     <th>Name</th>
                     <th>Type</th>
                     <th>Info</th>
+                    <th>Copy</th>
+                    <th>Edit</th>
                     <th>Delete</th>
                 </tr>
             {% else %}
                 <colgroup>
                     <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 50%;">
+                    <col span="1" style="width: 5%;">
+                    <col span="1" style="width: 70%;">
                 </colgroup>
                 <tr style="border: 2px solid black;">
                     <th>Name</th>
@@ -149,10 +164,10 @@
                 </tr>
             {% endif %}
             {% for a_id, assemble_config in experiment.assemble_configs %}
-                {{ experiment_config_row(experiment.state, 'assemble_config', 'Feature', a_id, assemble_config) }}
+                {{ experiment_config_row(experiment.state, 'assembling', 'Feature', a_id, assemble_config) }}
             {% endfor %}
             {% for l_id, learn_config in experiment.learn_configs %}
-                {{ experiment_config_row(experiment.state, 'learn_config', 'Learning', l_id, learn_config) }}
+                {{ experiment_config_row(experiment.state, 'learning', 'Learning', l_id, learn_config) }}
             {% endfor %}
         </table>
 
@@ -185,24 +200,28 @@
                     {% if experiment.has_runnable_tasks %}
                         <th>
                             <input type="image" onclick="runAllTasks()"
-                                   src="{{ url_for('static', filename='run-button.svg') }}" height="24" width="24"
+                                   src="{{ url_for('static', filename='play-multiple.png') }}" height="30" width="30"
                                    alt="run button"/>
                         </th>
-                        <th>
-                            Run all
-                        </th>
-                        <th></th>
                     {% elif experiment.all_tasks_completed %}
                         <th>{{ done(32) }}</th>
-                        <th>Completed</th>
-                        <th>
-                            <input type="image" onclick="rerunAllTasks()"
-                                   src="{{ url_for('static', filename='restart.png') }}" height="24" width="24"
-                                   alt="rerun button"/>
-                        </th>
                     {% else %}
                         <th></th>
-                        <th>Status</th>
+                    {% endif %}
+                    <th>Status</th>
+                    {% if experiment.all_tasks_completed %}
+                        <th>
+                            <input type="image" onclick="rerunAllTasks()"
+                                   src="{{ url_for('static', filename='restart-multiple.png') }}" height="30" width="30"
+                                   alt="rerun button"/>
+                        </th>
+                    {% elif experiment.has_stoppable_tasks %}
+                        <th>
+                            <input type="image" onclick="stopAllTasks()"
+                                   src="{{ url_for('static', filename='stop-multiple.png') }}" height="30" width="30"
+                                   alt="stop button"/>
+                        </th>
+                    {% else %}
                         <th></th>
                     {% endif %}
                 </tr>

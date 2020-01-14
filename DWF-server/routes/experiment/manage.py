@@ -3,6 +3,7 @@ from flask import render_template, make_response, request
 
 import config
 from controller import experiment_store as es
+from controller import worker_store as ws
 from controller import experiment_summary_store as ess
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
@@ -18,77 +19,41 @@ class Manage(Resource):
         try:
             experiment = es.get_experiment(hash)
             if request.json['command'] == 'generate_tasks':
-                changes = experiment.set_state("generating_tasks")
-                success = es.update_experiment(changes, hash)
-                generated_tasks = self.generate_tasks(experiment, hash)
-                if generated_tasks:
-                    success = success and self.init_summary(hash, experiment, generated_tasks)
-                    changes = experiment.set_state("generated_tasks")
-                    changes.update(experiment.add_task_list([t_id for t_id, _, _, _ in generated_tasks]))
-                    success = success and es.update_experiment(changes, hash)
-                    if success:
-                        return make_response("generate_tasks_success", 200)
-
-                else:
-                    changes = experiment.set_state("configuration")
-                    success = es.update_experiment(changes, hash)
-
-                return make_response("generate_tasks_need_assembling", 200)
+                success = self.generate_tasks(experiment, hash)
+                return make_response("generate_tasks_success" if success else "generate_tasks_need_assembling", 200)
 
             elif request.json['command'] == 'run_all':
-                success = True
-                for t_id in experiment.tasks:
-                    success = success and self.run_task(t_id)
-
-                if success:
-                    return make_response("run_success", 200)
-
-                return make_response("run_failed", 200)
+                success = self.run_all_tasks(experiment)
+                return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'run_task':
-                task_id = request.json['id']
-                success = self.run_task(task_id)
-                if success:
-                    return make_response("run_success", 200)
-
-                return make_response("run_failed", 200)
+                success = self.run_task(request.json['id'])
+                return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'rerun_all':
-                success = True
-                tasks = []
-                for t_id in experiment.tasks:
-                    t_success, a_task, l_task = self.rerun_task(t_id)
-                    if t_success:
-                        tasks.append((t_id, self.create_summary_task(a_task, l_task)))
-
-                    success = success and t_success
-
-                exp_sum = ess.get_experiment_summary(hash)
-                sum_changes = None
-                for t_id, t in tasks:
-                    sum_changes = exp_sum.update_task(t_id, t)
-
-                if sum_changes:
-                    success = success and ess.update_experiment_summary(sum_changes, hash)
-
-                if success:
-                    return make_response("rerun_success", 200)
-
-                return make_response("rerun_failed", 200)
+                success = self.rerun_all_tasks(experiment, hash)
+                return make_response("rerun_success" if success else "rerun_failed", 200)
 
             elif request.json['command'] == 'rerun_task':
-                task_id = request.json['id']
-                success, a_task, l_task = self.rerun_task(task_id)
-                if success:
-                    exp_sum = ess.get_experiment_summary(hash)
-                    sum_changes = exp_sum.update_task(task_id, self.create_summary_task(a_task, l_task))
-                    if sum_changes:
-                        success = ess.update_experiment_summary(sum_changes, hash)
+                success = self.rerun_task(hash, request.json['id'])
+                return make_response("rerun_success" if success else "rerun_failed", 200)
 
-                if success:
-                    return make_response("rerun_success", 200)
+            elif request.json['command'] == 'stop_all':
+                success = self.stop_all_tasks(experiment)
+                return make_response("stop_success" if success else "stop_failed", 200)
 
-                return make_response("rerun_failed", 200)
+            elif request.json['command'] == 'stop_task':
+                success = self.stop_task(request.json['id'])
+                return make_response("stop_success" if success else "stop_failed", 200)
+
+            elif request.json['command'] == 'delete_experiment':
+                success = self.stop_all_tasks(experiment)
+                success = success and es.delete_experiment(hash)
+                success = success and ess.delete_experiment_summary(hash)
+                return make_response(f"delete_success" if success else f"delete_failed", 200)
+
+            else:
+                abort(400, message="Unknown command.")
 
         except Exception as e:
             if config.debug_mode:
@@ -98,19 +63,22 @@ class Manage(Resource):
                 abort(404, message="Page not found")
 
     def init_summary(self, exp_id, exp, generated_tasks):
-        summary_tasks = {t_id: self.create_summary_task(a_task, l_task) for t_id, t, a_task, l_task in generated_tasks}
-        success = ess.new_experiment_summary(exp_id, ExperimentSummary(exp.name, exp.markdown, summary_tasks))
+        summary_tasks = {t_id: self.create_summary_task(a_task, l_task, t.created_ts) for t_id, t, a_task, l_task in generated_tasks}
+        success = ess.new_experiment_summary(
+            exp_id,
+            ExperimentSummary(exp.name, exp.markdown, summary_tasks, exp.created_ts)
+        )
         return bool(success)
 
     @staticmethod
-    def create_summary_task(a_task, l_task):
-        a_conf = a_task.assemble_config if not l_task else l_task.assemble_config
+    def create_summary_task(a_task, l_task, created_ts):
+        a_conf = (l_task or a_task).assemble_config
         l_conf = None if not l_task else l_task.learn_config
-        exp_sum = ExperimentSummaryTask(a_conf, l_conf)
+        exp_sum = ExperimentSummaryTask(a_conf, l_conf, created_ts)
         if a_task.is_completed():
             exp_sum.add_assemble_result(a_task.result_file_path)
 
-        if l_task.is_completed():
+        if l_task and l_task.is_completed():
             exp_sum.add_learn_result(l_task.result)
 
         if a_conf['strategy_id'] == "manual_file_input":
@@ -141,6 +109,8 @@ class Manage(Resource):
     def load_experiment(self, exp):
         tasks = [self.load_task_from_db(t_id) for t_id in exp.tasks]
         learn_configs = [(c_id, scs.get_config_by_id(c_id)) for c_id in exp.learn_configs]
+        runnable_tasks = [t for t in tasks if t['state'] == "generated"]
+        stoppable_tasks = [t for t in tasks if t['state'] == "runnable" or t['state'] == "running"]
         result = {
             "name": exp.name,
             "markdown": exp.markdown,
@@ -149,8 +119,9 @@ class Manage(Resource):
             "learn_configs": learn_configs,
             "tasks": tasks,
             "show_summary": learn_configs and [t for t in tasks if t['state'] == "completed"],
-            "has_runnable_tasks": bool([t for t in tasks if t['state'] == "generated"]),
-            "all_tasks_completed": not bool([t for t in tasks if t['state'] != "completed"]),
+            "has_runnable_tasks": bool(runnable_tasks),
+            "has_stoppable_tasks": bool(stoppable_tasks),
+            "all_tasks_completed": not runnable_tasks and not stoppable_tasks,
         }
         return result
 
@@ -185,38 +156,71 @@ class Manage(Resource):
 
         return result
 
+    def rerun_task(self, exp_id, task_id):
+        exp_sum = ess.get_experiment_summary(exp_id)
+        success, task, a_task, l_task = self._rerun_task(task_id)
+        if success:
+            sum_changes = exp_sum.update_task(task_id, self.create_summary_task(a_task, l_task, task.created_ts))
+            success = ess.update_experiment_summary(sum_changes, exp_id)
+
+        return success
+
+    def rerun_all_tasks(self, exp, exp_id):
+        exp_sum = ess.get_experiment_summary(exp_id)
+        sum_changes = None
+        success = True
+        for t_id in exp.tasks:
+            t_success, task, a_task, l_task = self._rerun_task(t_id)
+            if t_success:
+                sum_changes = exp_sum.update_task(t_id, self.create_summary_task(a_task, l_task, task.created_ts))
+
+        if sum_changes:
+            success = success and ess.update_experiment_summary(sum_changes, exp_id)
+
+        return success
+
     @staticmethod
-    def rerun_task(task_id):
+    def _rerun_task(task_id):
         task = ts.get_task_by_id(task_id)
 
-        a_task = ats.get_task_by_id(task.assemble_task_id)
-        a_task_changes = a_task.make_obsolete()
-        ats.update_task(a_task_changes, task.assemble_task_id)
+        if task.state != "completed":
+            return None, None, None, None
 
-        new_a_task = AssembleTask(a_task.assemble_config)
-        new_a_task.make_runnable()
-        new_a_task.add_parent(task_id)
-        new_a_task_id, new_a_task = ats.new_assemble_task(new_a_task)
+        new_a_task_id, new_a_task = ats.rerun_task(task.assemble_task_id)
+        if not new_a_task:
+            return None, None, None, None
 
         if task.learn_task_id:
-            l_task = lts.get_task_by_id(task.learn_task_id)
-            l_task_changes = l_task.make_obsolete()
-            lts.update_task(l_task_changes, task.learn_task_id)
-
-            new_l_task = LearnTask(l_task.assemble_config, l_task.assemble_task_id, l_task.learn_config)
-            new_l_task.make_runnable()
-            new_l_task.add_parent(task_id)
-            new_l_task_id, new_l_task = lts.new_learn_task(new_l_task)
-
+            new_l_task_id, new_l_task = lts.rerun_task(task.learn_task_id, new_a_task_id)
             task_changes = task.re_run(new_a_task_id, new_l_task_id)
-            return ts.update_task(task_changes, task_id), a_task, l_task
+            return ts.update_task(task_changes, task_id), task, new_a_task, new_l_task
 
         else:
             task_changes = task.re_run(new_a_task_id, None)
-            return ts.update_task(task_changes, task_id), a_task, None
+            return ts.update_task(task_changes, task_id), task, new_a_task, None
+
+    def generate_tasks(self, exp, exp_id):
+        changes = exp.set_state("generating_tasks")
+        success = es.update_experiment(changes, exp_id)
+        try:
+            generated_tasks_data = self.generate_tasks_data(exp, exp_id)
+            if generated_tasks_data:
+                success = success and self.init_summary(exp_id, exp, generated_tasks_data)
+                changes = exp.set_state("generated_tasks")
+                changes.update(exp.add_task_list([t_id for t_id, _, _, _ in generated_tasks_data]))
+                if success:
+                    success = success and es.update_experiment(changes, exp_id)
+                    return True
+
+        except Exception as e:
+            pass
+
+        changes = exp.set_state("configuration")
+        success = es.update_experiment(changes, exp_id)
+        return False
 
     @staticmethod
-    def generate_tasks(exp, exp_id):
+    def generate_tasks_data(exp, exp_id):
         assemble_configs = [scs.get_config_by_id(c_id) for c_id in exp.assemble_configs]
         learn_configs = [scs.get_config_by_id(c_id) for c_id in exp.learn_configs]
 
@@ -229,13 +233,14 @@ class Manage(Resource):
             a_task_es_id, a_task = ats.new_assemble_task(a_task)
             if a_task_es_id:
                 if not learn_configs:
-                    task = Task(exp_id, a_task_es_id, None)
-                    if a_task.is_completed():
-                        task.completed(a_task_es_id)
+                    if a_task.assemble_config['strategy_id'] != "manual_file_input":
+                        task = Task(exp_id, a_task_es_id, None)
+                        if a_task.is_completed():
+                            task.completed(a_task_es_id)
 
-                    task_id = ts.new_task(task)
-                    if task_id:
-                        generated_tasks.append((task_id, task, a_task, None))
+                        task_id = ts.new_task(task)
+                        if task_id:
+                            generated_tasks.append((task_id, task, a_task, None))
 
                 for l_conf in learn_configs:
                     l_task = LearnTask(a_conf.to_dict(), a_task_es_id, l_conf.to_dict())
@@ -251,33 +256,78 @@ class Manage(Resource):
 
         return generated_tasks
 
+    def run_all_tasks(self, exp):
+        success = True
+        for t_id in exp.tasks:
+            success = self.run_task(t_id) or success
+
+        return success
+
     @staticmethod
     def run_task(task_id):
         task = ts.get_task_by_id(task_id)
-        success = True
-        if task and task.state == "generated":
-            t_change = task.make_runnable()
-            a_task = ats.get_task_by_id(task.assemble_task_id)
-            a_task_change = a_task.add_parent(task_id)
-            if a_task.is_completed():
-                t_change.update(task.completed(task.assemble_task_id))
+        if not task or task.state != "generated":
+            return False
+
+        t_change = task.make_runnable()
+        a_task = ats.get_task_by_id(task.assemble_task_id)
+        a_task_change = a_task.add_parent(task_id)
+        if a_task.is_completed():
+            t_change.update(task.completed(task.assemble_task_id))
+
+        else:
+            a_task_change.update(a_task.make_runnable())
+
+        success = ats.update_task(a_task_change, task.assemble_task_id)
+        if success and task.learn_task_id:
+            l_task = lts.get_task_by_id(task.learn_task_id)
+            l_task_change = l_task.add_parent(task_id)
+            if l_task.is_completed():
+                t_change = task.completed(task.learn_task_id)
 
             else:
-                a_task_change.update(a_task.make_runnable())
+                l_task_change.update(l_task.make_runnable())
 
-            success = success and ats.update_task(a_task_change, task.assemble_task_id)
-            if success and task.learn_task_id:
-                l_task = lts.get_task_by_id(task.learn_task_id)
-                l_task_change = l_task.add_parent(task_id)
-                if l_task.is_completed():
-                    t_change = task.completed(task.learn_task_id)
+            success = lts.update_task(l_task_change, task.learn_task_id)
 
-                else:
-                    l_task_change.update(l_task.make_runnable())
+        if success:
+            success = ts.update_task(t_change, task_id)
 
-                success = lts.update_task(l_task_change, task.learn_task_id)
+        return success
 
-            if success:
-                success = ts.update_task(t_change, task_id)
+    def stop_all_tasks(self, exp):
+        success = True
+        for t_id in exp.tasks:
+            success = self._stop_task(t_id) or success
 
-        return success and task
+        return success
+
+    def stop_task(self, task_id):
+        return self._stop_task(task_id)
+
+    def _stop_task(self, task_id):
+        task = ts.get_task_by_id(task_id)
+
+        if task.state != "running":
+            return None
+
+        self._stop_sub_task(task_id, task.assemble_task_id, ats)
+
+        if task.learn_task_id:
+            self._stop_sub_task(task_id, task.learn_task_id, lts)
+
+        task_changes = task.stop()
+        return ts.update_task(task_changes, task_id)
+
+    @staticmethod
+    def _stop_sub_task(parent_task_id, sub_task_id, task_store):
+        sub_task = task_store.get_task_by_id(sub_task_id)
+        worker_id = sub_task.assigned_to
+        sub_task_changes = sub_task.stop(parent_task_id)
+        if sub_task_changes:
+            task_store.update_task(sub_task_changes, sub_task_id)
+            if not sub_task.assigned_to:
+                worker = ws.get_worker(worker_id)
+                if worker:
+                    worker_changes = worker.clear_task()
+                    ws.update_worker(worker_changes, worker_id)

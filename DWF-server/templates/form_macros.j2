@@ -36,7 +36,6 @@
                 <script>
                     $("#open_tree_{{ id }}").click(function () {
                         if (!$.trim($('#browse_tree_{{ id }}').html()).length) {
-                            console.log('build');
                             $('#browse_tree_{{ id }}').jstree({
                                 'core': {
                                     'data': {
@@ -64,7 +63,10 @@
                             }).on("select_node.jstree",
                                 function (evt, data) {
                                     $('#{{ id }}').val(data.node.a_attr.label);
-                                    $(this).hide()
+                                    $(this).hide();
+                                    let changeEvt = document.createEvent("HTMLEvents");
+                                    changeEvt.initEvent("change", false, true);
+                                    document.getElementById('{{ id }}').dispatchEvent(changeEvt);
                                 }
                             );
                         } else {
@@ -179,10 +181,13 @@
     </div>
 {% endmacro %}
 
-{% macro generate_strategies(strategies) %}
+{% macro generate_strategies(strategies, config_data) %}
     {{ select_input("selected_strategy", "Select strategy", strategies, strategy_option_builder) }}
     <script>
         let strategySelect = document.getElementById("selected_strategy");
+        {% if config_data %}
+            strategySelect.value = "{{ config_data.strategy_id }}";
+        {% endif %}
 
         function selectPresetCheckBox(grid_id, cb) {
             if (!cb.checked) {
@@ -229,54 +234,56 @@
                 strategySelect.addEventListener('change', () => setCheckBoxesVisibility("{{ grid_id }}", "{{ strategy.strategy_id }}"));
             </script>
         {% endif %}
-        {%- if strategy['parameters'] -%}
+        {%- if 'parameters' in strategy -%}
             <div class="form-group required" id="{{ strategy['strategy_id'] }}_div">
-                {%- if 'parameters' in strategy -%}
-                    {%- for parameter in strategy['parameters'] -%}
-                        {%- set param_id = strategy['strategy_id'] + '_' + parameter['parameter_id'] -%}
+                {%- for parameter in strategy['parameters'] -%}
+                    {%- set param_id = strategy['strategy_id'] + '_' + parameter['parameter_id'] -%}
+                    {% if config_data %}
+                        {{ input_field(param_id, parameter['label'], parameter['type'], config_data.strategy_parameters[parameter['parameter_id']], parameter['selection_values'], parameter['required']) }}
+                    {% else %}
                         {{ input_field(param_id, parameter['label'], parameter['type'], parameter['default_value'], parameter['selection_values'], parameter['required']) }}
-                        <script>
-                            function {{ param_id.replace("-", "_") }}_setVisibility(event, firstRun) {
-                                let conditions = [strategySelect.value === "{{ strategy.strategy_id }}"];
-                                {% if strategy.grid_search %}
-                                    let gridFields = ["{{ grid_id }}_small", "{{ grid_id }}_medium", "{{ grid_id }}_large"].map(id => document.getElementById(id));
-                                    for (let i = 0; i < gridFields.length; i++) {
-                                        if (firstRun)
-                                            gridFields[i].addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                    {% endif %}
+                    <script>
+                        function {{ param_id.replace("-", "_") }}_setVisibility(event, firstRun) {
+                            let conditions = [strategySelect.value === "{{ strategy.strategy_id }}"];
+                            {% if strategy.grid_search %}
+                                let gridFields = ["{{ grid_id }}_small", "{{ grid_id }}_medium", "{{ grid_id }}_large"].map(id => document.getElementById(id));
+                                for (let i = 0; i < gridFields.length; i++) {
+                                    if (firstRun)
+                                        gridFields[i].addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
 
-                                        conditions.push(!gridFields[i].checked);
-                                    }
-                                {% endif %}
-                                {%- if 'visibility_rules' in parameter %}
-                                    {% for rule in parameter['visibility_rules'] -%}
-                                        {%- with field_id = strategy['strategy_id'] + '_' + rule['field'] -%}
-                                            var field = document.getElementById("{{ field_id }}");
-                                            if (field) {
-                                                if (field.selectedOptions) {
-                                                    let values = Array.prototype.map.apply(field.selectedOptions, [e => e.value]);
-                                                    let condition = false;
-                                                    for (let i = 0; i < values.length; i++) {
-                                                        condition = condition || {% for value in rule['values'] %}checkFieldValue("" + values[i], "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %};
-                                                    }
-                                                    conditions.push(condition);
-                                                } else {
-                                                    conditions.push({% for value in rule['values'] %}checkFieldValue("" + field.value, "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %});
+                                    conditions.push(!gridFields[i].checked);
+                                }
+                            {% endif %}
+                            {%- if 'visibility_rules' in parameter %}
+                                {% for rule in parameter['visibility_rules'] -%}
+                                    {%- with field_id = strategy['strategy_id'] + '_' + rule['field'] -%}
+                                        var field = document.getElementById("{{ field_id }}");
+                                        if (field) {
+                                            if (field.selectedOptions) {
+                                                let values = Array.prototype.map.apply(field.selectedOptions, [e => e.value]);
+                                                let condition = false;
+                                                for (let i = 0; i < values.length; i++) {
+                                                    condition = condition || {% for value in rule['values'] %}checkFieldValue("" + values[i], "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %};
                                                 }
-                                                field.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                                                conditions.push(condition);
+                                            } else {
+                                                conditions.push({% for value in rule['values'] %}checkFieldValue("" + field.value, "{{ value }}"){% if loop.nextitem is defined %} || {% endif %}{% endfor %});
                                             }
-                                        {%- endwith -%}
-                                    {%- endfor %}
-                                {%- endif %}
-                                let paramDiv = document.getElementById("{{ param_id + '_div' }}");
-                                let paramFields = ["{{ param_id }}", "{{ param_id }}_from", "{{ param_id }}_to", "{{ param_id }}_step"].map(id => document.getElementById(id));
-                                hideField(paramDiv, paramFields, (conditions.length > conditions.reduce((x, y) => x + y)));
-                            }
+                                            field.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                                        }
+                                    {%- endwith -%}
+                                {%- endfor %}
+                            {%- endif %}
+                            let paramDiv = document.getElementById("{{ param_id + '_div' }}");
+                            let paramFields = ["{{ param_id }}", "{{ param_id }}_from", "{{ param_id }}_to", "{{ param_id }}_step"].map(id => document.getElementById(id));
+                            hideField(paramDiv, paramFields, (conditions.length > conditions.reduce((x, y) => x + y)));
+                        }
 
-                            {{ param_id.replace("-", "_") }}_setVisibility(null, true);
-                            strategySelect.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
-                        </script>
-                    {%- endfor -%}
-                {% endif -%}
+                        {{ param_id.replace("-", "_") }}_setVisibility(null, true);
+                        strategySelect.addEventListener('change', {{ param_id.replace("-", "_") }}_setVisibility);
+                    </script>
+                {%- endfor -%}
             </div>
         {% endif -%}
     {%- else -%}

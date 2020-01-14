@@ -7,7 +7,7 @@ class LearnTask:
         self.assemble_config = assemble_config
         self.assemble_task_id = assemble_task_id
         self.learn_config = learn_config
-        # state is "generated", "runnable", "running" or "completed"
+        # state values: "generated", "runnable", "running", "completed"
         self.state = "generated"
         self.assigned_to = None
         self.result = None
@@ -23,7 +23,7 @@ class LearnTask:
         res = cls(
             assemble_config=task['assemble_config'],
             assemble_task_id=task['assemble_task_id'],
-            learn_config=task['learn_config']
+            learn_config=task['learn_config'],
         )
         res.state = task['state']
         res.assigned_to = task['assigned_to']
@@ -36,7 +36,7 @@ class LearnTask:
         return res
 
     def add_parent(self, parent_task_id):
-        if parent_task_id:
+        if parent_task_id and parent_task_id not in self.parent_tasks:
             self.parent_tasks.append(parent_task_id)
 
         return {
@@ -49,6 +49,28 @@ class LearnTask:
 
         return {
             'up_to_date': self.up_to_date
+        }
+
+    def stop(self, parent_task_id):
+        if not parent_task_id or parent_task_id not in self.parent_tasks:
+            return None
+
+        self.parent_tasks.remove(parent_task_id)
+        if self.state != "completed" and len(self.parent_tasks) == 0:
+            self.state = "generated"
+            self.assigned_to = None
+            self.result = None
+            self.completed_ts = None
+            self.progress = None
+            self.log = None
+
+        return {
+            'state': self.state,
+            'assigned_to': self.assigned_to,
+            'result': self.result,
+            'completed_ts': self.completed_ts,
+            'progress': self.progress,
+            'log': self.log,
         }
 
     def make_runnable(self):

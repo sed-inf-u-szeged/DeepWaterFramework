@@ -29,32 +29,45 @@
     <tr id="{{ id }}_row">
         <td><b>{{ elem.strategy_name|e }}</b></td>
         <td>{{ type|e }}</td>
-        <td><b>{{ elem.strategy_id }}</b> -
+        <td><b>shared parameters</b> -
+            {% for k, v in elem.shared_parameters.items() %}
+                <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
+            {% endfor %}
+            <br/>
+            <b>{{ elem.strategy_id }}</b> -
             {% for k, v in elem.strategy_parameters.items() %}
                 <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
             {% endfor %}
         </td>
         {% if state == "configuration" %}
             <td>
-                <input type="image" onclick="deleteConfig('{{ id }}')"
-                       src="{{ url_for('static', filename='delete.svg') }}" height="24" width="24" alt="delete button"/>
+                <a href="{{ request.url + ('/copy_assembler_config/' if route == "assembling" else '/copy_learning_config/') + id }}">
+                    <img src="{{ url_for('static', filename='copy.svg') }}" alt="copy" height="24" width="24">
+                </a>
+            </td>
+            <td>
+                <a href="{{ request.url + ('/edit_assembler_config/' if route == "assembling" else '/edit_learning_config/') + id }}">
+                    <img src="{{ url_for('static', filename='edit.svg') }}" alt="edit" height="24" width="24">
+                </a>
+            </td>
+            <td>
+                <input type="image" onclick="deleteConfig('{{ id }}')" src="{{ url_for('static', filename='delete.svg') }}" height="24" width="24" alt="delete button"/>
             </td>
         {% endif %}
     </tr>
 {% endmacro %}
 
 {% macro experiment_task_row(task, state) %}
+            {% with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
     <tr>
         <td>
-            {% with need_link = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
-                {% if need_link %}
-                    <a href="{{ request.url_root + 'task/' + task.id }}">
-                {% endif %}
-                <b>{{ task.assemble_config.strategy_name }}{%- if task.learn_config %} + {{ task.learn_config.strategy_name }}{% endif %}</b>
-                {% if need_link %}
-                    </a>
-                {% endif %}
-            {% endwith %}
+            {% if not_only_manual %}
+                <a href="{{ request.url_root + 'task/' + task.id }}">
+            {% endif %}
+            <b>{{ task.assemble_config.strategy_name }}{%- if task.learn_config %} + {{ task.learn_config.strategy_name }}{% endif %}</b>
+            {% if not_only_manual %}
+                </a>
+            {% endif %}
         </td>
         <td><b>{{ task.assemble_config.strategy_id }}</b> -
             {% for k, v in task.assemble_config.strategy_parameters.items() %}
@@ -71,25 +84,38 @@
             {% endif %}
         </td>
         <td>
-            {% if task.state == "generated" %}
-                <input type="image" onclick="runTask('{{ task.id }}')"
-                       src="{{ url_for('static', filename='run-button.svg') }}" height="24" width="24"
-                       alt="run button"/>
-            {% elif task.state == "completed" %}
-                {{ done(32) }}
-            {% elif task.state == "running" %}
-                <div style="margin-top:-7px;position:relative;">{{ gears(25) }}</div>
-            {% else %}
-                {{ wait(32) }}
+            {% if not_only_manual %}
+                {% if task.state == "generated" %}
+                    <input type="image" onclick="runTask('{{ task.id }}')"
+                           src="{{ url_for('static', filename='play-arrow.png') }}" height="24" width="24"
+                           alt="run button"/>
+                {% elif task.state == "completed" %}
+                    {{ done(32) }}
+                {% elif task.state == "running" %}
+                    <div style="margin-top:-7px;position:relative;">{{ gears(25) }}</div>
+                {% else %}
+                    {{ wait(32) }}
+                {% endif %}
             {% endif %}
         </td>
-        <td>{{ task.status_info }}</td>
         <td>
-            {% if task.state == "completed" %}
-                <input type="image" onclick="rerunTask('{{ task.id }}')"
-                       src="{{ url_for('static', filename='restart.png') }}" height="24" width="24"
-                       alt="run button"/>
+            {% if not_only_manual %}
+                {{ task.status_info }}
+            {% endif %}
+        </td>
+        <td>
+            {% if not_only_manual %}
+                {% if task.state == "completed" %}
+                    <input type="image" onclick="rerunTask('{{ task.id }}')"
+                           src="{{ url_for('static', filename='restart.png') }}" height="24" width="24"
+                           alt="run button"/>
+                {% elif task.state != "generated" %}
+                    <input type="image" onclick="stopTask('{{ task.id }}')"
+                           src="{{ url_for('static', filename='stop-button.png') }}" height="24" width="24"
+                           alt="run button"/>
+                {% endif %}
             {% endif %}
         </td>
     </tr>
+            {% endwith %}
 {% endmacro %}

@@ -21,11 +21,13 @@
     
 {%- endblock -%}
 {% block navbar %}
-	<ul id="menu" class="header" style="width:100%;overflow:hidden;position: fixed;">
-		<li><my_tag><img src="{{ url_for('static', filename='favicon.ico') }}" height="20em" width="20em" /> DWF</my_tag></li>
+	<ul id="menu" class="header" style="height:50px;width:100%;overflow:hidden;position: fixed;z-index:1;">
+		<li><my_tag><img src="{{ url_for('static', filename='favicon.ico') }}" height="20px" width="20px" /> DWF</my_tag></li>
         <li>{{ nav_menu('workers', 'Workers') }}</li>
         <li>{{ nav_menu('experiment/list', 'Experiments') }}</li>
         <li>{{ nav_menu('experiment/new', 'New Experiment') }}</li>
         <li>{{ nav_menu_port('app/kibana#/dashboard/982628a0-06e0-11ea-924f-fb7ec4deb748?_g=(filters:!())&_a=(fullScreenMode:!t)', '5601', 'Results Dashboard') }}</li>        
 	</ul>
+    <div style="height:50px;">
+    </div>
 {% endblock %}

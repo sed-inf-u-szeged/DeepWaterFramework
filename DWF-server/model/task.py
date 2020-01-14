@@ -8,7 +8,7 @@ class Task:
         self.assemble_task_id = assemble_task_id
         self.learn_task_id = learn_task_id
         self.created_ts = timestamp_ms()
-        # state is "generated", "running" or "completed"
+        # state values: "generated", "running", "completed"
         self.state = "generated"
         self.completed_ts = None
 
@@ -17,12 +17,20 @@ class Task:
         res = cls(
             experiment_id=task['experiment_id'],
             assemble_task_id=task['assemble_task_id'],
-            learn_task_id=task['learn_task_id']
+            learn_task_id=task['learn_task_id'],
         )
         res.created_ts = task['created_ts']
         res.state = task['state']
         res.completed_ts = task['completed_ts']
         return res
+
+    def stop(self):
+        self.state = "generated"
+        self.completed_ts = None
+        return {
+            'state': self.state,
+            'completed_ts': self.completed_ts,
+        }
 
     def re_run(self, assemble_task_id, learn_task_id):
         self.assemble_task_id = assemble_task_id

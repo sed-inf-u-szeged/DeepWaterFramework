@@ -19,5 +19,9 @@ def update_experiment_summary(changes, exp_id):
     return es.update_document(combine_index(exp_id), 1, changes)
 
 
+def delete_experiment_summary(exp_id):
+    return es.delete_document(combine_index(exp_id), 1)
+
+
 def combine_index(exp_id):
     return f'{e_idx}_{exp_id}'.lower()

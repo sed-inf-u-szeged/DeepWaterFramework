@@ -1,0 +1,30 @@
+{% macro table_sort(table_id) %}
+    <script>
+        let table = document.getElementById("{{table_id}}");
+
+        function sortTable(n, asc, numeric) {
+            let rows, switching = true, i, x, y, shouldSwitch, dir = (asc ? "asc" : "desc"), switchCount = 0;
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1, shouldSwitch = false; i < (rows.length - 1) && !shouldSwitch; i++) {
+                    x = rows[i].getElementsByTagName("TD")[n].textContent.toLowerCase();
+                    y = rows[i + 1].getElementsByTagName("TD")[n].textContent.toLowerCase();
+                    if (numeric) {
+                        x = parseFloat(x);
+                        y = parseFloat(y);
+                    }
+                    shouldSwitch = dir === "asc" ? x > y : x < y;
+                }
+                if (shouldSwitch) {
+                    rows[i - 1].parentNode.insertBefore(rows[i], rows[i - 1]);
+                    switching = true;
+                    switchCount++;
+                } else if (switchCount === 0 && dir === (asc ? "asc" : "desc")) {
+                    dir = (!asc ? "asc" : "desc");
+                    switching = true;
+                }
+            }
+        }
+    </script>
+{% endmacro %}

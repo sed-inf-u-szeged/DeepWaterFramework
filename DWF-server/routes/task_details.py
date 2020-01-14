@@ -39,7 +39,7 @@ class TaskDetails(Resource):
             l_task = lts.get_task_by_id(task.learn_task_id)
             result['assemble_config'] = l_task.assemble_config
             result['learn_config'] = l_task.learn_config
-            result['progress'] = ((a_task.progress or 0.0) + (l_task.progress or 0.0)) / 2.0
+            result['progress'] = round((((a_task.progress or 0.0) + (l_task.progress or 0.0)) / 2.0) * 100, 2)
             result['task_in_progress'] = 'learning' if l_task.state == "running" or a_task.state == "completed" else 'assembling'
             result['result'] = l_task.result
             if l_task.assigned_to and not l_task.is_completed():

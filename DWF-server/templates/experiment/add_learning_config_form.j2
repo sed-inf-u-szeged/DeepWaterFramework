@@ -4,7 +4,7 @@
 {% block shared_parameters -%}
     {{ select_input("resample", "Resample Type", resample_types, triple_option_builder, False) }}
     {{ int_input("resample_amount", "Resample Amount", default_resample_amount, True) }}
-    {{ int_input(id="seed", label="Random Seed", default_value=1337) }}
+    {{ int_input(id="seed", label="Random Seed", default_value=default_seed) }}
     {{ select_input("preprocess_features", "Preprocess Features", feature_preprocess_types, triple_option_builder, False) }}
     {{ select_input("preprocess_labels", "Preprocess Labels", label_preprocess_types, triple_option_builder, False) }}
 {% endblock %}

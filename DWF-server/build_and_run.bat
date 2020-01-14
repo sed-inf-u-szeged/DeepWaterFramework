@@ -1,6 +1,6 @@
 echo off
-set SMB_VOL=
-set SMB_DOMAIN=
+set SMB_VOL=//1.2.3.4/my/path/to/Deep-Water
+set SMB_DOMAIN=my_domain_name
 docker volume inspect dwf_stack_sedstorvol>nul 2>&1
 IF %ERRORLEVEL%==0 (
     echo "The dwf_stack_sedstorvol exists, using it."

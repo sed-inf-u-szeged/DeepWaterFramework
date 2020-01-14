@@ -22,6 +22,22 @@ class Experiment:
         res.created_ts = exp['created_ts']
         return res
 
+    def edit_experiment(self, name, markdown):
+        self.name = name
+        self.markdown = markdown
+        return {
+            'name': self.name,
+            'markdown': self.markdown,
+        }
+
+    def copy_configs_from_experiment(self, from_exp):
+        self.assemble_configs = from_exp.assemble_configs
+        self.learn_configs = from_exp.learn_configs
+        return {
+            'assemble_configs': self.assemble_configs,
+            'learn_configs': self.learn_configs,
+        }
+
     def set_state(self, state):
         self.state = state
         return {

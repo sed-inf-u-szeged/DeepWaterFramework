@@ -20,34 +20,33 @@ class Result(Resource):
             if not result:
                 abort(400, message="Couldn't save result!")
 
-            response = {'hash': g.hash, 'task_id': result}
+            response = {'hash': g.hash}
             return make_response(jsonify(response), 200)
 
         except Exception as e:
             if config.debug_mode:
-                abort(400, message=str(e))
+                abort(404, message=str(e))
 
             else:
                 abort(404, message="Page not found")
 
     def set_result(self, json):
-        worker = ws.get_worker(g.hash)
         result = self.persist_result(
             "assembling",
             ats,
-            worker.current_task_id,
+            g.worker.current_task_id,
             self.get_assemble_result,
             json['result']
         ) or self.persist_result(
             "learning",
             lts,
-            worker.current_task_id,
+            g.worker.current_task_id,
             self.get_learn_result,
             json['result']
         )
 
         if result:
-            changes = worker.clear_task()
+            changes = g.worker.clear_task()
             success = ws.update_worker(changes, g.hash)
             if success:
                 return result
@@ -83,7 +82,7 @@ class Result(Resource):
                     change = p_task.completed(task_id)
                     success = success and ts.update_task(change, p_task_id)
 
-                return success
+                return bool(success)
 
         except Exception as e:
             return False

@@ -29,12 +29,14 @@ class Worker:
         return True if self.current_task_id else False
 
     def error_solved(self):
+        result = self.clear_task()
         self.error_logs = []
         self.blocked_by_error = False
-        return {
+        result.update({
             'error_logs': self.error_logs,
             'blocked_by_error': self.blocked_by_error,
-        }
+        })
+        return result
 
     def error(self, log):
         self.blocked_by_error = True
@@ -45,9 +47,6 @@ class Worker:
                 "message": log,
             })
             result.update({'error_logs': self.error_logs})
-
-        if self.is_working():
-            result.update(self.clear_task())
 
         return result
 

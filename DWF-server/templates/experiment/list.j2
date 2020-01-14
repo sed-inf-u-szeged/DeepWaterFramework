@@ -1,31 +1,41 @@
 {% extends "base.j2" %}
+{% from 'experiment/experiment_macros.j2' import initAjax %}
 {% from 'time_macros.j2' import format_time_stamp %}
+{% from 'table_macros.j2' import table_sort %}
 {% block content %}
     <div class="container">
         <div class="jumbotron">
             <h1 class="text-center" style="padding-bottom:30px;">Experiments</h1>
         </div>
         {% if experiments %}
-            <table class="table">
+            <table id="exp_list" class="table">
                 <colgroup>
-                    <col span="1" style="width: 30%;">
-                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 20%;">
+                    <col span="1" style="width: 15%;">
+                    <col span="1" style="width: 15%;">
                     <col span="1" style="width: 19%;">
                     <col span="1" style="width: 7%;">
                     <col span="1" style="width: 7%;">
                     <col span="1" style="width: 7%;">
+                    <col span="1" style="width: 5%;">
+                    <col span="1" style="width: 5%;">
                 </colgroup>
                 <tr>
-                    <th>Name</th>
-                    <th>Created</th>
-                    <th>Progress</th>
-                    <th>Tasks</th>
-                    <th>Running</th>
-                    <th>Completed</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(0, true)">Name</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(1, true)">Status</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(2, true)">Created</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(3, false, true)">Progress</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(4, false, true)">Tasks</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(5, false, true)">Running</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(6, false, true)">Completed</th>
+                    <th>Copy</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
                 </tr>
                 {% for id, exp in experiments %}
                     <tr>
                         <td><a href="{{ request.url_root + 'experiment/' + id }}"><b>{{ exp.name|e }}</b></a></td>
+                        <td>{% if exp.state == "configuration" %}Configuration{% elif not exp.progress > 0 %}Tasks generated{% elif exp.progress > 0 and exp.progress < 100 %}Running{% else %}Completed{% endif %}</td>
                         <td><b>{{ format_time_stamp(exp.created_ts) }}</b></td>
                         <td>
                             <div class="progress">
@@ -40,9 +50,70 @@
                         <td><b>{{ exp.tasks_total|e }}</b></td>
                         <td><b>{{ exp.tasks_running|e }}</b></td>
                         <td><b>{{ exp.tasks_completed|e }}</b></td>
+                        <td><a href="{{ request.url_root + 'experiment/' + id + '/copy' }}">
+                            <img src="{{ url_for('static', filename='copy.svg') }}" alt="copy" height="24" width="24">
+                        </a></td>
+                        <td><a href="{{ request.url_root + 'experiment/' + id + '/edit' }}">
+                            <img src="{{ url_for('static', filename='edit.svg') }}" alt="edit" height="24" width="24">
+                        </a></td>
+                        <td>
+                            <input type="image" src="{{ url_for('static', filename='delete.svg') }}"
+                                   alt="delete" height="24" width="24"
+                                   onclick="delete_experiment('{{ id }}')">
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
+            {{ table_sort("exp_list") }}
+            {{ initAjax() }}
+            <script>
+                let order_col = parseInt(sessionStorage.getItem("order_col"));
+                if (order_col >= 0 && order_col <= 6) {
+                    let order_asc = sessionStorage.getItem("order_asc");
+                    let numeric = sessionStorage.getItem("order_numeric");
+                    sortTable(order_col, order_asc, numeric);
+                    if (!sessionStorage.getItem("order_up")) {
+                        sortTable(order_col, order_asc, numeric);
+                    }
+                } else {
+                    sortTableBy(0, true);
+                }
+
+                function sortTableBy(col, asc, numeric) {
+                    let order_col = parseInt(sessionStorage.getItem("order_col"));
+                    if (order_col >= 0 && order_col <= 6 && order_col !== col) {
+                        sessionStorage.removeItem("order_up");
+                    }
+                    sortTable(col, asc, numeric);
+                    sessionStorage.setItem("order_col", col);
+                    if (asc) {
+                        sessionStorage.setItem("order_asc", asc);
+                    } else {
+                        sessionStorage.removeItem("order_asc");
+                    }
+                    if (sessionStorage.getItem("order_up")) {
+                        sessionStorage.removeItem("order_up");
+                    } else {
+                        sessionStorage.setItem("order_up", "true");
+                    }
+                    if (numeric) sessionStorage.setItem("order_numeric", "true");
+                    else sessionStorage.removeItem("order_numeric");
+                }
+
+                ajaxRequest.onreadystatechange = function () {
+                    if (ajaxRequest.readyState === 4) {
+                        if (ajaxRequest.responseText === "delete_success") {
+                            location.reload(true);
+                        } else if (ajaxRequest.responseText === "delete_failed") {
+                            alert("Delete experiment failed!");
+                        }
+                    }
+                };
+
+                function delete_experiment(hash) {
+                    sendPost(`{{ request.url_root }}experiment/${hash}`, {command: 'delete_experiment', hash});
+                }
+            </script>
         {% else %}
             <h2 class="text-center">No experiments created yet.</h2>
         {% endif %}

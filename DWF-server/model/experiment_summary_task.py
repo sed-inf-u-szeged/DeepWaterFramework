@@ -1,7 +1,8 @@
 class ExperimentSummaryTask:
-    def __init__(self, assemble_config, learn_config):
+    def __init__(self, assemble_config, learn_config, created_ts):
         self.assemble_config = assemble_config
         self.learn_config = learn_config
+        self.created_ts = created_ts
         self.assemble_result = None
         self.learn_result = None
 
@@ -10,6 +11,7 @@ class ExperimentSummaryTask:
         res = cls(
             assemble_config=task['assemble_config'],
             learn_config=task['learn_config'],
+            created_ts=task['created_ts'],
         )
         res.assemble_result = task['assemble_result']
         res.learn_result = task['learn_result']

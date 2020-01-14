@@ -80,11 +80,31 @@ def update_document(index, id, fields):
         return None
 
 
+def delete_document(index, id):
+    try:
+        return es.delete(index=index, id=id, refresh='true')['_id']
+
+    except Exception as e:
+        return None
+
+
 def search_documents(index, query, mapper):
     try:
         size = es.search(index=index)['hits']['total']['value']
         results = es.search(index=index, body=query, size=size)['hits']['hits']
-        return list(map(lambda d: (d['_id'], mapper(d['_source'])), results))
+        return [(d['_id'], mapper(d['_source'])) for d in results]
+
+    except Exception as e:
+        pass
+
+    return []
+
+
+def search_document_ids(index, query):
+    try:
+        size = es.search(index=index)['hits']['total']['value']
+        results = es.search(index=index, body=query, size=size)['hits']['hits']
+        return [d['_id'] for d in results]
 
     except Exception as e:
         pass

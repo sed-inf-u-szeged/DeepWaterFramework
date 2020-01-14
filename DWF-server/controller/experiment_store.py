@@ -19,3 +19,7 @@ def list_experiments():
 
 def update_experiment(changes, exp_id):
     return db.update_experiment(changes, exp_id)
+
+
+def delete_experiment(exp_id):
+    return db.delete_experiment(exp_id)

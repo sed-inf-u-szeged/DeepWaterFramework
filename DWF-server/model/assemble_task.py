@@ -5,7 +5,7 @@ from model.obj_flatten import flatten
 class AssembleTask:
     def __init__(self, assemble_config):
         self.assemble_config = assemble_config
-        # state is "generated", "runnable", "running" or "completed"
+        # state values: "generated", "runnable", "running", "completed"
         self.state = "generated"
         self.assigned_to = None
         self.result_file_path = None
@@ -30,7 +30,7 @@ class AssembleTask:
         return res
 
     def add_parent(self, parent_task_id):
-        if parent_task_id:
+        if parent_task_id and parent_task_id not in self.parent_tasks:
             self.parent_tasks.append(parent_task_id)
 
         return {
@@ -43,6 +43,28 @@ class AssembleTask:
 
         return {
             'up_to_date': self.up_to_date
+        }
+
+    def stop(self, parent_task_id):
+        if not parent_task_id or parent_task_id not in self.parent_tasks:
+            return None
+
+        self.parent_tasks.remove(parent_task_id)
+        if self.state != "completed" and len(self.parent_tasks) == 0:
+            self.state = "generated"
+            self.assigned_to = None
+            self.result_file_path = None
+            self.completed_ts = None
+            self.progress = None
+            self.log = None
+
+        return {
+            'state': self.state,
+            'assigned_to': self.assigned_to,
+            'result_file_path': self.result_file_path,
+            'completed_ts': self.completed_ts,
+            'progress': self.progress,
+            'log': self.log,
         }
 
     def make_runnable(self):

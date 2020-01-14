@@ -3,3 +3,4 @@ Flask-RESTful
 Flask-Bootstrap
 Jinja2
 Elasticsearch
+APScheduler

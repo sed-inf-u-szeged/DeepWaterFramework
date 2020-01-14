@@ -11,3 +11,7 @@ def get_experiment_summary(exp_id):
 
 def update_experiment_summary(changes, exp_id):
     return db.update_experiment_summary(changes, exp_id)
+
+
+def delete_experiment_summary(exp_id):
+    return db.delete_experiment_summary(exp_id)
