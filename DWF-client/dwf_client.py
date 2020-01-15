@@ -8,7 +8,7 @@ import sys
 import argparse
 import logging
 import traceback
-from multiprocessing import Process
+from multiprocessing import Process, Value
 from requests.exceptions import ConnectionError
 from time import sleep
 
@@ -16,6 +16,7 @@ from dwf_client_util import util
 from dwf_client_util import server
 from dwf_client_util import dwf_logging
 from dwf_client_util import task_manager
+ClientStatus = util.ClientStatus
 
 client_id = ''
 args = None
@@ -36,16 +37,18 @@ def process_task(task):
         return
 
 
-def run(client_id, args):
+def run(client_id, args, client_status):
     try:
         while True:
             task = server.request_task(client_id)
 
             if not task:
+                client_status.value = ClientStatus.IDLE
                 logging.info(f"No task available. Retrying in {util.config['RETRY_INTVAL']}s...")
                 sleep(util.config['RETRY_INTVAL'])
 
             else:
+                client_status.value = ClientStatus.WORKING
                 process_task(task)
     except ConnectionError as e:
         logging.info(f"Can't connect to server. Error message: \n {str(e)}\n Client is exiting...")
@@ -77,7 +80,6 @@ def run(client_id, args):
         sys.exit(0)
 
 
-
 def manage_processes(processes):
     while True:
         for process in processes:
@@ -90,7 +92,6 @@ def manage_processes(processes):
                 return
 
                       
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Start a DWF Client instance.")
     parser.add_argument('--reinit', help='reinitailize client id', action='store_true', default=False)
@@ -119,8 +120,10 @@ if __name__ == "__main__":
         logging.info(f"Client id: {client_id}")
         util.client_info['client_id'] = client_id
 
-        runner = Process(target=run, args=(client_id, args,))
-        pinging = Process(target=server.ping, args=(client_id, args, ))
+        client_status = Value("i", ClientStatus.IDLE)
+
+        runner = Process(target=run, args=(client_id, args, client_status))
+        pinging = Process(target=server.ping, args=(client_id, args, client_status))
 
         runner.start()
         pinging.start()
@@ -148,7 +151,6 @@ if __name__ == "__main__":
         if args.debug:
             logging.info(traceback.format_exc())
 
-        runner.terminate()
         sys.exit(-1)
 
     except KeyboardInterrupt:

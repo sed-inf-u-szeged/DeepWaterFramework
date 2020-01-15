@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import pickle
+from enum import IntEnum
 
 config = None
 client_info = {}
@@ -9,6 +10,10 @@ ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 HASH_PICKLE = 'client_hash'
 CONFIG_PATH = os.path.join(ABS_PATH, 'config.json')
 CPARAMS_PATH = os.path.join(ABS_PATH, 'client_params.json')
+
+class ClientStatus(IntEnum):
+    IDLE = 0
+    WORKING = 1
 
 def create_sandbox(dirname='sandbox'):
     if not os.path.isdir(dirname):

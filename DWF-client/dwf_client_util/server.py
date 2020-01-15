@@ -6,6 +6,7 @@ import logging, sys, traceback
 
 from dwf_client_util.platform_info import get_platform_info
 import dwf_client_util.util as util
+from dwf_client_util.util import ClientStatus
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 config = util.load_config()
@@ -30,17 +31,16 @@ def _set_environment():
     return cparams
 
 
-def is_stop(response):
-        if response.json()['hash'] == '':
-            return True
-        return False
+def is_stop(response, client_status):
+    return not response.json()['working'] and client_status.value == ClientStatus.WORKING
 
-def ping(client_id, args):
+def ping(client_id, args, client_status):
     try:
         while True:
             resp = send_to_endpoint('PING', {'hash': client_id})
-            if is_stop(resp):
-                return False
+            if is_stop(resp, client_status):
+                logging.info(f"Client received stop command from server")
+                return
 
             sleep(util.config['PING_INTVAL'])
     except ConnectionError as e:
