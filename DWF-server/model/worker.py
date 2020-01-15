@@ -2,7 +2,8 @@ from common import timestamp_ms
 
 
 class Worker:
-    def __init__(self, platform_info, environment):
+    def __init__(self, name, platform_info, environment):
+        self.name = name
         self.platform_info = platform_info
         self.environment = environment
         self.current_task_id = None
@@ -15,7 +16,7 @@ class Worker:
 
     @classmethod
     def from_es_data(cls, worker):
-        res = cls(worker['platform_info'], worker['environment'])
+        res = cls(worker['name'], worker['platform_info'], worker['environment'])
         res.current_task_id = worker['current_task_id']
         res.job_started_ts = worker['job_started_ts']
         res.task_history = worker['task_history']

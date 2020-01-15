@@ -9,10 +9,10 @@ class Register(Resource):
     @staticmethod
     def post():
         try:
-            if not request.json['platform_info'] or not request.json['environment']:
-                abort(403, message="Platform or environment info is missing.")
+            if not request.json['platform_info'] or not request.json['environment'] or not request.json['name']:
+                abort(403, message="Name, platform or environment info is missing.")
 
-            w_hash = ws.register_worker(request.json['platform_info'], request.json['environment'])
+            w_hash = ws.register_worker(request.json['name'], request.json['platform_info'], request.json['environment'])
             if w_hash:
                 return make_response(jsonify({'hash': w_hash}), 200)
 
