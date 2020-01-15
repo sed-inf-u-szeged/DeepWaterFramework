@@ -19,6 +19,7 @@ def prepare_connection_data():
     data = {}
     data['platform_info'] = get_platform_info()
     data['environment'] = _set_environment()
+    data['name'] = util.get_client_name(data['platform_info']['node'])
     print(data)
 
     return data

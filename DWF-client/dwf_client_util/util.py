@@ -75,6 +75,10 @@ def merge_params(cparams, params):
     
     return {**merged_params, **cparams}
 
+def get_client_name(default):
+    if 'NAME' in config and config['NAME']:
+        return config['NAME']
+    return default
 
 client_info['client_id'] = get_stored_hash()
 config = load_config()
