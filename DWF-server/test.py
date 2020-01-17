@@ -32,7 +32,7 @@ def add_configs(i, exp_id):
             'ASTEmbedding_bugFile': '\\input\\bugsu.csv',
             'ASTEmbedding_metricsFile': '\\input\\metrics.csv',
             'ASTEmbedding_model': 'none',
-            'ASTEmbedding_window_size': f'1{i % 10}',
+            'ASTEmbedding_window_size': '10',
             'ASTEmbedding_vector_size': '50',
             'ASTEmbedding_max_epochs': '1',
             'ASTEmbedding_seed': f'12345',

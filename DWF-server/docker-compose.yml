@@ -6,6 +6,7 @@ services:
       restart_policy:
         condition: on-failure
     volumes:
+      - dwfdata:/dwf_data
       - sedstorvol:/Deep-Water
     environment:
         - DWF_INIT_DB
@@ -43,6 +44,8 @@ services:
       - dwf-network
 volumes:
   esdata:
+    driver: local
+  dwfdata:
     driver: local
   sedstorvol:
     driver: local

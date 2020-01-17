@@ -7,9 +7,8 @@ import config
 from middleware import validate_hash
 from controller import worker_store as ws
 
-from multiprocessing import Process
-
 executor = concurrent.futures.ThreadPoolExecutor()
+
 
 class GetTask(Resource):
     method_decorators = [validate_hash]

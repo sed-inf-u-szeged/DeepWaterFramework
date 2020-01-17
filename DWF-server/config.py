@@ -2,7 +2,9 @@ import os
 init_test_environment = os.environ.get('DWF_INIT_TEST', False)
 debug_mode = os.environ.get('DWF_DEBUG_MODE', False)
 local_mode = os.environ.get('DWF_LOCAL_MODE', False)
-init_db = os.environ.get('DWF_INIT_DB', False)
+
+DB_LOCK_FILE = '/dwf_data/db_init.lock'
+init_db = os.environ.get('DWF_INIT_DB', False) and (local_mode or not os.path.isfile(DB_LOCK_FILE))
 
 es_host = 'elasticsearch' if not local_mode else 'localhost'
 es_port = 9200
@@ -28,6 +30,3 @@ es_indices = [
 
 flask_port = 12345 if not local_mode else 4000
 flask_host = '0.0.0.0' if not local_mode else 'localhost'
-
-_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-_LOCK_FILE = os.path.join(_ROOT_DIR, 'db_init.lock')

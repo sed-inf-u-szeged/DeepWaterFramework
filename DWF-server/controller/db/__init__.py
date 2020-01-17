@@ -23,6 +23,10 @@ def init_db():
         es.indices.delete(index=f'{index}*')
         asd = es.indices.create(index=index, ignore=400, body=settings)
 
+    if not config.local_mode:
+        with open(config.DB_LOCK_FILE, 'w'):
+            pass
+
 
 if config.init_db:
     init_db()
