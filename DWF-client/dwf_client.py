@@ -22,7 +22,7 @@ client_id = ''
 args = None
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
-def process_task(task):
+def process_task(task, client_id):
     try:
         logging.info(f'New task assigned:\n {task}')
         task_manager.process_task(task)
@@ -30,10 +30,10 @@ def process_task(task):
 
     except Exception as e:
         logging.info(f"Task can't be completed, error occured: {str(e)}")
-        if args.debug:
-            logging.info(traceback.format_exc())
+        #if args.debug:
+            #logging.info(traceback.format_exc())
 
-        server.send_to_endpoint('ERROR', {"hash": client_id, "log": str(e)})
+        server.send_to_endpoint('ERROR', {"hash": client_id, "log": f"Error: {str(e)} \n Task: {str(task)}."})
         return
 
 
@@ -49,7 +49,7 @@ def run(client_id, args, client_status):
 
             else:
                 client_status.value = ClientStatus.WORKING
-                process_task(task)
+                process_task(task, client_id)
     except ConnectionError as e:
         logging.info(f"Can't connect to server. Error message: \n {str(e)}\n Client is exiting...")
         if args.debug:
