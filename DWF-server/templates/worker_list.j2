@@ -19,7 +19,7 @@
                 {% for worker_id, worker in workers %}
                     <tr>
                         <td class="align-middle">
-                            <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker_id|e }}</b></a>
+                            <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker.name|e }}</b></a>
                         </td>
                         {% if worker.blocked_by_error %}
                             <td class="align-middle">

@@ -11,8 +11,8 @@ def is_worker(worker_id):
     return True if db.get_worker_by_id(worker_id) else False
 
 
-def register_worker(platform_info, environment):
-    return db.register_worker(Worker(platform_info, environment))
+def register_worker(name, platform_info, environment):
+    return db.register_worker(Worker(name, platform_info, environment))
 
 
 def worker_error(worker_id, worker, log):
