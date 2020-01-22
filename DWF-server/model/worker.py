@@ -11,6 +11,7 @@ class Worker:
         self.task_history = []
         self.error_logs = []
         self.blocked_by_error = False
+        self.deleted = False
         self.communication_ts = timestamp_ms()
         self.register_ts = timestamp_ms()
 
@@ -22,12 +23,19 @@ class Worker:
         res.task_history = worker['task_history']
         res.error_logs = worker['error_logs']
         res.blocked_by_error = worker['blocked_by_error']
+        res.deleted = worker['deleted']
         res.communication_ts = worker['communication_ts']
         res.register_ts = worker['register_ts']
         return res
 
     def is_working(self):
         return True if self.current_task_id else False
+
+    def delete(self):
+        self.deleted = True
+        return {
+            'deleted': self.deleted
+        }
 
     def error_solved(self):
         result = self.clear_task()
