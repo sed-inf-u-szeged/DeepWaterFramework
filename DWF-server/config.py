@@ -3,9 +3,6 @@ init_test_environment = os.environ.get('DWF_INIT_TEST', False)
 debug_mode = os.environ.get('DWF_DEBUG_MODE', False)
 local_mode = os.environ.get('DWF_LOCAL_MODE', False)
 
-DB_LOCK_FILE = '/dwf_data/db_init.lock'
-init_db = os.environ.get('DWF_INIT_DB', False) and (local_mode or not os.path.isfile(DB_LOCK_FILE))
-
 es_host = 'elasticsearch' if not local_mode else 'localhost'
 es_port = 9200
 

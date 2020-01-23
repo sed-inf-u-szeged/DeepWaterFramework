@@ -20,13 +20,12 @@ def init_db():
         },
     }
     for index in config.es_indices:
-        es.indices.delete(index=f'{index}*')
-        asd = es.indices.create(index=index, ignore=400, body=settings)
+        if not es.indices.exists(index=f'{index}*'):
+            asd = es.indices.create(index=index, ignore=400, body=settings)
+            print(f'{index}* created')
 
-    if not config.local_mode:
-        with open(config.DB_LOCK_FILE, 'w'):
-            pass
+        else:
+            print(f'{index}* exists')
 
 
-if config.init_db:
-    init_db()
+init_db()
