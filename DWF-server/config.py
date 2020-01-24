@@ -2,6 +2,7 @@ import os
 init_test_environment = os.environ.get('DWF_INIT_TEST', False)
 debug_mode = os.environ.get('DWF_DEBUG_MODE', False)
 local_mode = os.environ.get('DWF_LOCAL_MODE', False)
+init_db = os.environ.get('DWF_INIT_DB', False)
 
 es_host = 'elasticsearch' if not local_mode else 'localhost'
 es_port = 9200
