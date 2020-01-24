@@ -1,6 +1,6 @@
 {% macro table_sort(table_id) %}
     <script>
-        let table = document.getElementById("{{table_id}}");
+        var table = document.getElementById("{{table_id}}");
 
         function sortTable(n, asc, numeric) {
             let rows, switching = true, i, x, y, shouldSwitch, dir = (asc ? "asc" : "desc"), switchCount = 0;
@@ -23,6 +23,35 @@
                 } else if (switchCount === 0 && dir === (asc ? "asc" : "desc")) {
                     dir = (!asc ? "asc" : "desc");
                     switching = true;
+                }
+            }
+        }
+    </script>
+{% endmacro %}
+
+{% macro search_table(table_id, searchInput_id) %}
+    <script>
+        var table = document.getElementById("{{table_id}}");
+        let searchInput = document.getElementById("{{searchInput_id}}");
+
+        function searchTable(columns) {
+            sessionStorage.setItem("{{searchInput_id}}", searchInput.value);
+            let filter = searchInput.value.toUpperCase();
+            let tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (let i = 0; i < tr.length; i++) {
+                for (let j in columns) {
+                    let td = tr[i].getElementsByTagName("td")[columns[j]];
+                    if (td) {
+                        let txtValue = td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                            break;
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
                 }
             }
         }
