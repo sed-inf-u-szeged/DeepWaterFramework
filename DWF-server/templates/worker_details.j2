@@ -70,9 +70,15 @@
                     {% endfor -%}
                 </div>
                 <hr/>
-                <div class="row text-center">
-                    <a href="{{ request.url_root + 'worker_fixed/' + worker_id }}"><h3>Worker fixed, continue.</h3></a>
-                </div>
+                {% if worker.deleted %}
+                    <div class="row text-center">
+                        <h3 style="color: red;">This Worker is deleted.</h3>
+                    </div>
+                {% else %}
+                    <div class="row text-center">
+                        <a href="{{ request.url_root + 'worker_fixed/' + worker_id }}"><h3>Worker fixed, continue.</h3></a>
+                    </div>
+                {% endif %}
             {% endif %}
             {% if worker.current_task_id -%}
                 <div class="row">

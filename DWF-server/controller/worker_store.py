@@ -117,5 +117,11 @@ def get_worker(worker_id):
     return db.get_worker_by_id(worker_id)
 
 
-def update_worker(changes, task_id):
-    return db.update_worker(changes, task_id)
+def update_worker(changes, worker_id):
+    return db.update_worker(changes, worker_id)
+
+
+def delete_worker(worker_id):
+    worker = get_worker(worker_id)
+    changes = worker.delete()
+    return update_worker(changes, worker_id)
