@@ -198,8 +198,9 @@
             <table id="tasks_table" class="table" style="border: 1px solid black;">
                 <caption style="border: 2px solid black;text-align: center"><h4><b>Tasks</b></h4></caption>
                 <colgroup>
-                    <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 20%;">
+                    <col span="1" style="width: 40%;">
+                    <col span="1" style="width: 10%;">
                     <col span="1" style="width: 5%;">
                     <col span="1" style="width: 20%;">
                     <col span="1" style="width: 5%;">
@@ -207,6 +208,7 @@
                 <tr style="border: 2px solid black;">
                     <th>Name</th>
                     <th>Info</th>
+                    <th>Order</th>
                     {% if experiment.has_runnable_tasks %}
                         <th>
                             <input type="image" onclick="runAllTasks()"

@@ -1,12 +1,15 @@
 from common import timestamp_ms
+from model import Priority
 from model.obj_flatten import flatten
 
 
 class LearnTask:
-    def __init__(self, assemble_config, assemble_task_id, learn_config):
+    def __init__(self, assemble_config, assemble_task_id, learn_config, priority=Priority.NORMAL, order_in_exp=0):
         self.assemble_config = assemble_config
         self.assemble_task_id = assemble_task_id
         self.learn_config = learn_config
+        self.priority = priority
+        self.order_in_exp = order_in_exp
         # state values: "generated", "runnable", "running", "completed"
         self.state = "generated"
         self.assigned_to = None
@@ -24,6 +27,8 @@ class LearnTask:
             assemble_config=task['assemble_config'],
             assemble_task_id=task['assemble_task_id'],
             learn_config=task['learn_config'],
+            priority=task['priority'],
+            order_in_exp=task['order_in_exp'],
         )
         res.state = task['state']
         res.assigned_to = task['assigned_to']
@@ -134,6 +139,14 @@ class LearnTask:
             'progress': self.progress,
             'log': self.log,
         }
+
+    def set_priority(self, priority):
+        self.priority = priority
+        return {'priority': self.priority}
+
+    def set_order_in_exp(self, order_in_exp):
+        self.order_in_exp = order_in_exp
+        return {'order_in_exp': self.order_in_exp}
 
     def flatten(self):
         return flatten({

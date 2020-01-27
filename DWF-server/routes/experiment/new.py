@@ -4,7 +4,6 @@ from flask import render_template, make_response, request, redirect, url_for
 import config
 from model import Experiment
 from controller import experiment_store as es
-from controller import experiment_summary_store as ess
 
 
 class New(Resource):
@@ -16,12 +15,10 @@ class New(Resource):
 
             orig_exp = es.get_experiment(edit_id or copy_id)
             if edit_id:
-                changes = orig_exp.edit_experiment(request.form['experiment_name'], request.form['markdown'])
-                experiment_id = es.update_experiment(changes, edit_id)
-                success = ess.update_experiment_summary(changes, edit_id)
+                success = es.edit_experiment(edit_id, request.form['experiment_name'], request.form['markdown'], request.form['experiment_priority'])
 
             else:
-                new_experiment = Experiment(request.form['experiment_name'], request.form['markdown'])
+                new_experiment = Experiment(request.form['experiment_name'], request.form['markdown'], request.form['experiment_priority'])
                 experiment_id = es.new_experiment(new_experiment)
                 if experiment_id and copy_id:
                     changes = new_experiment.copy_configs_from_experiment(orig_exp)

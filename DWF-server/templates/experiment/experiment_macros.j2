@@ -84,6 +84,7 @@
                     {% endfor %}
                 {% endif %}
             </td>
+            <td>{{ task.order_in_exp }}. <a href="#">+</a> <a href="#">-</a></td>
             <td>
                 {% if not_only_manual %}
                     {% if task.state == "generated" %}
