@@ -49,7 +49,7 @@ def update_task(changes, task_id):
 def rerun_task(task_id):
     a_task = get_task_by_id(task_id)
     if a_task.assemble_config['strategy_id'] == "manual_file_input":
-        return None, None
+        return task_id, a_task
 
     a_task_changes = a_task.make_obsolete()
     update_task(a_task_changes, task_id)
