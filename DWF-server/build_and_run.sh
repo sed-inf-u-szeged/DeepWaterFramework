@@ -9,4 +9,5 @@ export DWF_INIT_DB=
 docker build -t=dwf-server .
 docker tag dwf-server viszkoktamas93/dwf-server
 docker swarm init
+sudo sysctl -w vm.max_map_count=262144
 docker stack deploy -c docker-compose.yml dwf_stack

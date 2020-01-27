@@ -8,32 +8,32 @@ services:
     volumes:
       - sedstorvol:/Deep-Water
     ports:
-      - "4000:12345"
+      - 4000:12345
     networks:
       - dwf-network
   elasticsearch:
-    image: elasticsearch:7.3.1
+    image: elasticsearch:7.5.2
     environment:
       - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - 127.0.0.1:9200:9200
     networks:
       - dwf-network
   kibana:
-    image: kibana:7.3.1
+    image: kibana:7.5.2
     ports:
-      - "5601:5601"
+      - 5601:5601
     networks:
       - dwf-network
   visualizer:
     image: dockersamples/visualizer:stable
     ports:
-      - "8080:8080"
+      - 8080:8080
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       placement:
         constraints: [node.role == manager]

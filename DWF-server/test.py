@@ -150,7 +150,7 @@ def create_experiment(i, name, task_gen, task_run):
 
 
 if __name__ == '__main__':
-    test_cases = 99
+    test_cases = 6
     test_results = []
     for i in range(1, int(test_cases/3) + 1, 1):
         res = create_experiment(i, f'Default parameters {i}', True, True)

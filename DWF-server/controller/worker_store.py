@@ -1,4 +1,4 @@
-from multiprocessing import Lock
+from threading import Lock
 from controller.db import worker_db as db
 from model import Worker
 from controller import assemble_task_store as ats

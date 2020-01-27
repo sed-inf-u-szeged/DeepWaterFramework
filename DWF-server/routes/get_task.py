@@ -1,13 +1,9 @@
-import concurrent.futures
-
 from flask_restful import Resource
 from flask import jsonify, make_response, g
 
 import config
 from middleware import validate_hash
 from controller import worker_store as ws
-
-executor = concurrent.futures.ThreadPoolExecutor()
 
 
 class GetTask(Resource):
@@ -27,6 +23,5 @@ class GetTask(Resource):
     @staticmethod
     def get_task():
         ws.ping_worker(g.hash, g.worker)
-        f = executor.submit(ws.assign_task_to_worker, g.hash, g.worker)
-        assigned_task_id, assigned_task = f.result()
+        assigned_task_id, assigned_task = ws.assign_task_to_worker(g.hash, g.worker)
         return assigned_task or ''
