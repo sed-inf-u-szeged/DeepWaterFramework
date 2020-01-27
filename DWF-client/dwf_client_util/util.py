@@ -15,6 +15,9 @@ class ClientStatus(IntEnum):
     IDLE = 0
     WORKING = 1
 
+class Signals(IntEnum):
+    STOP_TASK = 0
+
 def create_sandbox(dirname='sandbox'):
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
