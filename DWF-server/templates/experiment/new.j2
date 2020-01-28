@@ -27,7 +27,7 @@
         <form id="new_experiment_form" class="form" method="post" autocomplete="off">
             {{ input_field(id="experiment_name", label="Experiment Name", type="text", default_value=name, required=True) }}
             <div id="checkName"></div>
-            {{ select_input(id="experiment_priority", label="Priority", options=[(0, "LOW", False), (1, "NORMAL", True), (2, "HIGH", False), (3, "IMMEDIATE", False)], triple_option_builder) }}
+            {{ select_input("experiment_priority", "Priority", priorities, triple_option_builder) }}
             <div class="form-group required">
                 <label for="wmd-input">Markdown</label>
                 <div id="wmd-button-bar"></div>

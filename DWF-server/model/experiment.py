@@ -1,5 +1,5 @@
 from common import timestamp_ms
-from model import Priority
+from model.priority import Priority
 
 
 class Experiment:
