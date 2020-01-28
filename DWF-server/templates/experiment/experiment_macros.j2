@@ -60,6 +60,7 @@
 {% macro experiment_task_row(task, state) %}
     {% with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
         <tr>
+            <td><button onclick="reorderTask('{{ task.id }}', 'up')">+</button> <button onclick="reorderTask('{{ task.id }}', 'down')">-</button> {{ task.order_in_exp }}.</td>
             <td>
                 {% if not_only_manual %}
                     <a href="{{ request.url_root + 'task/' + task.id }}">
@@ -84,7 +85,6 @@
                     {% endfor %}
                 {% endif %}
             </td>
-            <td>{{ task.order_in_exp }}. <a href="#">+</a> <a href="#">-</a></td>
             <td>
                 {% if not_only_manual %}
                     {% if task.state == "generated" %}

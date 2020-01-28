@@ -46,6 +46,10 @@ class Manage(Resource):
                 success = self.stop_task(request.json['id'])
                 return make_response("stop_success" if success else "stop_failed", 200)
 
+            elif request.json['command'] == 'reorder_task':
+                success = self.reorder_task(request.json['id'], request.json['direction'] == "up")
+                return make_response("reorder_success" if success else "reorder_failed", 200)
+
             elif request.json['command'] == 'delete_experiment':
                 success = self.stop_all_tasks(experiment)
                 success = success and es.delete_experiment(hash)
@@ -107,7 +111,7 @@ class Manage(Resource):
                 abort(404, message="Page not found")
 
     def load_experiment(self, exp):
-        tasks = [self.load_task_from_db(t_id) for t_id in exp.tasks]
+        tasks = sorted([self.load_task_from_db(t_id) for t_id in exp.tasks], key=lambda t: t["order_in_exp"])
         learn_configs = [(c_id, scs.get_config_by_id(c_id)) for c_id in exp.learn_configs]
         runnable_tasks = [t for t in tasks if t['state'] == "generated"]
         stoppable_tasks = [t for t in tasks if t['state'] == "runnable" or t['state'] == "running"]
@@ -131,6 +135,7 @@ class Manage(Resource):
         result = {
             "id": task_id,
             "state": task.state,
+            "order_in_exp": task.order_in_exp,
             "status_info": "Task Completed" if task.state == "completed" else "Run task",
         }
         assemble_task = ats.get_task_by_id(task.assemble_task_id)
@@ -226,6 +231,8 @@ class Manage(Resource):
 
         generated_tasks = []
 
+        index = 1
+
         for a_conf in assemble_configs:
             a_conf_dict = a_conf.to_dict()
             a_conf_dict.pop('shared_parameters', None)
@@ -234,7 +241,8 @@ class Manage(Resource):
             if a_task_es_id:
                 if not learn_configs:
                     if a_task.assemble_config['strategy_id'] != "manual_file_input":
-                        task = Task(exp_id, a_task_es_id, None)
+                        task = Task(exp_id, a_task_es_id, None, exp.priority, index)
+                        index += 1
                         if a_task.is_completed():
                             task.completed(a_task_es_id)
 
@@ -246,7 +254,8 @@ class Manage(Resource):
                     l_task = LearnTask(a_conf.to_dict(), a_task_es_id, l_conf.to_dict())
                     l_task_es_id, l_task = lts.new_learn_task(l_task)
                     if l_task_es_id:
-                        task = Task(exp_id, a_task_es_id, l_task_es_id)
+                        task = Task(exp_id, a_task_es_id, l_task_es_id, exp.priority, index)
+                        index += 1
                         if l_task.is_completed():
                             task.completed(l_task_es_id)
 
@@ -331,3 +340,22 @@ class Manage(Resource):
                 if worker:
                     worker_changes = worker.clear_task()
                     ws.update_worker(worker_changes, worker_id)
+
+    @staticmethod
+    def reorder_task(task_id, direction):
+        try:
+            task = ts.get_task_by_id(task_id)
+            swap_task_id, swap_task = ts.search_task_by_dict({
+                'order_in_exp': task.order_in_exp + (-1 if direction else 1),
+                'experiment_id': task.experiment_id,
+            })
+            task_order = task.order_in_exp
+            task_changes = task.set_order_in_exp(swap_task.order_in_exp)
+            success = ts.update_task(task_changes, task_id)
+            swap_task_changes = swap_task.set_order_in_exp(task_order)
+            return ts.update_task(swap_task_changes, swap_task_id) and success
+
+        except Exception as e:
+            pass
+
+        return False

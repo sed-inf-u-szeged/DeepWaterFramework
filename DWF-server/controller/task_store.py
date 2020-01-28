@@ -17,6 +17,10 @@ def search_task(task):
     return db.search_task(task)
 
 
+def search_task_by_dict(dict):
+    return db.search_task_by_dict(dict)
+
+
 def list_tasks():
     return db.get_all_task()
 
