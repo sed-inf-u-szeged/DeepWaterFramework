@@ -11,7 +11,7 @@ class Task:
         self.priority = priority
         self.order_in_exp = order_in_exp
         self.created_ts = timestamp_ms()
-        # state values: "generated", "running", "completed"
+        # state values: "generated", "runnable", "running", "completed"
         self.state = "generated"
         self.completed_ts = None
 
@@ -37,11 +37,17 @@ class Task:
             'completed_ts': self.completed_ts,
         }
 
+    def start(self):
+        self.state = "running"
+        return {
+            'state': self.state,
+        }
+
     def re_run(self, assemble_task_id, learn_task_id):
         self.assemble_task_id = assemble_task_id
         self.learn_task_id = learn_task_id
         self.created_ts = timestamp_ms()
-        self.state = "running"
+        self.state = "runnable"
         self.completed_ts = None
         return {
             'assemble_task_id': self.assemble_task_id,
@@ -51,9 +57,9 @@ class Task:
             'completed_ts': self.completed_ts,
         }
 
-    def make_runnable(self):
-        if self.state == "generated":
-            self.state = "running"
+    def make_runnable(self, force=False):
+        if force or self.state == "generated":
+            self.state = "runnable"
 
         return {
             'state': self.state,
@@ -66,6 +72,9 @@ class Task:
         if task_id == self.learn_task_id or (task_id == self.assemble_task_id and not self.learn_task_id):
             self.completed_ts = timestamp_ms()
             self.state = "completed"
+
+        elif task_id == self.assemble_task_id:
+            self.state = "runnable"
 
         return {
             'completed_ts': self.completed_ts,

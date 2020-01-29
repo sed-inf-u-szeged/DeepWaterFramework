@@ -1,6 +1,7 @@
 from threading import Lock
 from controller.db import worker_db as db
 from model import Worker
+from controller import task_store as ts
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
 
@@ -37,7 +38,13 @@ def _remove_task(worker_id, worker):
     try:
         task = ats.get_task_by_id(worker.current_task_id) or lts.get_task_by_id(worker.current_task_id)
         task_changes = task.revoke_assign_from(worker_id)
-        return ats.update_task(task_changes, worker.current_task_id) or lts.update_task(task_changes, worker.current_task_id)
+        success = ats.update_task(task_changes, worker.current_task_id) or lts.update_task(task_changes, worker.current_task_id)
+        parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+        for pt_id, parent in parents:
+            t_change = parent.make_runnable(True)
+            success = ts.update_task(t_change, pt_id) and success
+
+        return success
 
     except Exception as e:
         return None
@@ -64,10 +71,15 @@ def assign_task(worker_id, worker, task_store):
 
         task_changes = task.assign_to(worker_id)
         task_result_id = task_store.update_task(task_changes, task_id)
+        parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+        parent_success = True
+        for pt_id, parent in parents:
+            p_change = parent.start()
+            parent_success = ts.update_task(p_change, pt_id) and parent_success
 
     worker_changes = worker.new_task(task_id)
     worker_result_id = db.update_worker(worker_changes, worker_id)
-    if not worker_result_id or not task_result_id:
+    if not worker_result_id or not task_result_id or not parent_success:
         return None
 
     return task_dict

@@ -193,7 +193,7 @@
                     <a href="{{ request.url_root + 'experiment/' + hash + '/summary' }}"><h3><b>Summary</b></h3></a>
                 </div>
             {% endif %}
-            <input type="text" id="tasks_table_searchInput" onkeyup="searchTable([0, 1, 3])" placeholder="Search here.."
+            <input type="text" id="tasks_table_searchInput" onkeyup="searchTable([1, 2, 4])" placeholder="Search here.."
                    style="background-image: url('{{ url_for('static', filename='searchicon.png') }}');
                            background-position: 10px 12px;
                            background-repeat: no-repeat;
@@ -205,8 +205,8 @@
             <table id="tasks_table" class="table" style="border: 1px solid black;">
                 <caption style="border: 2px solid black;text-align: center"><h4><b>Tasks</b></h4></caption>
                 <colgroup>
-                    <col span="1" style="width: 10%;">
-                    <col span="1" style="width: 20%;">
+                    <col span="1" style="width: 6%;">
+                    <col span="1" style="width: 24%;">
                     <col span="1" style="width: 40%;">
                     <col span="1" style="width: 5%;">
                     <col span="1" style="width: 20%;">
@@ -245,14 +245,14 @@
                     {% endif %}
                 </tr>
                 {% for task in experiment.tasks %}
-                    {{ experiment_task_row(task, experiment.state) }}
+                    {{ experiment_task_row(task, experiment) }}
                 {% endfor %}
             </table>
             {{ search_table("tasks_table", "tasks_table_searchInput") }}
             <script>
                 let tasks_table_searchInput = document.getElementById("tasks_table_searchInput");
                 tasks_table_searchInput.value = sessionStorage.getItem("tasks_table_searchInput");
-                searchTable([0, 1, 3]);
+                searchTable([1, 2, 4]);
             </script>
         {% endif %}
     </div>

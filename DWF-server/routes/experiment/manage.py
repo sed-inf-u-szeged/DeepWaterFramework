@@ -142,20 +142,18 @@ class Manage(Resource):
         if task.learn_task_id:
             learn_task = lts.get_task_by_id(task.learn_task_id)
             result["learn_config"] = learn_task.learn_config
-            if task.state == "running":
+            if task.state == "runnable" or task.state == "running":
                 if learn_task.state == "runnable":
-                    if assemble_task.is_completed():
-                        result["state"] = learn_task.state
-
                     result["status_info"] = "Learning is waiting for worker"
+
                 elif learn_task.state == "running":
                     result["status_info"] = "Learning is in progress"
 
         result["assemble_config"] = assemble_task.assemble_config
-        if task.state == "running":
+        if task.state == "runnable" or task.state == "running":
             if assemble_task.state == "runnable":
-                result["state"] = assemble_task.state
                 result["status_info"] = "Assembling is waiting for worker"
+
             elif assemble_task.state == "running":
                 result["status_info"] = "Assembling is in progress"
 
@@ -345,12 +343,13 @@ class Manage(Resource):
     def reorder_task(task_id, direction):
         try:
             task = ts.get_task_by_id(task_id)
+            task_order = task.order_in_exp
+            swap_order = task_order + (-1 if direction else 1)
             swap_task_id, swap_task = ts.search_task_by_dict({
-                'order_in_exp': task.order_in_exp + (-1 if direction else 1),
+                'order_in_exp': swap_order,
                 'experiment_id': task.experiment_id,
             })
-            task_order = task.order_in_exp
-            task_changes = task.set_order_in_exp(swap_task.order_in_exp)
+            task_changes = task.set_order_in_exp(swap_order)
             success = ts.update_task(task_changes, task_id)
             swap_task_changes = swap_task.set_order_in_exp(task_order)
             return ts.update_task(swap_task_changes, swap_task_id) and success

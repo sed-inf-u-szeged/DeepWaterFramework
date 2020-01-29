@@ -57,10 +57,19 @@
     </tr>
 {% endmacro %}
 
-{% macro experiment_task_row(task, state) %}
-    {% with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
-        <tr>
-            <td><button onclick="reorderTask('{{ task.id }}', 'up')">+</button> <button onclick="reorderTask('{{ task.id }}', 'down')">-</button> {{ task.order_in_exp }}.</td>
+{% macro experiment_task_row(task, exp) -%}
+    {%- with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
+        {{ "" }}<tr>
+            <td>
+                <button onclick="reorderTask('{{ task.id }}', 'up')" {% if not task.order_in_exp > 1 -%}
+                        disabled
+                {%- endif -%}
+                >+</button>{{ "" -}}
+                <button onclick="reorderTask('{{ task.id }}', 'down')" {% if not task.order_in_exp < exp.tasks|length -%}
+                        disabled
+                {%- endif -%}
+                >-</button>
+            </td>
             <td>
                 {% if not_only_manual %}
                     <a href="{{ request.url_root + 'task/' + task.id }}">
@@ -71,19 +80,20 @@
                     </a>
                 {% endif %}
             </td>
-            <td><b>{{ task.assemble_config.strategy_id }}</b> -
-                {% for k, v in task.assemble_config.strategy_parameters.items() %}
-                    <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
-                {% endfor %}
+            <td>
+                <b>{{ task.assemble_config.strategy_id }}</b> - {{ "" -}}
+                {%- for k, v in task.assemble_config.strategy_parameters.items() -%}
+                    <b>{{ k }}</b>:{{ v }}{%- if loop.nextitem is defined %} | {% endif -%}
+                {%- endfor %}
                 <br/>
-                {% if task.learn_config %}
-                    <b>{{ task.learn_config.strategy_id }}</b> -
-                    {% for k, v in task.learn_config.strategy_parameters.items() %}
-                        <b>{{ k }}</b>:{{ v }}{% if loop.nextitem is defined %} | {% endif %}
-                    {% else %}
+                {% if task.learn_config -%}
+                    <b>{{ task.learn_config.strategy_id }}</b> - {{ "" -}}
+                    {%- for k, v in task.learn_config.strategy_parameters.items() -%}
+                        <b>{{ k }}</b>:{{ v }}{%- if loop.nextitem is defined %} | {% endif -%}
+                    {%- else -%}
                         <b>no hyperparameters</b>
                     {% endfor %}
-                {% endif %}
+                {%- endif %}
             </td>
             <td>
                 {% if not_only_manual %}
