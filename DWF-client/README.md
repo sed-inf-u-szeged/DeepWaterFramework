@@ -30,6 +30,8 @@ If usig pip:
 
 #### Switches
 - `--reinit`: Start client with it's state reset (use when server db is wiped).
+- `--debug`: Show traceback along with exception messages.
+- `--name=NAME`: Set client's name to NAME (this is given by the client user, may not be unique server wise)  
 
 ### Configurations
 Can be found at subfolder `dwf_client_utils`.
