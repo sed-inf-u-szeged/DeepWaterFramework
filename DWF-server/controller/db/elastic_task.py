@@ -25,7 +25,7 @@ def search_task(task):
 
 
 def search_task_by_dict(dict):
-    doc = es.search_one_document(t_idx, es.dict_query(flatten(dict), sort))
+    doc = es.search_one_document(t_idx, es.dict_query(flatten(dict)))
     if doc:
         return doc['_id'], Task.from_es_data(doc['_source'])
 

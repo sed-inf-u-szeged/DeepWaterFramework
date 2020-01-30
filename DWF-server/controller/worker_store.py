@@ -63,6 +63,9 @@ def _worker_blocked(worker_id, worker, log):
 def _assign_parent_task(worker_id, worker):
     with mutex:
         scheduled_experiment = scheduler.get_next()
+        if not scheduled_experiment:
+            return None
+
         task_id, task = ts.search_task_by_order(scheduled_experiment)
         assigned_task_id = _assign_task(worker_id, task.assemble_task_id, ats) or _assign_task(worker_id, task.learn_task_id, lts)
         task_id, task = ts.search_task_by_order(scheduled_experiment)
