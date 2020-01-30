@@ -30,13 +30,16 @@ def search_one_document(index, query):
         return None
 
 
-def dict_query(dict):
+def dict_query(dict, sort=None):
     return {
         'query': {
             'bool': {
                 'must': list(map(lambda attr: {'term': {attr[0]: attr[1]}}, dict))
             }
-        }
+        },
+        'sort': [] if not sort else [
+            sort
+        ]
     }
 
 

@@ -21,6 +21,10 @@ def search_task_by_dict(dict):
     return db.search_task_by_dict(dict)
 
 
+def search_task_by_order(exp_id):
+    return db.search_task_by_order(exp_id)
+
+
 def list_tasks():
     return db.get_all_task()
 

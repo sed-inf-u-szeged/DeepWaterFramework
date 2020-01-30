@@ -8,6 +8,7 @@ from controller import experiment_summary_store as ess
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
 from controller import task_store as ts
+from controller.task_scheduler import scheduler
 from controller import strategy_config_store as scs
 from model import AssembleTask, LearnTask, Task
 from model.experiment_summary import ExperimentSummary
@@ -24,26 +25,42 @@ class Manage(Resource):
 
             elif request.json['command'] == 'run_all':
                 success = self.run_all_tasks(experiment)
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'run_task':
                 success = self.run_task(request.json['id'])
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'rerun_all':
                 success = self.rerun_all_tasks(experiment, hash)
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("rerun_success" if success else "rerun_failed", 200)
 
             elif request.json['command'] == 'rerun_task':
                 success = self.rerun_task(hash, request.json['id'])
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("rerun_success" if success else "rerun_failed", 200)
 
             elif request.json['command'] == 'stop_all':
                 success = self.stop_all_tasks(experiment)
+                if success:
+                    scheduler.remove_experiment(hash)
+
                 return make_response("stop_success" if success else "stop_failed", 200)
 
             elif request.json['command'] == 'stop_task':
                 success = self.stop_task(request.json['id'])
+                scheduler.check_experiment(hash, experiment.priority)
                 return make_response("stop_success" if success else "stop_failed", 200)
 
             elif request.json['command'] == 'reorder_task':
@@ -52,6 +69,9 @@ class Manage(Resource):
 
             elif request.json['command'] == 'delete_experiment':
                 success = self.stop_all_tasks(experiment)
+                if success:
+                    scheduler.remove_experiment(hash)
+
                 success = success and es.delete_experiment(hash)
                 success = success and ess.delete_experiment_summary(hash)
                 return make_response(f"delete_success" if success else f"delete_failed", 200)
