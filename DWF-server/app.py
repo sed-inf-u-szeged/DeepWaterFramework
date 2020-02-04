@@ -6,9 +6,12 @@ import os
 import config
 from routes import *
 from controller import worker_observer
+from controller import experiment_store as es
+from controller import task_scheduler
 
 app = Flask(__name__)
 worker_observer.init()
+task_scheduler.init(es.list_experiments())
 
 Bootstrap(app)
 

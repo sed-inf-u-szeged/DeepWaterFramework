@@ -67,10 +67,17 @@ def _assign_parent_task(worker_id, worker):
             return None
 
         task_id, task = ts.search_task_by_order(scheduled_experiment)
-        assigned_task_id = _assign_task(worker_id, task.assemble_task_id, ats) or _assign_task(worker_id, task.learn_task_id, lts)
-        task_id, task = ts.search_task_by_order(scheduled_experiment)
-        if not task_id:
-            scheduler.remove_experiment(scheduled_experiment)
+        assigned_task_id, experiment_ids = _assign_task(worker_id, task.assemble_task_id, ats)
+        if not assigned_task_id:
+            assigned_task_id, experiment_ids = _assign_task(worker_id, task.learn_task_id, lts)
+
+        if not assigned_task_id:
+            return None
+
+        for exp_id in experiment_ids:
+            task_id, task = ts.search_task_by_order(exp_id)
+            if not task_id:
+                scheduler.remove_experiment(exp_id)
 
     task_dict = ats.get_config_by_task_id(assigned_task_id) or lts.get_config_by_task_id(assigned_task_id)
     worker_changes = worker.new_task(assigned_task_id)
@@ -84,17 +91,18 @@ def _assign_parent_task(worker_id, worker):
 def _assign_task(worker_id, task_id, task_store):
     task = task_store.get_task_by_id(task_id)
     if task.state != "runnable":
-        return False
+        return None, None
 
     task_changes = task.assign_to(worker_id)
     task_result_id = task_store.update_task(task_changes, task_id)
     parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+    experiment_ids = {p.experiment_id for _, p in parents}
     parent_success = True
     for pt_id, parent in parents:
         p_change = parent.start()
         parent_success = ts.update_task(p_change, pt_id) and parent_success
 
-    return task_id
+    return task_id, experiment_ids
 
 
 def ping_worker(worker_id, worker):

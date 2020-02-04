@@ -11,14 +11,12 @@ class GetTask(Resource):
 
     def post(self):
         try:
-            return make_response(jsonify({'task': self.get_task()}), 200)
+            task = self.get_task()
 
         except Exception as e:
-            if config.debug_mode:
-                return make_response(str(e), 400)
+            task = ''
 
-            else:
-                return make_response('', 400)
+        return make_response(jsonify({'task': task}), 200)
 
     @staticmethod
     def get_task():

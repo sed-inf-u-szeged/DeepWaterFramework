@@ -57,3 +57,8 @@ class TaskScheduler:
 
 
 scheduler = TaskScheduler()
+
+
+def init(exp_list):
+    for exp_id, exp in exp_list:
+        scheduler.check_experiment(exp_id, exp.priority)
