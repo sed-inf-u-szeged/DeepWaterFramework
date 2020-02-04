@@ -8,6 +8,7 @@ from controller import experiment_summary_store as ess
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
 from controller import task_store as ts
+from controller.task_scheduler import scheduler
 from controller import strategy_config_store as scs
 from model import AssembleTask, LearnTask, Task
 from model.experiment_summary import ExperimentSummary
@@ -24,32 +25,57 @@ class Manage(Resource):
 
             elif request.json['command'] == 'run_all':
                 success = self.run_all_tasks(experiment)
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'run_task':
                 success = self.run_task(request.json['id'])
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("run_success" if success else "run_failed", 200)
 
             elif request.json['command'] == 'rerun_all':
                 success = self.rerun_all_tasks(experiment, hash)
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("rerun_success" if success else "rerun_failed", 200)
 
             elif request.json['command'] == 'rerun_task':
                 success = self.rerun_task(hash, request.json['id'])
+                if success:
+                    scheduler.add_experiment(hash, experiment.priority)
+
                 return make_response("rerun_success" if success else "rerun_failed", 200)
 
             elif request.json['command'] == 'stop_all':
                 success = self.stop_all_tasks(experiment)
+                if success:
+                    scheduler.remove_experiment(hash)
+
                 return make_response("stop_success" if success else "stop_failed", 200)
 
             elif request.json['command'] == 'stop_task':
                 success = self.stop_task(request.json['id'])
+                scheduler.check_experiment(hash, experiment.priority)
                 return make_response("stop_success" if success else "stop_failed", 200)
+
+            elif request.json['command'] == 'reorder_task':
+                success = self.reorder_task(request.json['id'], request.json['direction'] == "up")
+                return make_response("reorder_success" if success else "reorder_failed", 200)
 
             elif request.json['command'] == 'delete_experiment':
                 success = self.stop_all_tasks(experiment)
+                if success:
+                    scheduler.remove_experiment(hash)
+
                 success = success and es.delete_experiment(hash)
-                success = success and ess.delete_experiment_summary(hash)
+                if ess.get_experiment_summary(hash):
+                    success = success and ess.delete_experiment_summary(hash)
+
                 return make_response(f"delete_success" if success else f"delete_failed", 200)
 
             else:
@@ -107,7 +133,7 @@ class Manage(Resource):
                 abort(404, message="Page not found")
 
     def load_experiment(self, exp):
-        tasks = [self.load_task_from_db(t_id) for t_id in exp.tasks]
+        tasks = sorted([self.load_task_from_db(t_id) for t_id in exp.tasks], key=lambda t: t["order_in_exp"])
         learn_configs = [(c_id, scs.get_config_by_id(c_id)) for c_id in exp.learn_configs]
         runnable_tasks = [t for t in tasks if t['state'] == "generated"]
         stoppable_tasks = [t for t in tasks if t['state'] == "runnable" or t['state'] == "running"]
@@ -131,26 +157,25 @@ class Manage(Resource):
         result = {
             "id": task_id,
             "state": task.state,
+            "order_in_exp": task.order_in_exp,
             "status_info": "Task Completed" if task.state == "completed" else "Run task",
         }
         assemble_task = ats.get_task_by_id(task.assemble_task_id)
         if task.learn_task_id:
             learn_task = lts.get_task_by_id(task.learn_task_id)
             result["learn_config"] = learn_task.learn_config
-            if task.state == "running":
+            if task.state == "runnable" or task.state == "running":
                 if learn_task.state == "runnable":
-                    if assemble_task.is_completed():
-                        result["state"] = learn_task.state
-
                     result["status_info"] = "Learning is waiting for worker"
+
                 elif learn_task.state == "running":
                     result["status_info"] = "Learning is in progress"
 
         result["assemble_config"] = assemble_task.assemble_config
-        if task.state == "running":
+        if task.state == "runnable" or task.state == "running":
             if assemble_task.state == "runnable":
-                result["state"] = assemble_task.state
                 result["status_info"] = "Assembling is waiting for worker"
+
             elif assemble_task.state == "running":
                 result["status_info"] = "Assembling is in progress"
 
@@ -226,6 +251,8 @@ class Manage(Resource):
 
         generated_tasks = []
 
+        index = 1
+
         for a_conf in assemble_configs:
             a_conf_dict = a_conf.to_dict()
             a_conf_dict.pop('shared_parameters', None)
@@ -234,7 +261,8 @@ class Manage(Resource):
             if a_task_es_id:
                 if not learn_configs:
                     if a_task.assemble_config['strategy_id'] != "manual_file_input":
-                        task = Task(exp_id, a_task_es_id, None)
+                        task = Task(exp_id, a_task_es_id, None, exp.priority, index)
+                        index += 1
                         if a_task.is_completed():
                             task.completed(a_task_es_id)
 
@@ -246,7 +274,8 @@ class Manage(Resource):
                     l_task = LearnTask(a_conf.to_dict(), a_task_es_id, l_conf.to_dict())
                     l_task_es_id, l_task = lts.new_learn_task(l_task)
                     if l_task_es_id:
-                        task = Task(exp_id, a_task_es_id, l_task_es_id)
+                        task = Task(exp_id, a_task_es_id, l_task_es_id, exp.priority, index)
+                        index += 1
                         if l_task.is_completed():
                             task.completed(l_task_es_id)
 
@@ -331,3 +360,23 @@ class Manage(Resource):
                 if worker:
                     worker_changes = worker.clear_task()
                     ws.update_worker(worker_changes, worker_id)
+
+    @staticmethod
+    def reorder_task(task_id, direction):
+        try:
+            task = ts.get_task_by_id(task_id)
+            task_order = task.order_in_exp
+            swap_order = task_order + (-1 if direction else 1)
+            swap_task_id, swap_task = ts.search_task_by_dict({
+                'order_in_exp': swap_order,
+                'experiment_id': task.experiment_id,
+            })
+            task_changes = task.set_order_in_exp(swap_order)
+            success = ts.update_task(task_changes, task_id)
+            swap_task_changes = swap_task.set_order_in_exp(task_order)
+            return ts.update_task(swap_task_changes, swap_task_id) and success
+
+        except Exception as e:
+            pass
+
+        return False

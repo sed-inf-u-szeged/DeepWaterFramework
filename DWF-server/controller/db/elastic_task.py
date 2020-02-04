@@ -1,6 +1,7 @@
 from . import elastic as es
 from config import es_task_index as t_idx
 from model.task import Task
+from model.obj_flatten import flatten
 
 
 def new_task(task):
@@ -21,6 +22,28 @@ def search_task(task):
         return doc['_id']
 
     return None
+
+
+def search_task_by_dict(dict):
+    doc = es.search_one_document(t_idx, es.dict_query(flatten(dict)))
+    if doc:
+        return doc['_id'], Task.from_es_data(doc['_source'])
+
+    return None, None
+
+
+def search_task_by_order(exp_id):
+    doc = es.search_one_document(
+        t_idx,
+        es.dict_query(
+            flatten({'experiment_id': exp_id, 'state': "runnable"}),
+            {'order_in_exp': {'order': 'asc'}}
+        )
+    )
+    if doc:
+        return doc['_id'], Task.from_es_data(doc['_source'])
+
+    return None, None
 
 
 def get_all_task():

@@ -8,7 +8,6 @@ class Worker:
         self.environment = environment
         self.current_task_id = None
         self.job_started_ts = None
-        self.task_history = []
         self.error_logs = []
         self.blocked_by_error = False
         self.deleted = False
@@ -20,7 +19,6 @@ class Worker:
         res = cls(worker['name'], worker['platform_info'], worker['environment'])
         res.current_task_id = worker['current_task_id']
         res.job_started_ts = worker['job_started_ts']
-        res.task_history = worker['task_history']
         res.error_logs = worker['error_logs']
         res.blocked_by_error = worker['blocked_by_error']
         res.deleted = worker['deleted']
@@ -72,12 +70,10 @@ class Worker:
     def new_task(self, task_id):
         self.current_task_id = task_id
         self.job_started_ts = timestamp_ms()
-        self.task_history.append(task_id)
         self.communication_ts = timestamp_ms()
         return {
             'current_task_id': self.current_task_id,
             'job_started_ts': self.job_started_ts,
-            'task_history': self.task_history,
             'communication_ts': self.communication_ts,
         }
 

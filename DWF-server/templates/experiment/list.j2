@@ -9,17 +9,6 @@
         </div>
         {% if experiments %}
             <table id="exp_list" class="table">
-                <colgroup>
-                    <col span="1" style="width: 20%;">
-                    <col span="1" style="width: 15%;">
-                    <col span="1" style="width: 15%;">
-                    <col span="1" style="width: 19%;">
-                    <col span="1" style="width: 7%;">
-                    <col span="1" style="width: 7%;">
-                    <col span="1" style="width: 7%;">
-                    <col span="1" style="width: 5%;">
-                    <col span="1" style="width: 5%;">
-                </colgroup>
                 <tr>
                     <th style="cursor: pointer;" onclick="sortTableBy(0, true)">Name</th>
                     <th style="cursor: pointer;" onclick="sortTableBy(1, true)">Status</th>
@@ -27,7 +16,8 @@
                     <th style="cursor: pointer;" onclick="sortTableBy(3, false, true)">Progress</th>
                     <th style="cursor: pointer;" onclick="sortTableBy(4, false, true)">Tasks</th>
                     <th style="cursor: pointer;" onclick="sortTableBy(5, false, true)">Running</th>
-                    <th style="cursor: pointer;" onclick="sortTableBy(6, false, true)">Completed</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(6, false, true)">Comp.</th>
+                    <th style="cursor: pointer;" onclick="sortTableBy(7)">Priority</th>
                     <th>Copy</th>
                     <th>Edit</th>
                     <th>Delete</th>
@@ -50,6 +40,7 @@
                         <td><b>{{ exp.tasks_total|e }}</b></td>
                         <td><b>{{ exp.tasks_running|e }}</b></td>
                         <td><b>{{ exp.tasks_completed|e }}</b></td>
+                        <td><b>{{ exp.priority }}</b></td>
                         <td><a href="{{ request.url_root + 'experiment/' + id + '/copy' }}">
                             <img src="{{ url_for('static', filename='copy.svg') }}" alt="copy" height="24" width="24">
                         </a></td>
@@ -68,7 +59,7 @@
             {{ initAjax() }}
             <script>
                 let order_col = parseInt(sessionStorage.getItem("order_col"));
-                if (order_col >= 0 && order_col <= 6) {
+                if (order_col >= 0 && order_col <= 7) {
                     let order_asc = sessionStorage.getItem("order_asc");
                     let numeric = sessionStorage.getItem("order_numeric");
                     sortTable(order_col, order_asc, numeric);
@@ -81,7 +72,7 @@
 
                 function sortTableBy(col, asc, numeric) {
                     let order_col = parseInt(sessionStorage.getItem("order_col"));
-                    if (order_col >= 0 && order_col <= 6 && order_col !== col) {
+                    if (order_col >= 0 && order_col <= 7 && order_col !== col) {
                         sessionStorage.removeItem("order_up");
                     }
                     sortTable(col, asc, numeric);

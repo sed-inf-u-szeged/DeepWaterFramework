@@ -1,10 +1,12 @@
 from common import timestamp_ms
+from model.priority import Priority
 
 
 class Experiment:
-    def __init__(self, name, markdown):
+    def __init__(self, name, markdown, priority=Priority.NORMAL):
         self.name = name
         self.markdown = markdown
+        self.priority = priority
         # state is "configuration", "generating_tasks" or "generated_tasks"
         self.state = "configuration"
         self.assemble_configs = []
@@ -14,7 +16,7 @@ class Experiment:
 
     @classmethod
     def from_es_data(cls, exp):
-        res = cls(exp['name'], exp['markdown'])
+        res = cls(exp['name'], exp['markdown'], exp['priority'])
         res.state = exp['state']
         res.assemble_configs = exp['assemble_configs']
         res.learn_configs = exp['learn_configs']
@@ -22,12 +24,14 @@ class Experiment:
         res.created_ts = exp['created_ts']
         return res
 
-    def edit_experiment(self, name, markdown):
+    def edit_experiment(self, name, markdown, priority=Priority.NORMAL):
         self.name = name
         self.markdown = markdown
+        self.priority = priority
         return {
             'name': self.name,
             'markdown': self.markdown,
+            'priority': self.priority,
         }
 
     def copy_configs_from_experiment(self, from_exp):

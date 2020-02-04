@@ -1,8 +1,10 @@
 from threading import Lock
 from controller.db import worker_db as db
 from model import Worker
+from controller import task_store as ts
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
+from controller.task_scheduler import scheduler
 
 mutex = Lock()
 
@@ -29,7 +31,7 @@ def assign_task_to_worker(worker_id, worker):
         task = ats.get_config_by_task_id(worker.current_task_id) or lts.get_config_by_task_id(worker.current_task_id)
         return worker.current_task_id, task
 
-    task = assign_task(worker_id, worker, ats) or assign_task(worker_id, worker, lts)
+    task = _assign_parent_task(worker_id, worker)
     return worker.current_task_id, task
 
 
@@ -37,7 +39,13 @@ def _remove_task(worker_id, worker):
     try:
         task = ats.get_task_by_id(worker.current_task_id) or lts.get_task_by_id(worker.current_task_id)
         task_changes = task.revoke_assign_from(worker_id)
-        return ats.update_task(task_changes, worker.current_task_id) or lts.update_task(task_changes, worker.current_task_id)
+        success = ats.update_task(task_changes, worker.current_task_id) or lts.update_task(task_changes, worker.current_task_id)
+        parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+        for pt_id, parent in parents:
+            t_change = parent.make_runnable(True)
+            success = ts.update_task(t_change, pt_id) and success
+
+        return success
 
     except Exception as e:
         return None
@@ -52,25 +60,49 @@ def _worker_blocked(worker_id, worker, log):
         return None
 
 
-def assign_task(worker_id, worker, task_store):
+def _assign_parent_task(worker_id, worker):
     with mutex:
-        task_id, task = task_store.get_unassigned_task()
-        if not task_id:
+        scheduled_experiment = scheduler.get_next()
+        if not scheduled_experiment:
             return None
 
-        task_dict = task_store.get_config_by_task_id(task_id)
-        if not task_dict:
+        task_id, task = ts.search_task_by_order(scheduled_experiment)
+        assigned_task_id, experiment_ids = _assign_task(worker_id, task.assemble_task_id, ats)
+        if not assigned_task_id:
+            assigned_task_id, experiment_ids = _assign_task(worker_id, task.learn_task_id, lts)
+
+        if not assigned_task_id:
             return None
 
-        task_changes = task.assign_to(worker_id)
-        task_result_id = task_store.update_task(task_changes, task_id)
+        for exp_id in experiment_ids:
+            task_id, task = ts.search_task_by_order(exp_id)
+            if not task_id:
+                scheduler.remove_experiment(exp_id)
 
-    worker_changes = worker.new_task(task_id)
+    task_dict = ats.get_config_by_task_id(assigned_task_id) or lts.get_config_by_task_id(assigned_task_id)
+    worker_changes = worker.new_task(assigned_task_id)
     worker_result_id = db.update_worker(worker_changes, worker_id)
-    if not worker_result_id or not task_result_id:
+    if not worker_result_id or not assigned_task_id:
         return None
 
     return task_dict
+
+
+def _assign_task(worker_id, task_id, task_store):
+    task = task_store.get_task_by_id(task_id)
+    if task.state != "runnable":
+        return None, None
+
+    task_changes = task.assign_to(worker_id)
+    task_result_id = task_store.update_task(task_changes, task_id)
+    parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+    experiment_ids = {p.experiment_id for _, p in parents}
+    parent_success = True
+    for pt_id, parent in parents:
+        p_change = parent.start()
+        parent_success = ts.update_task(p_change, pt_id) and parent_success
+
+    return task_id, experiment_ids
 
 
 def ping_worker(worker_id, worker):

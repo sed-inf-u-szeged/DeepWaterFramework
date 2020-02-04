@@ -5,10 +5,12 @@ import config
 from middleware import validate_task
 from middleware import validate_hash
 from controller import worker_store as ws
+from controller import experiment_store as es
 from controller import experiment_summary_store as ess
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
 from controller import task_store as ts
+from controller.task_scheduler import scheduler
 
 
 class Result(Resource):
@@ -65,18 +67,22 @@ class Result(Resource):
                 parent_tasks = [(t_id, ts.get_task_by_id(t_id)) for t_id in task.parent_tasks]
                 for p_task_id, p_task in parent_tasks:
                     if p_task.experiment_id in experiments:
-                        exp = experiments[p_task.experiment_id]
+                        exp_sum = experiments[p_task.experiment_id]
 
                     else:
-                        exp = ess.get_experiment_summary(p_task.experiment_id)
-                        if exp:
-                            experiments[p_task.experiment_id] = exp
+                        if p_task.learn_task_id:
+                            exp = es.get_experiment(p_task.experiment_id)
+                            scheduler.add_experiment(p_task.experiment_id, exp.priority)
+
+                        exp_sum = ess.get_experiment_summary(p_task.experiment_id)
+                        if exp_sum:
+                            experiments[p_task.experiment_id] = exp_sum
 
                     if job_type == "assembling":
-                        exp_change = exp.set_assemble_result(p_task_id, result)
+                        exp_change = exp_sum.set_assemble_result(p_task_id, result)
 
                     else:
-                        exp_change = exp.set_learn_result(p_task_id, result)
+                        exp_change = exp_sum.set_learn_result(p_task_id, result)
 
                     success = success and ess.update_experiment_summary(exp_change, p_task.experiment_id)
                     change = p_task.completed(task_id)

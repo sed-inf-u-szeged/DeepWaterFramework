@@ -84,12 +84,15 @@
                 if (ajaxRequest.readyState === 4) {
                     if (ajaxRequest.responseText === "generate_tasks_success" ||
                         ajaxRequest.responseText === "stop_success" ||
+                        ajaxRequest.responseText === "reorder_success" ||
                         ajaxRequest.responseText === "run_success") {
                         location.reload(true);
                     } else if (ajaxRequest.responseText === "run_failed") {
                         alert("Run failed!");
                     } else if (ajaxRequest.responseText === "stop_failed") {
                         alert("Stop failed!");
+                    } else if (ajaxRequest.responseText === "reorder_failed") {
+                        alert("Reorder failed!");
                     } else if (ajaxRequest.responseText === "generate_tasks_need_assembling") {
                         alert("At least one Feature Assembling method is required!");
                     } else if (ajaxRequest.responseText) {
@@ -131,6 +134,10 @@
 
             function stopTask(id) {
                 sendPost("{{ request.url }}", {command: 'stop_task', hash: "{{ hash }}", id});
+            }
+
+            function reorderTask(id, direction) {
+                sendPost("{{ request.url }}", {command: 'reorder_task', hash: "{{ hash }}", id, direction});
             }
         </script>
         <table class="table" style="border: 1px solid black;">
@@ -186,7 +193,7 @@
                     <a href="{{ request.url_root + 'experiment/' + hash + '/summary' }}"><h3><b>Summary</b></h3></a>
                 </div>
             {% endif %}
-            <input type="text" id="tasks_table_searchInput" onkeyup="searchTable([0, 1, 3])" placeholder="Search here.."
+            <input type="text" id="tasks_table_searchInput" onkeyup="searchTable([1, 2, 4])" placeholder="Search here.."
                    style="background-image: url('{{ url_for('static', filename='searchicon.png') }}');
                            background-position: 10px 12px;
                            background-repeat: no-repeat;
@@ -198,13 +205,15 @@
             <table id="tasks_table" class="table" style="border: 1px solid black;">
                 <caption style="border: 2px solid black;text-align: center"><h4><b>Tasks</b></h4></caption>
                 <colgroup>
-                    <col span="1" style="width: 25%;">
-                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 6%;">
+                    <col span="1" style="width: 24%;">
+                    <col span="1" style="width: 40%;">
                     <col span="1" style="width: 5%;">
                     <col span="1" style="width: 20%;">
                     <col span="1" style="width: 5%;">
                 </colgroup>
                 <tr style="border: 2px solid black;">
+                    <th>Order</th>
                     <th>Name</th>
                     <th>Info</th>
                     {% if experiment.has_runnable_tasks %}
@@ -236,14 +245,14 @@
                     {% endif %}
                 </tr>
                 {% for task in experiment.tasks %}
-                    {{ experiment_task_row(task, experiment.state) }}
+                    {{ experiment_task_row(task, experiment) }}
                 {% endfor %}
             </table>
             {{ search_table("tasks_table", "tasks_table_searchInput") }}
             <script>
                 let tasks_table_searchInput = document.getElementById("tasks_table_searchInput");
                 tasks_table_searchInput.value = sessionStorage.getItem("tasks_table_searchInput");
-                searchTable([0, 1, 3]);
+                searchTable([1, 2, 4]);
             </script>
         {% endif %}
     </div>

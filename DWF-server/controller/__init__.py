@@ -6,3 +6,5 @@ import controller.strategy_config_store as strategy_config_store
 import controller.task_store as task_store
 import controller.experiment_summary_store as experiment_summary_store
 import controller.experiment_store as experiment_store
+import controller.priority_controller as priority_controller
+import controller.task_scheduler as task_scheduler

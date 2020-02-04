@@ -8,7 +8,7 @@ GET_EXPERIMENT_URL = BASE_URL + '/experiment/get'
 
 def new_experiment(name):
     try:
-        resp = post(NEW_EXPERIMENT_URL, data={'experiment_name': name, 'markdown': f"{name}'s markdown"})
+        resp = post(NEW_EXPERIMENT_URL, data={'experiment_name': name, 'markdown': f"{name}'s markdown", 'experiment_priority': 1, })
         if resp.status_code == 200:
             print('create experiment OK')
             resp = get(f'{GET_EXPERIMENT_URL}/{name}')
