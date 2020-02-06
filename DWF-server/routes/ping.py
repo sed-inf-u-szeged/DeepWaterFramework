@@ -17,7 +17,7 @@ class Ping(Resource):
 
         except Exception as e:
             if config.debug_mode:
-                return make_response(str(e), 404)
+                return make_response(jsonify({'hash': '', 'working': False, 'error': str(e)}))
 
             else:
-                return make_response('', 404)
+                return make_response(jsonify({'hash': '', 'working': False}))

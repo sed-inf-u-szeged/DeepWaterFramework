@@ -15,16 +15,21 @@ def init_db():
     for index in config.es_indices:
         if config.local_mode and config.init_db:
             asd = es.indices.delete(index=f'{index}*')
-            print(f'{index}* deleted, res: {asd}')
+            if config.debug_mode:
+                print(f'{index}* deleted, res: {asd}')
+
             asd = create_index(es, index)
-            print(f'{index}* recreated, res: {asd}')
+            if config.debug_mode:
+                print(f'{index}* recreated, res: {asd}')
 
         elif not es.indices.exists(index=f'{index}*'):
             asd = create_index(es, index)
-            print(f'{index}* created, res: {asd}')
+            if config.debug_mode:
+                print(f'{index}* created, res: {asd}')
 
         else:
-            print(f'{index}* exists')
+            if config.debug_mode:
+                print(f'{index}* exists')
 
 
 def create_index(es, name):

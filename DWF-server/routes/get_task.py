@@ -1,7 +1,6 @@
 from flask_restful import Resource
 from flask import jsonify, make_response, g
 
-import config
 from middleware import validate_hash
 from controller import worker_store as ws
 

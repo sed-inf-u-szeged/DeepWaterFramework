@@ -9,14 +9,8 @@ class DeleteConfig(Resource):
     @staticmethod
     def post():
         try:
-            e = es.get_experiment(request.json['hash'])
-            change = e.remove_config(request.json['id'])
-            if change:
-                es_id = es.update_experiment(change, request.json['hash'])
-                if es_id:
-                    return make_response(request.json['id'])
-
-            return make_response('', 200)
+            success = es.remove_config(request.json['hash'], request.json['id'])
+            return make_response(request.json['id']) if success else make_response('')
 
         except Exception as e:
             if config.debug_mode:

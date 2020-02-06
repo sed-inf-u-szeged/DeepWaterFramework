@@ -70,15 +70,18 @@ def add_configs(i, exp_id):
             'svm_C': '2.6',
             'svm_gamma': '0.02',
             'svm_kernel': 'rbf',
-            'tree_max-depth': '10',
+            'tree_max-depth_from': '5',
+            'tree_max-depth_to': '10',
+            'tree_max-depth_step': '1',
         }
         add_learn_config(learning_data, 'bayes', exp_id)
-        add_learn_config(learning_data, 'cdnnc', exp_id)
-        add_learn_config(learning_data, 'forest', exp_id)
+        # add_learn_config(learning_data, 'cdnnc', exp_id)
+        # add_learn_config(learning_data, 'forest', exp_id)
         add_learn_config(learning_data, 'linear', exp_id)
-        add_learn_config(learning_data, 'logistic', exp_id)
-        add_learn_config(learning_data, 'sdnnc', exp_id)
-        add_learn_config(learning_data, 'svm', exp_id)
+        # add_learn_config(learning_data, 'logistic', exp_id)
+        # add_learn_config(learning_data, 'knn', exp_id)
+        # add_learn_config(learning_data, 'sdnnc', exp_id)
+        # add_learn_config(learning_data, 'svm', exp_id)
         add_learn_config(learning_data, 'tree', exp_id)
         add_learn_config(learning_data, 'zeror', exp_id)
         return True
@@ -150,7 +153,7 @@ def create_experiment(i, name, task_gen, task_run):
 
 
 if __name__ == '__main__':
-    test_cases = 6
+    test_cases = 12
     test_results = []
     for i in range(1, int(test_cases/3) + 1, 1):
         res = create_experiment(i, f'Default parameters {i}', True, True)

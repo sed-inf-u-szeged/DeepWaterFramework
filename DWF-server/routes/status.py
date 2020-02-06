@@ -17,15 +17,14 @@ class Status(Resource):
             if not status:
                 abort(403, message="progress or message is missing or not types of float and string")
 
-            response = {'hash': g.hash}
-            return make_response(jsonify(response), 200)
+            return make_response(jsonify({'hash': g.hash}), 200)
 
         except Exception as e:
             if config.debug_mode:
-                abort(404, message=str(e))
+                return make_response(jsonify({'hash': '', 'error': str(e)}))
 
             else:
-                abort(404, message="Page not found")
+                return make_response(jsonify({'hash': '', 'error': True}))
 
     def set_status(self, json):
         progress = max(.0, min(1., float(json['progress'])))

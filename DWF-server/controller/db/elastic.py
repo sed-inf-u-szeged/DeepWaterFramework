@@ -7,8 +7,7 @@ es = Elasticsearch([{'host': config.es_host, 'port': 9200}])
 
 def create_document(index, doc):
     try:
-        document_id = es.index(index=index, body=doc, refresh='true')['_id']
-        return document_id
+        return es.index(index=index, body=doc, refresh='true')['_id']
 
     except Exception as e:
         return None

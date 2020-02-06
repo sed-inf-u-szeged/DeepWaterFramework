@@ -24,15 +24,12 @@ class New(Resource):
                 )
 
             else:
-                new_experiment = Experiment(
+                experiment_id = es.new_experiment(
                     request.form['experiment_name'],
                     request.form['markdown'],
-                    int(request.form['experiment_priority'])
+                    int(request.form['experiment_priority']),
+                    copy_id
                 )
-                experiment_id = es.new_experiment(new_experiment)
-                if experiment_id and copy_id:
-                    changes = new_experiment.copy_configs_from_experiment(orig_exp)
-                    experiment_id = es.update_experiment(changes, experiment_id)
 
             if experiment_id:
                 return redirect(url_for('manage_experiment', hash=experiment_id))

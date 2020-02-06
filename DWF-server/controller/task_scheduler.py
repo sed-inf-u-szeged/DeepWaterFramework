@@ -48,7 +48,7 @@ class TaskScheduler:
         self.add_experiment(exp_id, priority)
 
     def check_experiment(self, exp_id, priority):
-        exp_has_task = ts.search_task_by_order(exp_id)
+        exp_has_task, _ = ts.search_task_by_order(exp_id)
         if exp_has_task:
             self.add_experiment(exp_id, priority)
 

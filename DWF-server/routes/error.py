@@ -19,10 +19,10 @@ class Error(Resource):
 
         except Exception as e:
             if config.debug_mode:
-                return make_response(str(e), 404)
+                return make_response(jsonify({'hash': '', 'error': str(e)}))
 
             else:
-                return make_response('', 404)
+                return make_response(jsonify({'hash': '', 'error': True}))
 
     @staticmethod
     def remove_current_task(worker_id, json):

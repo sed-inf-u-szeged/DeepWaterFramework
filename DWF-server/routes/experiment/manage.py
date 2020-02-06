@@ -261,7 +261,7 @@ class Manage(Resource):
             if a_task_es_id:
                 if not learn_configs:
                     if a_task.assemble_config['strategy_id'] != "manual_file_input":
-                        task = Task(exp_id, a_task_es_id, None, exp.priority, index)
+                        task = Task(exp_id, a_task_es_id, None, index)
                         index += 1
                         if a_task.is_completed():
                             task.completed(a_task_es_id)
@@ -274,7 +274,7 @@ class Manage(Resource):
                     l_task = LearnTask(a_conf.to_dict(), a_task_es_id, l_conf.to_dict())
                     l_task_es_id, l_task = lts.new_learn_task(l_task)
                     if l_task_es_id:
-                        task = Task(exp_id, a_task_es_id, l_task_es_id, exp.priority, index)
+                        task = Task(exp_id, a_task_es_id, l_task_es_id, index)
                         index += 1
                         if l_task.is_completed():
                             task.completed(l_task_es_id)
