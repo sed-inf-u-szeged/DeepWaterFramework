@@ -15,7 +15,10 @@ class AddAssembleConfig(Resource):
             if not request.form:
                 abort(403, message='missing form')
 
-            assemble_config_list = cb.generate_assemble_configs(form_data=request.form)
+            assemble_config_list, error_msg = cb.generate_assemble_configs(form_data=request.form)
+            if error_msg:
+                return make_response(error_msg, 403)
+
             success = es.add_config_list(hash, edit_id, assemble_config_list, True)
             if success:
                 return redirect(url_for('manage_experiment', hash=hash))

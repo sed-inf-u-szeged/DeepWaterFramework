@@ -15,7 +15,10 @@ class AddLearnConfig(Resource):
             if not request.form:
                 abort(403, message='missing form')
 
-            learn_config_list = cb.generate_learn_configs(form_data=request.form)
+            learn_config_list, error_msg = cb.generate_learn_configs(form_data=request.form)
+            if error_msg:
+                return make_response(error_msg, 403)
+
             success = es.add_config_list(hash, edit_id, learn_config_list, False)
             if success:
                 return redirect(url_for('manage_experiment', hash=hash))
