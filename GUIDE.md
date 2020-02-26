@@ -56,17 +56,28 @@ The worker can be started with the Python script located in the DWF-client folde
 python DWF-client/dwf_client.py
 ```
 
+When the client connects to the server, it receives a hash ID, as you can see in the clients' console log.
+
+![Client log](guide_images/pic_14.png)
+
+This hash code identificates the worker, that also can be found at the Workers view.
+
+![Worker ID](guide_images/pic_15.png)
+
 To run multiple clients on a machine, you have to duplicate the DWF-client directory for each one of instances.
 
 Now you have a fully working DWF framework.
 
 ## Preparing the dataset
 
-Hence the input of the machine learning part of the framework has to be a csv file, which contains only numeric data, we have to implement our feature assembler or we have to use a dataset that is in the required format. Now we are going to use a public dataset called [Heart Disease Data Set](https://archive.ics.uci.edu/ml/datasets/Heart+Disease).
+Hence the input of the machine learning part of the framework has to be in a csv formatted file, which contains only numeric values as data and a header row, we have to use a dataset that is in the required format or we can implement our feature assembler easily.
+However, implementing a custom feature assembler is out of the scope for this tutorial.
+
+This time, for the sake of simplicity, we are going to use a public dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets.php), called [Heart Disease Data Set](https://archive.ics.uci.edu/ml/datasets/Heart+Disease), which is going to be in csv format after a few minor changes.
 
 ### Download the data file
 
-You can download the .data file here: [reprocessed.hungarian.data](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/reprocessed.hungarian.data).
+First, download the .data file here: [reprocessed.hungarian.data](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/reprocessed.hungarian.data).
 
 ### Reformat the data file
 
@@ -74,7 +85,7 @@ Replace spaces with commas in the file (e.g. with Ctrl+H in Notepad++) to conver
 
 ![Broken row of csv file](guide_images/pic_00.png)
 
-Add header row to the file, name the columns anything you like, here is an example:
+Add a header row to the file, and name the columns anything you like, here is an example:
 
 ![Add header row](guide_images/pic_13.png)
 
@@ -94,11 +105,19 @@ Give your experiment a name and fill the Markdown field with some description ab
 
 ### Configure a feature assembling method
 
-As we mentioned earlier, the learning phase of the tasks require a csv file with only numeric data. The way you provide this file may vary depending on your goals. Now we will use our previously "preprocessed" file. To do so, click on "add feature assembling config".
+As we mentioned above, the learning phase of the tasks can accept only csv formatted files with only numeric values as data.
+
+Here comes into play the option that you can implement your own feature assembler. If you have lots of files in the same format, like images, text documents or data with nominal features, you might want to implement a custom feature assembling method, which can process and convert your data into the required format automatically.
+
+Now we will use our previously "preprocessed" file. To do so, click on "add feature assembling config".
 
 ![add feature assembling config](guide_images/pic_04.png)
 
-On the next screen select Manual File Input as strategy, browse the file you prepared previously, and fill in the Label column field with the name of the column that you want to predict on, in our case its "label".
+Then select Manual File Input as strategy, which means that nothing will be changed in our file, since we formatted it manually. Also we could select our feature assembling method here.
+
+Browse the file you prepared previously, and fill in the Label column field with the column name that you want to predict.
+
+If you named the columns according to the tutorial, it's going to be "label".
 
 ![Feature Assembling form](guide_images/pic_05.png)
 
@@ -106,15 +125,25 @@ Then click Submit.
 
 ### Configure a learning algorithm
 
-If you are not familiar with machine learning, or just want to get some results as fast as possible we recommend you to use the Random Forest Classifier. First, click on "add learning config".
+Because our dataset consists of only a few hundred rows, using neural network makes no sense, we going to use some simple algorithm.
+
+First, click on "add learning config".
 
 ![add learning config](guide_images/pic_06.png)
 
-Select Random Forest Classifier from the strategy selector dropdown menu.
+The framework will provide you the required default values for each algorithm.
+
+For the first algorithm, select Random Forest Classifier from the strategy selector dropdown menu.
 
 ![Learning config form](guide_images/pic_07.png)
 
 Then click Submit.
+
+You can add multiple Classifier algorithms the same way. Here are some examples:
+
+![Logistic Regression](guide_images/pic_16.png)
+
+![SVM](guide_images/pic_17.png)
 
 ### Generate tasks
 
@@ -138,6 +167,14 @@ Once the worker finishes the process of a task, it's results being saved in the 
 
 ![Click Summary](guide_images/pic_11.png)
 
-The best results in any column is marked with green background. Also you can order the results by clicking on the name of the specific columns.
+Here you can see the results of all learning algorithms with actual values, making it easy to compare them.
+
+The best results in any column is marked with green background.
+
+You can order the results by clicking on the name of the specific columns.
 
 ![Summary view](guide_images/pic_12.png)
+
+Clicking on the name of a specific task will navigate you to the Task Details page, where you can see what parameters produced the selected results.
+
+![Task Details](guide_images/pic_18.png)
