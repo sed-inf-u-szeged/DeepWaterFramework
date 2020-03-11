@@ -1,0 +1,13 @@
+<div fxLayoutGap="16px">
+  <button *ngIf="showUpdateButton" mat-mini-fab matTooltip="Update data" (click)="emitNewData$.next()">
+    <mat-icon>update</mat-icon>
+  </button>
+  <div class="button-container">
+    <div class="spinner-container" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <button mat-icon-button [disabled]="isLoading" (click)="forceRefresh$.next()" matTooltip="Check for data update">
+      <mat-icon>sync</mat-icon>
+    </button>
+  </div>
+</div>

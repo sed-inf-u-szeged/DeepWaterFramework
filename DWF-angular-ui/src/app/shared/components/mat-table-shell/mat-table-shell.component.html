@@ -1,0 +1,16 @@
+<div fxLayout fxLayoutAlign="center center">
+  <mat-form-field fxFlex="50%">
+    <input matInput (keyup)="applyFilter($event)" placeholder="Filter" />
+  </mat-form-field>
+</div>
+<ng-content select="table[mat-table]"></ng-content>
+<div class="footer">
+  <div fxLayout fxLayoutGap="16px">
+    <ng-content select="ng-container[footer-actions]"></ng-content>
+    <button mat-raised-button (click)="exportToCsv()" [disabled]="!dataSource?.filteredData?.length">
+      <mat-icon>save_alt</mat-icon>
+      Export to csv
+    </button>
+  </div>
+  <mat-paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
+</div>

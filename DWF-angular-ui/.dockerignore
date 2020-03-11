@@ -1,0 +1,14 @@
+coverage
+dist
+documentation
+node_modules
+.editorconfig
+.gitignore
+.prettierignore
+.prettierrc
+debug.log
+docker-compose.dev.yml
+docker-compose.yml
+proxy.conf.json
+README.md
+server.js

@@ -1,0 +1,58 @@
+@import '~@angular/material/theming';
+
+@import './app/modules/learn-task/pages/learn-tasks/learn-task-table/learn-task-table.component.scss-theme';
+@import './app/modules/learn-task/components/learn-result-focus-button/learn-result-focus-button.component.scss-theme';
+
+@include mat-core();
+
+@mixin custom-components-theme($theme) {
+  @include learn-task-table-component-theme($theme);
+  @include learn-result-focus-button-component-theme($theme);
+}
+
+.default-theme {
+  $primary: mat-palette($mat-deep-purple);
+  $accent: mat-palette($mat-amber, A200, A100, A400);
+  $warn: mat-palette($mat-red);
+  $theme: mat-light-theme($primary, $accent, $warn);
+  @include angular-material-theme($theme);
+  @include custom-components-theme($theme);
+
+  .error-tooltip {
+    background-color: mat-color($warn, default);
+  }
+}
+
+.dark-theme {
+  $primary: mat-palette($mat-pink);
+  $accent: mat-palette($mat-blue-grey);
+  $warn: mat-palette($mat-red);
+  $theme: mat-dark-theme($primary, $accent, $warn);
+  @include angular-material-theme($theme);
+  @include custom-components-theme($theme);
+
+  .error-tooltip {
+    background-color: mat-color($warn, default);
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.error-tooltip {
+  white-space: pre-line;
+}
+
+td.mat-cell,
+td.mat-footer-cell,
+th.mat-header-cell {
+  padding-right: 8px !important;
+  padding-left: 8px !important;
+}

@@ -1,0 +1,53 @@
+<app-page-header [pageTitle]="'Experiments'" [errorMessage]="errorMessage">
+  <app-refresh-button
+    [observableDataResolved]="observableDataResolved"
+    (newData)="handleNewData($event)"
+  ></app-refresh-button>
+</app-page-header>
+
+<div fxLayoutAlign="center">
+  <div fxFlex="70%" fxFlex.lt-lg="100%" fxLayoutGap="16px">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let experiment of experimentsPage">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-checkbox
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()"
+              (change)="$event ? selectedExperiments.toggle(experiment.indexHash) : null"
+              [checked]="selectedExperiments.isSelected(experiment.indexHash)"
+            >
+              {{ experiment.name }}
+            </mat-checkbox>
+          </mat-panel-title>
+          <mat-panel-description>
+            {{ experiment.created_ts | date: 'medium' }} • {{ experiment.numberOfTasks }}
+            {{ experiment.numberOfTasks > 1 ? 'tasks' : 'task' }}
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <markdown>{{ experiment.markdown }}</markdown>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <div class="footer">
+      <button
+        mat-raised-button
+        [routerLink]="['/learn-tasks', 'of-experiments', selectedExperiments.selected | joinHashes]"
+        [disabled]="selectedExperiments.selected.length === 0"
+        matBadge="{{ selectedExperiments.selected.length }}"
+        matBadgeColor="accent"
+        [matBadgeDisabled]="selectedExperiments.selected.length === 0"
+      >
+        <mat-icon>navigate_next</mat-icon>
+        Open selected
+      </button>
+      <mat-paginator
+        [pageSizeOptions]="pageSizeOptions"
+        [length]="experiments.length"
+        (page)="paging($event)"
+      ></mat-paginator>
+    </div>
+  </div>
+</div>

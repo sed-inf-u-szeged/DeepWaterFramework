@@ -1,0 +1,13 @@
+.theme-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-app-background {
+  flex: 1;
+}
+
+.page-container {
+  padding: 16px;
+}

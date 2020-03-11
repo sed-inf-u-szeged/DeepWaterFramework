@@ -1,0 +1,119 @@
+<app-mat-table-shell [dataSource]="dataSource" [columnsToExport]="columnsToExport">
+  <table mat-table multiTemplateDataRows matSort [dataSource]="dataSource" class="tasks-table">
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? masterToggle() : undefined"
+          [checked]="selectedRows.hasValue() && isAllSelected()"
+          [indeterminate]="selectedRows.hasValue() && !isAllSelected()"
+        >
+          Hash
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let task">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="$event ? selectedRows.toggle(task.hash) : undefined"
+          [checked]="selectedRows.isSelected(task.hash)"
+        >
+          {{ task.shortHash }}
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="radio">
+      <mat-radio-group [(ngModel)]="referencedRow">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-radio-button (click)="$event.stopPropagation()" [value]="undefined" [checked]="true"></mat-radio-button>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-radio-button (click)="$event.stopPropagation()" [value]="row"></mat-radio-button>
+        </td>
+      </mat-radio-group>
+    </ng-container>
+
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of linkColumns">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
+      <td mat-cell *matCellDef="let task">
+        <a mat-button [routerLink]="task[column].linkUrl" (click)="$event.stopPropagation()">{{ task[column] }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of valueColumns" appHeat>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
+      <ng-container
+        *ngIf="{
+          referencedRow: referencedRow && referencedRow[column],
+          unfocusThreshold: focusState.checked ? sortedValueColumns[column][focusState.index!] : undefined,
+          heatmapRange: heatmapEnabled ? bestWorstValues[column] : undefined
+        } as columnData"
+      >
+        <td
+          app-learn-result-value-cell
+          mat-cell
+          *matCellDef="let task"
+          [display]="task[column]"
+          [compareTo]="columnData.referencedRow"
+          [unfocusThreshold]="columnData.unfocusThreshold"
+          [heatmapRange]="columnData.heatmapRange"
+        ></td>
+      </ng-container>
+    </ng-container>
+
+    <ng-container matColumnDef="expandedRowCol">
+      <td mat-cell *matCellDef="let task" [attr.colspan]="columnsToDisplay.length">
+        <div
+          class="tasks-table__parameters"
+          *ngIf="task === expandedRow"
+          [@detailExpand]="task == expandedRow ? 'expanded' : 'collapsed'"
+        >
+          <div class="params-table-wrapper" *ngFor="let parameter of task.parameters | keyvalue">
+            <table class="params-table">
+              <caption>
+                <h3 class="mat-h3">{{ parameter.key }}</h3>
+              </caption>
+              <tr *ngFor="let param of parameter.value | keyvalue">
+                <td class="params-table__key">{{ param.key }}</td>
+                <td>{{ param.value }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr
+      mat-row
+      *matRowDef="let task; columns: columnsToDisplay"
+      class="tasks-table__task-row"
+      [ngClass]="{ 'tasks-table__task-row--borderless': expandedRow === task }"
+      (click)="expandedRow = expandedRow === task ? undefined : task"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="let task; columns: ['expandedRowCol']"
+      class="tasks-table__detail-row"
+      [ngClass]="{ 'tasks-table__detail-row--borderless': expandedRow !== task }"
+    ></tr>
+  </table>
+
+  <ng-container footer-actions>
+    <button
+      mat-raised-button
+      [routerLink]="['compare', selectedRows.selected | joinHashes]"
+      [disabled]="selectedRows.selected.length < 2"
+      matBadge="{{ selectedRows.selected.length }}"
+      matBadgeColor="accent"
+      [matBadgeDisabled]="selectedRows.selected.length < 2"
+    >
+      <mat-icon>compare_arrows</mat-icon>
+      Compare selected
+    </button>
+    <app-learn-result-focus-button
+      [dataSize]="dataSource.data.length"
+      (focusChange)="focusState = $event"
+    ></app-learn-result-focus-button>
+    <app-learn-result-heatmap-button (enabled)="heatmapEnabled = $event"></app-learn-result-heatmap-button>
+  </ng-container>
+</app-mat-table-shell>

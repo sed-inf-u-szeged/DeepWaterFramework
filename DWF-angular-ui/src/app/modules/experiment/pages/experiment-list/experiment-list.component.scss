@@ -1,0 +1,21 @@
+.mat-expansion-panel-header {
+  &-title,
+  &-description {
+    flex-basis: 0;
+  }
+
+  &-description {
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  mat-paginator {
+    background: unset;
+  }
+}

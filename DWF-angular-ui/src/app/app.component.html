@@ -1,0 +1,29 @@
+<div class="theme-wrapper" [class]="theme">
+  <div class="mat-typography mat-app-background">
+    <mat-toolbar class="mat-elevation-z6" color="primary" style="position: relative; z-index: 2;" role="heading">
+      <a mat-button routerLink="/">DWF-angular-ui</a>
+      <div style="flex: 1"></div>
+      <button [matMenuTriggerFor]="themeMenu" mat-icon-button>
+        <mat-icon>format_color_fill</mat-icon>
+      </button>
+      <mat-menu #themeMenu>
+        <button mat-menu-item (click)="themeService.setDarkTheme(false)">
+          <mat-icon [color]="!isDarkTheme ? 'accent' : undefined">{{
+            !isDarkTheme ? 'radio_button_checked' : 'radio_button_unchecked'
+          }}</mat-icon
+          >Light theme
+        </button>
+        <button mat-menu-item (click)="themeService.setDarkTheme(true)">
+          <mat-icon [color]="isDarkTheme ? 'accent' : undefined">{{
+            isDarkTheme ? 'radio_button_checked' : 'radio_button_unchecked'
+          }}</mat-icon
+          >Dark theme
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate" style="position: absolute;"></mat-progress-bar>
+    <div class="page-container">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

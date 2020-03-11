@@ -1,0 +1,26 @@
+@import '~@angular/material/theming';
+
+@mixin learn-task-table-component-theme($theme) {
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+
+  app-learn-task-table {
+    .tasks-table {
+      &__detail-row {
+        background-color: mat-color($background, hover, 0.06);
+      }
+
+      &__task-row {
+        &:hover {
+          background-color: mat-color($background, hover);
+        }
+      }
+    }
+
+    .params-table {
+      &__key {
+        color: mat-color($foreground, secondary-text);
+      }
+    }
+  }
+}

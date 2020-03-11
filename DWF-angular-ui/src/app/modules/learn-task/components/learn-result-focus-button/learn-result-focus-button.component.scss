@@ -1,0 +1,19 @@
+.learn-result-focus-button-menu {
+  padding: 8px 16px;
+  font-size: 14px;
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__number-select {
+    overflow: hidden;
+
+    mat-form-field {
+      width: 48px;
+      margin-bottom: -1.25em;
+    }
+  }
+}

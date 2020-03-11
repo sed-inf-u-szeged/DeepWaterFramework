@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+
+@mixin learn-result-focus-button-component-theme($theme) {
+  $foreground: map-get($theme, foreground);
+
+  .learn-result-focus-button-menu {
+    color: mat-color($foreground, text);
+  }
+}

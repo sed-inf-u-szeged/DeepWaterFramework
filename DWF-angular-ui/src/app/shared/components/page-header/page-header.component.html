@@ -1,0 +1,16 @@
+<header class="page-header">
+  {{ pageTitle }}
+  <mat-icon
+    *ngIf="!!errorMessage"
+    color="warn"
+    class="page-header__error-icon"
+    [matTooltip]="errorMessage"
+    matTooltipPosition="after"
+    matTooltipClass="error-tooltip"
+  >
+    error
+  </mat-icon>
+  <div class="page-header__actions" fxLayout fxLayoutGap="16px">
+    <ng-content></ng-content>
+  </div>
+</header>
