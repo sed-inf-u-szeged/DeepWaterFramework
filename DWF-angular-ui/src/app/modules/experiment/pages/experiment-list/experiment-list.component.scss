@@ -1,3 +1,5 @@
+@import '~@angular/material/theming';
+
 .mat-expansion-panel-header {
   &-title,
   &-description {
@@ -5,16 +7,24 @@
   }
 
   &-description {
-    justify-content: space-between;
     align-items: center;
   }
 }
 
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.list-header {
+  position: relative;
+  &__sort {
+    padding-bottom: 1.25rem;
+    padding-left: 16px;
 
+    &--absolute {
+      position: absolute;
+      right: 0;
+    }
+  }
+}
+
+.list-footer {
   mat-paginator {
     background: unset;
   }

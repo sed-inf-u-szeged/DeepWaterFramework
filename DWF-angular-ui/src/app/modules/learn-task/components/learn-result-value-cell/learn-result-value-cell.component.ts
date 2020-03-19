@@ -2,6 +2,7 @@ import { Component, Input, HostBinding, OnChanges, SimpleChanges, ChangeDetectio
 import { ValueCell } from '@app/shared/models/value-cell';
 import { HeatmapRange } from './heatmap-range';
 
+/** Table cell for `ValueCell`s with heatmap, unfocus, compare features. */
 @Component({
   selector: 'td[app-learn-result-value-cell]',
   templateUrl: './learn-result-value-cell.component.html',
@@ -9,12 +10,18 @@ import { HeatmapRange } from './heatmap-range';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LearnResultValueCellComponent implements OnChanges {
+  /** Whether the cell is unfocused. */
   isUnfocused = false;
+  /** Comparison state. */
   comparison: { shouldDisplay: boolean; isBetter?: boolean; difference?: string } = { shouldDisplay: false };
 
+  /** The `ValueCell` to display. */
   @Input() display: ValueCell;
+  /** The `ValueCell to compare to. */
   @Input() compareTo?: ValueCell;
+  /** A threshold to unfocus this cell if the displayed `ValueCell`'s value is worse. */
   @Input() unfocusThreshold?: number;
+  /** The worst and best values of the column to calculate the correct heatmap color for this cell. */
   @Input() set heatmapRange(heatmapRange: HeatmapRange | undefined) {
     if (heatmapRange != null) {
       const { worst, best } = heatmapRange;
@@ -25,14 +32,17 @@ export class LearnResultValueCellComponent implements OnChanges {
     }
   }
 
+  /** Heatmap background color of the cell. */
   @HostBinding('class.borderless')
   @HostBinding('style.background-color')
   heatColor?: string;
 
+  /** Gets the correct transparent class when the cell is unfocused. */
   @HostBinding('class') get transparentClass(): string | undefined {
     return this.isUnfocused ? (!!this.heatColor ? 'transparent' : 'transparent-inner') : undefined;
   }
 
+  /** Whether the cell should display comparision. */
   shouldDisplayComparison(): boolean {
     return (
       this.compareTo != null &&
@@ -42,6 +52,7 @@ export class LearnResultValueCellComponent implements OnChanges {
     );
   }
 
+  /** Updates the comparison whether it should be displayed and calculates the properties for it. */
   updateComparison(): void {
     if (this.shouldDisplayComparison()) {
       const difference = this.display.value - this.compareTo!.value;
@@ -57,6 +68,7 @@ export class LearnResultValueCellComponent implements OnChanges {
     }
   }
 
+  /** Updates whether the cell should be unfocused or not. */
   updateIsUnfocused(): void {
     if (this.unfocusThreshold == null) {
       this.isUnfocused = false;
@@ -69,6 +81,7 @@ export class LearnResultValueCellComponent implements OnChanges {
     }
   }
 
+  /** Calls update on the features when their dependent input is changed.  */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.display || changes.compareTo) this.updateComparison();
     if (changes.display || changes.unfocusThreshold) this.updateIsUnfocused();

@@ -25,9 +25,16 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { FilterInputComponent } from './components/filter-input/filter-input.component';
 
 @NgModule({
-  declarations: [MatTableShellComponent, RefreshButtonComponent, JoinHashesPipe, PageHeaderComponent],
+  declarations: [
+    MatTableShellComponent,
+    RefreshButtonComponent,
+    JoinHashesPipe,
+    PageHeaderComponent,
+    FilterInputComponent,
+  ],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -49,6 +56,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     PageHeaderComponent,
     RefreshButtonComponent,
     JoinHashesPipe,
+    FilterInputComponent,
 
     MatBadgeModule,
     MatButtonModule,

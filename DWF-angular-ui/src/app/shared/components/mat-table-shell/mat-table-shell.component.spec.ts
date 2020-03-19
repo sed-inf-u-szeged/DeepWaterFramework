@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -34,18 +34,7 @@ describe('MatTableShellComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should debounce applying filter by 250ms', fakeAsync(() => {
-    component.dataSource = new MatTableDataSource(testData);
-    fixture.detectChanges();
-    component.applyFilter(({ target: { value: 'a' } } as unknown) as KeyboardEvent);
-    expect(component.dataSource.filter).toBe('');
-    tick(249);
-    expect(component.dataSource.filter).toBe('');
-    tick(1);
-    expect(component.dataSource.filter).toBe('a');
-  }));
-
-  it('should ...', () => {
+  it('should call saveAs when exporting to csv', () => {
     component.dataSource = new MatTableDataSource([...testData]);
     fixture.detectChanges();
     const spiedSaveAs = spyOn(FileSaver, 'saveAs').and.returnValue();

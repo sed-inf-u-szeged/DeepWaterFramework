@@ -1,5 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { PageEvent } from '@angular/material/paginator';
+import {
+  async,
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  flushMicrotasks,
+  discardPeriodicTasks,
+} from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -19,7 +25,7 @@ describe('ExperimentListComponent', () => {
       indexHash: `index${i}`,
       name: exp.name,
       numberOfTasks: Object.keys(exp.tasks).length,
-      created_ts: exp.created_ts,
+      created: new Date(exp.created_ts),
       markdown: exp.markdown,
     })),
   };
@@ -32,11 +38,7 @@ describe('ExperimentListComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: {
-              data: {
-                experimentList: { resolved: dataResolved, observable: of(dataResolved) },
-              },
-            },
+            snapshot: { data: { experimentList: { resolved: dataResolved, observable: of(dataResolved) } } },
           },
         },
       ],
@@ -46,19 +48,18 @@ describe('ExperimentListComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ExperimentListComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should page', () => {
-    component.paging({ pageIndex: 0, pageSize: 1 } as PageEvent);
-    expect(component.experimentsPage.length).toEqual(1);
-    expect(component.experimentsPage).toEqual(component.experiments.slice(0, 1));
-    component.paging({ pageIndex: 1, pageSize: 1 } as PageEvent);
-    expect(component.experimentsPage.length).toEqual(1);
-    expect(component.experimentsPage).toEqual(component.experiments.slice(1, 2));
-  });
+  it('should create render$', fakeAsync(() => {
+    fixture.detectChanges();
+    flushMicrotasks();
+    fixture.detectChanges();
+    expect(component.render$).toBeTruthy();
+    discardPeriodicTasks();
+  }));
 });

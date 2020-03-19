@@ -1,7 +1,5 @@
 <div fxLayout fxLayoutAlign="center center">
-  <mat-form-field fxFlex="50%">
-    <input matInput (keyup)="applyFilter($event)" placeholder="Filter" />
-  </mat-form-field>
+  <app-filter-input fxFlex="50%" (filter)="dataSource.filter = $event"></app-filter-input>
 </div>
 <ng-content select="table[mat-table]"></ng-content>
 <div class="footer">

@@ -8,12 +8,14 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LearnResultChartData } from './learn-result-chart-data';
 
+/** Stacked bar chart for displaying result parameters. */
 @Component({
   selector: 'app-learn-result-chart',
   templateUrl: './learn-result-chart.component.html',
   styleUrls: ['./learn-result-chart.component.scss'],
 })
 export class LearnResultChartComponent {
+  /** Chart's base setup. */
   readonly baseOption: EChartOption = {
     backgroundColor: 'transparent',
     tooltip: {
@@ -34,22 +36,35 @@ export class LearnResultChartComponent {
     xAxis: { type: 'category' },
     yAxis: {},
   };
+  /** Current application theme. */
   readonly theme$: Observable<string>;
+  /** Tooltip text for the chart's legends. */
   chartTooltipData: { [key: string]: string };
+  /** The chart options object passed to the chart as input. */
   chartDataUpdate: EChartOption;
 
-  @Input()
-  set data(data: LearnResultChartData) {
+  /** Updates the chart on data input change. */
+  @Input() set data(data: LearnResultChartData) {
     if (data) {
       this.updateChart(data);
     }
   }
 
+  /**
+   * Constructs a new `LearnResultChartComponent` and maps the application's theme name into the correct chart theme name.
+   * @param themeService Theme service for observing the current app theme.
+   * @param domSanitizer Dom sanitizer for sanitizing the custom tooltip's html.
+   */
   constructor(themeService: ThemeService, private domSanitizer: DomSanitizer) {
     this.theme$ = themeService.isDarkTheme$.pipe(map(isDarkTheme => (isDarkTheme ? 'dark' : 'light')));
   }
 
-  paramsToHtml(lt: Task): string {
+  /**
+   * Makes html description list from the `Task`'s config parameters.
+   * @param task A task to make html from its config parameters.
+   * @returns HTML description list of config parameters as string.
+   */
+  paramsToHtml(task: Task): string {
     const joinParams = (params: { [param: string]: string | number }) =>
       Object.entries(params)
         .map(([key, value]) => this.domSanitizer.sanitize(SecurityContext.HTML, `<dd>${key}: ${value}</dd>`))
@@ -57,15 +72,19 @@ export class LearnResultChartComponent {
     return `
       <dl>
         <dt>Features:</dt>
-        ${joinParams(lt.assemble_config.strategy_parameters)}
-        ${joinParams(lt.assemble_config.shared_parameters)}
+        ${joinParams(task.assemble_config.strategy_parameters)}
+        ${joinParams(task.assemble_config.shared_parameters)}
         <dt>Learning:</dt>
-        ${joinParams(lt.learn_config.strategy_parameters)}
-        ${joinParams(lt.learn_config.shared_parameters)}
+        ${joinParams(task.learn_config.strategy_parameters)}
+        ${joinParams(task.learn_config.shared_parameters)}
       </dl>
     `;
   }
 
+  /**
+   * Shapes it's input into the chart's data format and creates the custom tooltip's data.
+   * @param data The data to be shown on the chart.
+   */
   updateChart(data: LearnResultChartData): void {
     this.chartTooltipData = data.taskEntries.reduce((obj, [hash, task]) => {
       obj[this.taskName(hash, task)] = this.paramsToHtml(task);
@@ -90,10 +109,21 @@ export class LearnResultChartComponent {
     };
   }
 
+  /**
+   * Roundes number to 3 decimals if its not undefined.
+   * @param value The number to round or undefined.
+   * @returns The rounded number or undefined if the value was undefined.
+   */
   roundValue(value: number | undefined): number | undefined {
     return value != null ? round(value, 3) : undefined;
   }
 
+  /**
+   * Creates a name for a task from its algorithm, preset and hash.
+   * @param hash Hash of the task.
+   * @param task The task.
+   * @returns The name for the task.
+   */
   taskName(hash: string, task: Task): string {
     return `${task.assemble_config.strategy_name} +\n${task.learn_config.strategy_name} (${hash.substr(0, 5)})`;
   }

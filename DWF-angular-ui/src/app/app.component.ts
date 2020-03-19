@@ -12,22 +12,28 @@ import { ThemeService } from '@app/core/services/theme/theme.service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-/** Top level component */
+/** Top level component. */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  /** Whether the app is navigating */
+  /** Whether the app is navigating. */
   isLoading = true;
-  /** Whether the current theme is the dark theme */
+  /** Whether the current theme is the dark theme. */
   isDarkTheme: boolean;
-  /** CSS class name of the current theme */
+  /** CSS class name of the current theme. */
   theme: string;
-  /** Component's subscriptions  */
+  /** Component's subscriptions. */
   readonly subscriptions: Subscription[] = [];
 
+  /**
+   * Constructs a new `AppComponent`.
+   * @param router Router service to check navigation events.
+   * @param themeService Theme service to change theme.
+   * @param overlayContainer OverlayContainer to update it's class list with the current theme class.
+   */
   constructor(private router: Router, public themeService: ThemeService, private overlayContainer: OverlayContainer) {}
 
   /** Subscribe to router events and current theme on init */
@@ -46,8 +52,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Set isLoading property based on RouterEvent navigation
-   * @param routerEvent The router event
+   * Set isLoading property based on RouterEvent navigation.
+   * @param routerEvent The router event.
    */
   checkRouterEvent(routerEvent: RouterEvent): void {
     if (routerEvent instanceof NavigationStart) {
@@ -61,7 +67,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Update OverlayContainer classlist with current theme's classname */
+  /** Update OverlayContainer classlist with current theme's classname. */
   updateOverlayClassList(): void {
     const classList = this.overlayContainer.getContainerElement().classList;
     const themeClasses = Array.from(classList).filter((item: string) => item.includes('-theme'));
@@ -71,7 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
     classList.add(this.theme);
   }
 
-  /** Unsubscribe from subscriptions on destroy */
+  /** Unsubscribe from subscriptions on destroy. */
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
