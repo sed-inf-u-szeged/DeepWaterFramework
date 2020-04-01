@@ -12,26 +12,23 @@ type TaskEntry = LearnResultChartData['taskEntries'][number];
 })
 export class BestResultsChartComponent {
   readonly baseChartData: Omit<LearnResultChartData, 'taskEntries'> = {
-    resultType: 'test',
-    resultParams: ['precision', 'recall', 'fmes'],
+    resultSet: 'test',
+    resultSetParams: ['precision', 'recall', 'fmes'],
   };
 
   chartData: LearnResultChartData;
 
-  @Input()
-  set tasks(tasks: Experiment['tasks'][]) {
+  @Input() set tasksOfExperiments(tasksOfExperiments: Experiment['tasks'][]) {
     this.chartData = {
       ...this.baseChartData,
-      taskEntries: Object.values(this.getBestTasksByPresetPlusAlgorithm(tasks)),
+      taskEntries: Object.values(this.getBestTasksByPresetPlusAlgorithm(tasksOfExperiments)),
     };
   }
 
-  constructor() {}
-
-  getBestTasksByPresetPlusAlgorithm(tasks: Experiment['tasks'][]): { [key: string]: TaskEntry } {
+  getBestTasksByPresetPlusAlgorithm(tasksOfExperiments: Experiment['tasks'][]): { [key: string]: TaskEntry } {
     const bestResults: { [key: string]: TaskEntry } = {};
-    for (const taskObj of tasks) {
-      for (const [hash, task] of Object.entries(taskObj)) {
+    for (const tasks of tasksOfExperiments) {
+      for (const [hash, task] of Object.entries(tasks)) {
         const key = `${task.assemble_config.strategy_name} ${task.learn_config.strategy_name}`;
         const bestResult = bestResults.key?.[1].learn_result?.test.fmes;
         const currResult = task.learn_result?.test.fmes;

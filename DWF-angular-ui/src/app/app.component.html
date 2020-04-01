@@ -1,4 +1,4 @@
-<div class="theme-wrapper" [class]="theme">
+<div class="theme-wrapper" [class]="currentTheme">
   <div class="mat-typography mat-app-background">
     <mat-toolbar class="mat-elevation-z6" color="primary" style="position: relative; z-index: 2;" role="heading">
       <a mat-button routerLink="/">DWF-angular-ui</a>
@@ -7,17 +7,14 @@
         <mat-icon>format_color_fill</mat-icon>
       </button>
       <mat-menu #themeMenu>
-        <button mat-menu-item (click)="themeService.setDarkTheme(false)">
-          <mat-icon [color]="!isDarkTheme ? 'accent' : undefined">{{
-            !isDarkTheme ? 'radio_button_checked' : 'radio_button_unchecked'
-          }}</mat-icon
-          >Light theme
-        </button>
-        <button mat-menu-item (click)="themeService.setDarkTheme(true)">
-          <mat-icon [color]="isDarkTheme ? 'accent' : undefined">{{
-            isDarkTheme ? 'radio_button_checked' : 'radio_button_unchecked'
-          }}</mat-icon
-          >Dark theme
+        <button mat-menu-item *ngFor="let theme of themeService.themes" (click)="themeService.setTheme(theme.class)">
+          <ng-container *ngIf="currentTheme === theme.class; else notCurrentTheme">
+            <mat-icon color="accent">radio_button_checked</mat-icon>
+          </ng-container>
+          <ng-template #notCurrentTheme>
+            <mat-icon>radio_button_unchecked</mat-icon>
+          </ng-template>
+          {{ theme.name }}
         </button>
       </mat-menu>
     </mat-toolbar>

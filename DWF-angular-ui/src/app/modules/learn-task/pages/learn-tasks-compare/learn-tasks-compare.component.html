@@ -1,8 +1,8 @@
-<app-page-header pageTitle="Compare tasks by {{ resultType }} results" [errorMessage]="errorMessage">
+<app-page-header pageTitle="Compare tasks by {{ resultSet }} results" [errorMessage]="errorMessage">
   <span>
     <button mat-flat-button [matMenuTriggerFor]="menu" color="primary">
       <mat-icon>bar_chart</mat-icon>
-      {{ resultType }}
+      {{ resultSet }}
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
     <mat-menu #menu="matMenu">

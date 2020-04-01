@@ -25,7 +25,10 @@ export class LearnResultValueCellComponent implements OnChanges {
   @Input() set heatmapRange(heatmapRange: HeatmapRange | undefined) {
     if (heatmapRange != null) {
       const { worst, best } = heatmapRange;
-      const alpha = worst == null || best == null ? 0 : (this.display.value - worst) / (best - worst);
+      const alpha =
+        worst == null || best == null || !isFinite(this.display.value)
+          ? 0
+          : (this.display.value - worst) / (best - worst);
       this.heatColor = `rgba(47, 94, 196, ${alpha})`;
     } else {
       this.heatColor = undefined;

@@ -1,0 +1,30 @@
+<button mat-stroked-button [matMenuTriggerFor]="columnMenu">
+  <mat-icon>view_column</mat-icon>
+  Result Columns
+</button>
+<mat-menu #columnMenu="matMenu">
+  <div
+    class="learn-result-column-picker-menu"
+    cdkDropList
+    cdkDropListLockAxis="y"
+    cdkDropListOrientation="vertical"
+    (click)="$event.stopPropagation()"
+    *ngIf="themeService.theme$ | async as theme"
+  >
+    <div
+      *ngFor="let item of columnPickerItems; index as i"
+      cdkDrag
+      cdkDragBoundary=".learn-result-column-picker-menu"
+      [cdkDragPreviewClass]="theme"
+      [cdkDragData]="{ index: i }"
+      (cdkDragDropped)="columnDropped($event)"
+    >
+      <div class="learn-result-column-picker-menu__draggable-row">
+        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+        <mat-checkbox [checked]="item.selected" (click)="$event.stopPropagation()" (change)="columnToggled(item)">
+          {{ item.column }}
+        </mat-checkbox>
+      </div>
+    </div>
+  </div>
+</mat-menu>

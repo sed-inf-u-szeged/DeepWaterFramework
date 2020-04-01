@@ -16,24 +16,24 @@ describe('ThemeService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should not have dark theme by default (no local storage key)', () => {
-    expect(localStorage.getItem('DWF-isDarkTheme')).toBeNull();
-    service.isDarkTheme$.subscribe(isDarkTheme => expect(isDarkTheme).toBeFalse());
+  it('should be default-theme by default (no local storage key)', () => {
+    expect(localStorage.getItem('DWF-theme')).toBeNull();
+    service.theme$.subscribe(theme => expect(theme).toBe('default-theme'));
   });
 
-  it('should set dark theme', () => {
-    service.setDarkTheme(true);
-    service.isDarkTheme$.subscribe(isDarkTheme => expect(isDarkTheme).toBeTrue());
-    expect(localStorage.getItem('DWF-isDarkTheme')).toBe('true');
+  it('should set dark-theme', () => {
+    service.setTheme('dark-theme');
+    service.theme$.subscribe(theme => expect(theme).toBe('dark-theme'));
+    expect(localStorage.getItem('DWF-theme')).toBe('dark-theme');
   });
 
   it('should read theme from local storage', () => {
-    localStorage.setItem('DWF-isDarkTheme', 'true');
+    localStorage.setItem('DWF-theme', 'dark-theme');
     service = new ThemeService();
-    service.isDarkTheme$.subscribe(isDarkTheme => expect(isDarkTheme).toBeTrue());
+    service.theme$.subscribe(theme => expect(theme).toBe('dark-theme'));
 
-    localStorage.setItem('DWF-isDarkTheme', 'false');
+    localStorage.setItem('DWF-theme', 'default-theme');
     service = new ThemeService();
-    service.isDarkTheme$.subscribe(isDarkTheme => expect(isDarkTheme).toBeFalse());
+    service.theme$.subscribe(isDarkTheme => expect(isDarkTheme).toBe('default-theme'));
   });
 });

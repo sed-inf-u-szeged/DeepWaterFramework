@@ -43,17 +43,17 @@ export interface Result {
   };
 }
 
-export enum StdDevIndex {
-  tp,
-  tn,
-  fp,
-  fn,
-  accuracy,
-  precision,
-  recall,
-  fmes,
-  mcc,
-  covered_issues,
-  missed_issues,
-  completeness,
-}
+export const stdDevIndex = {
+  tp: 0,
+  tn: 1,
+  fp: 2,
+  fn: 3,
+  accuracy: 4,
+  precision: 5,
+  recall: 6,
+  fmes: 7,
+  mcc: 8,
+  covered_issues: 9,
+  missed_issues: 10,
+  completeness: 11,
+} as const;

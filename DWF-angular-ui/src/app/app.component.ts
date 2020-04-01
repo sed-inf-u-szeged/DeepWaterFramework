@@ -21,10 +21,8 @@ import { Subscription } from 'rxjs';
 export class AppComponent implements OnInit, OnDestroy {
   /** Whether the app is navigating. */
   isLoading = true;
-  /** Whether the current theme is the dark theme. */
-  isDarkTheme: boolean;
   /** CSS class name of the current theme. */
-  theme: string;
+  currentTheme: string;
   /** Component's subscriptions. */
   readonly subscriptions: Subscription[] = [];
 
@@ -43,9 +41,8 @@ export class AppComponent implements OnInit, OnDestroy {
         .pipe(filter((event): event is RouterEvent => event instanceof RouterEvent))
         .subscribe(routerEvent => this.checkRouterEvent(routerEvent)),
 
-      this.themeService.isDarkTheme$.subscribe(isDarkTheme => {
-        this.isDarkTheme = isDarkTheme;
-        this.theme = `${isDarkTheme ? 'dark' : 'default'}-theme`;
+      this.themeService.theme$.subscribe(theme => {
+        this.currentTheme = theme;
         this.updateOverlayClassList();
       })
     );
@@ -74,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (themeClasses.length) {
       classList.remove(...themeClasses);
     }
-    classList.add(this.theme);
+    classList.add(this.currentTheme);
   }
 
   /** Unsubscribe from subscriptions on destroy. */

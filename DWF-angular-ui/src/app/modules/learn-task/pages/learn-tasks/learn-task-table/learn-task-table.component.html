@@ -1,4 +1,11 @@
 <app-mat-table-shell [dataSource]="dataSource" [columnsToExport]="columnsToExport">
+  <ng-container header-actions>
+    <app-learn-result-column-picker
+      [columnOptions]="columnOptions"
+      (columns)="onColumnPickerChange($event)"
+    ></app-learn-result-column-picker
+  ></ng-container>
+
   <table mat-table multiTemplateDataRows matSort [dataSource]="dataSource" class="tasks-table">
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
@@ -7,7 +14,7 @@
           [checked]="selectedRows.hasValue() && isAllSelected()"
           [indeterminate]="selectedRows.hasValue() && !isAllSelected()"
         >
-          Hash
+          hash
         </mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let task">
@@ -44,8 +51,8 @@
       <ng-container
         *ngIf="{
           referencedRow: referencedRow && referencedRow[column],
-          unfocusThreshold: focusState.checked ? sortedValueColumns[column][focusState.index!] : undefined,
-          heatmapRange: heatmapEnabled ? bestWorstValues[column] : undefined
+          unfocusThreshold: focusState.checked ? tableService.sortedValueColumns[column][focusState.index!] : undefined,
+          heatmapRange: heatmapEnabled ? tableService.bestWorstValues[column] : undefined
         } as columnData"
       >
         <td

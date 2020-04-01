@@ -25,7 +25,7 @@ describe('ExperimentListComponent', () => {
       indexHash: `index${i}`,
       name: exp.name,
       numberOfTasks: Object.keys(exp.tasks).length,
-      created: new Date(exp.created_ts),
+      created: new Date(Number(exp.created_ts)),
       markdown: exp.markdown,
     })),
   };

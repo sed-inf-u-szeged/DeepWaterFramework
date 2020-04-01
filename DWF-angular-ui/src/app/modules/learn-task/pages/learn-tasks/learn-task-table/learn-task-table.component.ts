@@ -5,22 +5,33 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { Experiment, HashWithTask, Task } from '@app/data/models/experiment';
 import { LinkCell } from '@app/shared/models/link-cell';
-import { toValueCell } from '@app/shared/models/value-cell';
+import { ValueCell } from '@app/shared/models/value-cell';
 import { MatTableShellComponent } from '@app/shared/components/mat-table-shell/mat-table-shell.component';
-import { once, maxBy, minBy } from 'lodash-es';
-import { LinkCells, TableRow, ValueCells } from './table-row';
 import { FocusState } from '../../../components/learn-result-focus-button/focus-state';
-import { HeatmapRange } from '../../../components/learn-result-value-cell/heatmap-range';
+import {
+  EveryResultSetParam,
+  LearnResultTableService,
+} from '../../../services/learn-result-table/learn-result-table.service';
+import { ColumnPickerOptions } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
 
-type SortableColumn = keyof (ValueCells & LinkCells);
-type SortedValueColumns = { [key in keyof ValueCells]: (number | undefined)[] };
-type ValueColumnsHeatmapRange = { [key in keyof ValueCells]: HeatmapRange };
+type LinkCells = Record<'preset' | 'algorithm', LinkCell>;
+type ValueCells = Record<string, ValueCell>;
+type TableRow = LinkCells &
+  ValueCells & {
+    hash: string;
+    shortHash: string;
+    parameters: {
+      features: Task['assemble_config']['strategy_parameters'] & Task['assemble_config']['shared_parameters'];
+      learning: Task['learn_config']['strategy_parameters'] & Task['learn_config']['shared_parameters'];
+    };
+  };
 
 @Component({
   selector: 'app-learn-task-table',
   templateUrl: './learn-task-table.component.html',
   styleUrls: ['./learn-task-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [LearnResultTableService],
   animations: [
     trigger('detailExpand', [
       state('collapsed, void', style({ height: '0px', minHeight: '0px' })),
@@ -30,48 +41,39 @@ type ValueColumnsHeatmapRange = { [key in keyof ValueCells]: HeatmapRange };
   ],
 })
 export class LearnTaskTableComponent implements OnInit, AfterViewInit {
-  @Input() set tasks(tasks: Experiment['tasks'][]) {
-    this.dataSource.data = tasks.flatMap(task => Object.entries(task).map(taskEntry => this.mapToTableRow(taskEntry)));
-    this._bestWorstValues = once(() => this.getValueColumnsHeatmapRange());
-    this._sortedValueColumns = once(() => this.getSortedValueColumns());
-  }
-  readonly linkColumns: (keyof LinkCells)[] = ['Preset', 'Algorithm'];
-  readonly valueColumns: (keyof ValueCells)[] = [
-    'Train-Prec',
-    'Train-Recall',
-    'Train-F',
-    'Dev-Prec',
-    'Dev-Recall',
-    'Dev-F',
-    'Test-Prec',
-    'Test-Recall',
-    'Test-F',
-  ];
-  readonly columnsToExport = [...this.linkColumns, ...this.valueColumns];
-  readonly columnsToDisplay = ['select' as const, 'radio' as const, ...this.linkColumns, ...this.valueColumns];
+  readonly defaultParams: EveryResultSetParam[] = ['precision', 'recall', 'fmes'];
+  readonly linkColumns: Readonly<(keyof LinkCells)[]> = ['preset', 'algorithm'] as const;
+  valueColumns: (keyof ValueCells)[] = this.tableService.toColumnNames(this.defaultParams);
+  readonly baseColumnsToExport = [...this.linkColumns] as const;
+  columnsToExport: (keyof TableRow)[] = [...this.baseColumnsToExport, ...this.valueColumns];
+  readonly baseColumnsToDisplay = ['select' as const, 'radio' as const, ...this.linkColumns] as const;
+  columnsToDisplay: (keyof TableRow)[] = [...this.baseColumnsToDisplay, ...this.valueColumns];
   readonly dataSource = new MatTableDataSource<TableRow>([]);
   readonly selectedRows = new SelectionModel<string>(true, []);
+  readonly columnOptions: ColumnPickerOptions<EveryResultSetParam> = {
+    columns: this.tableService.allParams,
+    defaultToggled: this.defaultParams,
+    defaultAllSelected: false,
+  };
+
   expandedRow?: TableRow;
   referencedRow?: TableRow;
   focusState: FocusState = { checked: false };
   heatmapEnabled = false;
 
-  @ViewChild(MatTableShellComponent, { static: true }) tableShell: MatTableShellComponent;
-
-  private _sortedValueColumns: () => SortedValueColumns;
-  get sortedValueColumns() {
-    return this._sortedValueColumns();
+  @Input() set tasksOfExperiments(tasksOfExperiments: Experiment['tasks'][]) {
+    this.dataSource.data = tasksOfExperiments.flatMap(tasks =>
+      Object.entries(tasks).map(taskEntry => this.mapToTableRow(taskEntry))
+    );
+    this.tableService.data = this.dataSource.data;
   }
+  @ViewChild(MatTableShellComponent, { static: true }) readonly tableShell: MatTableShellComponent;
 
-  private _bestWorstValues: () => ValueColumnsHeatmapRange;
-  get bestWorstValues() {
-    return this._bestWorstValues();
-  }
-
-  constructor(private route: ActivatedRoute) {}
+  constructor(private readonly route: ActivatedRoute, public readonly tableService: LearnResultTableService) {}
 
   ngOnInit() {
-    this.dataSource.sortingDataAccessor = (data: TableRow, sortHeaderId: SortableColumn) => data[sortHeaderId].value;
+    this.dataSource.sortingDataAccessor = (data: TableRow, sortHeaderId: keyof TableRow) =>
+      (data[sortHeaderId] as LinkCell | ValueCell).value;
     this.dataSource.filterPredicate = this.filterPredicate;
   }
 
@@ -80,18 +82,16 @@ export class LearnTaskTableComponent implements OnInit, AfterViewInit {
     if (expandRowByHash != null) {
       const foundRowIndex = this.dataSource.data.findIndex(task => task.hash === expandRowByHash);
       if (foundRowIndex !== -1) {
-        setTimeout(() => {
+        Promise.resolve().then(() => {
           this.tableShell.jumpToRow(foundRowIndex);
           this.expandedRow = this.dataSource.data[foundRowIndex];
-        }, 0);
+        });
       }
     }
   }
 
   isAllSelected(): boolean {
-    const numSelected = this.selectedRows.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
+    return this.selectedRows.selected.length === this.dataSource.data.length;
   }
 
   masterToggle(): void {
@@ -120,25 +120,11 @@ export class LearnTaskTableComponent implements OnInit, AfterViewInit {
   mapToLinkCells(task: Task): LinkCells {
     const experimentIds: string = this.route.snapshot.paramMap.get('experimentIds')!;
     return {
-      Preset: new LinkCell(
+      preset: new LinkCell(
         task.assemble_config.strategy_name,
         `/assemble-configs/of-experiments/${experimentIds}/by-preset/${task.assemble_config.strategy_id}`
       ),
-      Algorithm: new LinkCell(task.learn_config.strategy_name, `by-algorithm/${task.learn_config.strategy_id}`),
-    };
-  }
-
-  mapToValueCells(learnResult: Task['learn_result']): ValueCells {
-    return {
-      'Train-Prec': toValueCell(learnResult, 'train', 'precision'),
-      'Train-Recall': toValueCell(learnResult, 'train', 'recall'),
-      'Train-F': toValueCell(learnResult, 'train', 'fmes'),
-      'Dev-Prec': toValueCell(learnResult, 'dev', 'precision'),
-      'Dev-Recall': toValueCell(learnResult, 'dev', 'recall'),
-      'Dev-F': toValueCell(learnResult, 'dev', 'fmes'),
-      'Test-Prec': toValueCell(learnResult, 'test', 'precision'),
-      'Test-Recall': toValueCell(learnResult, 'test', 'recall'),
-      'Test-F': toValueCell(learnResult, 'test', 'fmes'),
+      algorithm: new LinkCell(task.learn_config.strategy_name, `by-algorithm/${task.learn_config.strategy_id}`),
     };
   }
 
@@ -147,30 +133,17 @@ export class LearnTaskTableComponent implements OnInit, AfterViewInit {
       hash,
       shortHash: hash.substr(0, 5),
       ...this.mapToLinkCells(task),
-      ...this.mapToValueCells(task.learn_result),
+      ...this.tableService.mapToValueCells(task.learn_result),
       parameters: {
         features: { ...task.assemble_config.strategy_parameters, ...task.assemble_config.shared_parameters },
         learning: { ...task.learn_config.strategy_parameters, ...task.learn_config.shared_parameters },
       },
-    };
+    } as TableRow;
   }
 
-  getValueColumnsHeatmapRange(): ValueColumnsHeatmapRange {
-    return this.valueColumns.reduce((acc, col) => {
-      const worstRow = minBy(this.dataSource.data, row => row[col].value);
-      const bestRow = maxBy(this.dataSource.data, row => row[col].value);
-      acc[col] = {
-        worst: worstRow && worstRow[col].value,
-        best: bestRow && bestRow[col].value,
-      };
-      return acc;
-    }, {} as ValueColumnsHeatmapRange);
-  }
-
-  getSortedValueColumns(): SortedValueColumns {
-    return this.valueColumns.reduce((acc, col) => {
-      acc[col] = this.dataSource.data.map(row => row[col].value).sort((a, b) => -(a - b));
-      return acc;
-    }, {} as SortedValueColumns);
+  onColumnPickerChange(columns: EveryResultSetParam[]): void {
+    this.valueColumns = this.tableService.toColumnNames(columns);
+    this.columnsToDisplay = [...this.baseColumnsToDisplay, ...this.valueColumns];
+    this.columnsToExport = [...this.baseColumnsToExport, ...this.valueColumns];
   }
 }

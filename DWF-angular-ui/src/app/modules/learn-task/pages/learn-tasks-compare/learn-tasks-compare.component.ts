@@ -5,7 +5,9 @@ import { ObservableDataResolved } from '@app/data/models/observable-data-resolve
 import { HashWithTask } from '@app/data/models/experiment';
 import { LearnResultChartData } from '../../components/learn-result-chart/learn-result-chart-data';
 
-type NotTrainResultParams = LearnResultChartData<Exclude<LearnResultChartData['resultType'], 'train'>>['resultParams'];
+type NotTrainResultParams = LearnResultChartData<
+  Exclude<LearnResultChartData['resultSet'], 'train'>
+>['resultSetParams'];
 
 @Component({
   selector: 'app-learn-tasks-compare',
@@ -16,7 +18,7 @@ export class LearnTasksCompareComponent implements OnInit {
   errorMessage?: string;
   observableDataResolved: ObservableDataResolved<HashWithTask[]>;
   tasks: HashWithTask[];
-  resultType: LearnResultChartData['resultType'] = 'test';
+  resultSet: LearnResultChartData['resultSet'] = 'test';
   chart1Data: LearnResultChartData;
   chart2Data: LearnResultChartData;
 
@@ -26,26 +28,26 @@ export class LearnTasksCompareComponent implements OnInit {
     this.observableDataResolved = this.route.snapshot.data.learnTasksCompare;
     this.tasks = this.observableDataResolved.resolved.data;
     this.errorMessage = this.observableDataResolved.resolved.error;
-    this.updateCharts(this.resultType);
+    this.updateCharts(this.resultSet);
   }
 
-  updateCharts(resultType: LearnResultChartData['resultType']): void {
-    this.resultType = resultType;
-    const chart1Params: LearnResultChartData['resultParams'] = ['fmes', 'recall', 'precision', 'mcc', 'accuracy'];
-    const chart2Params: LearnResultChartData['resultParams'] = ['tp', 'tn', 'fp', 'fn'];
+  updateCharts(resultSet: LearnResultChartData['resultSet']): void {
+    this.resultSet = resultSet;
+    const chart1Params: LearnResultChartData['resultSetParams'] = ['fmes', 'recall', 'precision', 'mcc', 'accuracy'];
+    const chart2Params: LearnResultChartData['resultSetParams'] = ['tp', 'tn', 'fp', 'fn'];
 
-    if (resultType !== 'train') {
+    if (resultSet !== 'train') {
       (chart1Params as NotTrainResultParams).push('completeness');
       (chart2Params as NotTrainResultParams).push('covered_issues', 'missed_issues');
     }
 
-    this.chart1Data = { taskEntries: this.tasks, resultType, resultParams: chart1Params };
-    this.chart2Data = { taskEntries: this.tasks, resultType, resultParams: chart2Params };
+    this.chart1Data = { taskEntries: this.tasks, resultSet, resultSetParams: chart1Params };
+    this.chart2Data = { taskEntries: this.tasks, resultSet, resultSetParams: chart2Params };
   }
 
   handleNewData(newData: DataResolved<HashWithTask[]>) {
     this.tasks = newData.data;
     this.errorMessage = newData.error;
-    this.updateCharts(this.resultType);
+    this.updateCharts(this.resultSet);
   }
 }

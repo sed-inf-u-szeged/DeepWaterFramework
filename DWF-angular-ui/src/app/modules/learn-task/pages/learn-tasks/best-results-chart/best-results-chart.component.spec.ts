@@ -51,7 +51,7 @@ describe('BestResultsChartComponent', () => {
         },
       },
     ] as unknown) as Experiment['tasks'][];
-    component.tasks = testTasks;
+    component.tasksOfExperiments = testTasks;
     fixture.detectChanges();
     expect(component.chartData.taskEntries).toEqual([['task2', testTasks[1].task2]]);
   });

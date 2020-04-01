@@ -1,0 +1,11 @@
+@import '~@angular/material/theming';
+
+@mixin learn-result-column-picker-component-theme($theme) {
+  $background: map-get($theme, background);
+  $foreground: map-get($theme, foreground);
+
+  .learn-result-column-picker-menu__draggable-row {
+    color: mat-color($foreground, text);
+    background-color: mat-color($background, card);
+  }
+}

@@ -41,18 +41,18 @@ describe('LearnTasksCompareComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('updateCharts with not train result type', () => {
+  it('updateCharts with not train result set', () => {
     component.updateCharts('dev');
-    expect(component.chart1Data.resultParams as any[]).toContain('completeness');
-    expect(component.chart2Data.resultParams as any[]).toContain('covered_issues');
-    expect(component.chart2Data.resultParams as any[]).toContain('missed_issues');
+    expect(component.chart1Data.resultSetParams as any[]).toContain('completeness');
+    expect(component.chart2Data.resultSetParams as any[]).toContain('covered_issues');
+    expect(component.chart2Data.resultSetParams as any[]).toContain('missed_issues');
   });
 
-  it('updateCharts with train result type', () => {
+  it('updateCharts with train result set', () => {
     component.updateCharts('train');
-    expect(component.chart1Data.resultParams as any[]).not.toContain('completeness');
-    expect(component.chart2Data.resultParams as any[]).not.toContain('covered_issues');
-    expect(component.chart2Data.resultParams as any[]).not.toContain('missed_issues');
+    expect(component.chart1Data.resultSetParams as any[]).not.toContain('completeness');
+    expect(component.chart2Data.resultSetParams as any[]).not.toContain('covered_issues');
+    expect(component.chart2Data.resultSetParams as any[]).not.toContain('missed_issues');
   });
 
   it('handleNewData', () => {

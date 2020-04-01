@@ -1,7 +1,12 @@
-<div fxLayout fxLayoutAlign="center center">
-  <app-filter-input fxFlex="50%" (filter)="dataSource.filter = $event"></app-filter-input>
+<div fxLayout fxLayoutAlign="center center" class="filter-header">
+  <app-filter-input fxFlex="100%" fxFlex.gt-md="50%" (filter)="dataSource.filter = $event"></app-filter-input>
+  <div class="filter-header__actions" ngClass.gt-md="filter-header__actions--absolute">
+    <ng-content select="ng-container[header-actions]"></ng-content>
+  </div>
 </div>
-<ng-content select="table[mat-table]"></ng-content>
+<div class="table-container">
+  <ng-content select="table[mat-table]"></ng-content>
+</div>
 <div class="footer">
   <div fxLayout fxLayoutGap="16px">
     <ng-content select="ng-container[footer-actions]"></ng-content>

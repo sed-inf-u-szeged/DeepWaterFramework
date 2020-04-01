@@ -1,6 +1,8 @@
 @import '~@angular/material/theming';
 
 :host {
+  white-space: nowrap;
+
   &.transparent,
   &.transparent-inner > * {
     opacity: 0.3;

@@ -2,12 +2,14 @@
 
 @import './app/modules/learn-task/pages/learn-tasks/learn-task-table/learn-task-table.component.scss-theme';
 @import './app/modules/learn-task/components/learn-result-focus-button/learn-result-focus-button.component.scss-theme';
+@import './app/modules/learn-task/components/learn-result-column-picker/learn-result-column-picker.component.scss-theme';
 
 @include mat-core();
 
 @mixin custom-components-theme($theme) {
   @include learn-task-table-component-theme($theme);
   @include learn-result-focus-button-component-theme($theme);
+  @include learn-result-column-picker-component-theme($theme);
 }
 
 .default-theme {

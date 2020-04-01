@@ -51,12 +51,12 @@ export class LearnResultChartComponent {
   }
 
   /**
-   * Constructs a new `LearnResultChartComponent` and maps the application's theme name into the correct chart theme name.
+   * Constructs a new `LearnResultChartComponent` and maps the application's theme into the correct chart theme name.
    * @param themeService Theme service for observing the current app theme.
    * @param domSanitizer Dom sanitizer for sanitizing the custom tooltip's html.
    */
   constructor(themeService: ThemeService, private domSanitizer: DomSanitizer) {
-    this.theme$ = themeService.isDarkTheme$.pipe(map(isDarkTheme => (isDarkTheme ? 'dark' : 'light')));
+    this.theme$ = themeService.theme$.pipe(map(theme => (theme === 'dark-theme' ? 'dark' : 'light')));
   }
 
   /**
@@ -96,9 +96,9 @@ export class LearnResultChartComponent {
       dataset: {
         source: [
           ['name', ...data.taskEntries.map(([hash, task]) => this.taskName(hash, task))],
-          ...data.resultParams.map(key => [
+          ...data.resultSetParams.map(key => [
             key,
-            ...data.taskEntries.map(([_, task]) => this.roundValue(task.learn_result?.[data.resultType]?.[key])),
+            ...data.taskEntries.map(([_, task]) => this.roundValue(task.learn_result?.[data.resultSet]?.[key])),
           ]),
         ],
       },

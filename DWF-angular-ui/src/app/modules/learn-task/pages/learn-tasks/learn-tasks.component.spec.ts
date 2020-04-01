@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,6 +14,7 @@ import { LearnResultHeatmapButtonComponent } from '../../components/learn-result
 import { LearnResultValueCellComponent } from '../../components/learn-result-value-cell/learn-result-value-cell.component';
 import { LearnResultFocusButtonComponent } from '../../components/learn-result-focus-button/learn-result-focus-button.component';
 import { LearnResultChartComponent } from '../../components/learn-result-chart/learn-result-chart.component';
+import { LearnResultColumnPickerComponent } from '../../components/learn-result-column-picker/learn-result-column-picker.component';
 
 describe('LearnTasksComponent', () => {
   let component: LearnTasksComponent;
@@ -21,7 +23,7 @@ describe('LearnTasksComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule, NoopAnimationsModule, NgxEchartsCoreModule],
+      imports: [SharedModule, RouterTestingModule, NoopAnimationsModule, NgxEchartsCoreModule, DragDropModule],
       declarations: [
         LearnTasksComponent,
         LearnTaskTableComponent,
@@ -31,6 +33,7 @@ describe('LearnTasksComponent', () => {
         LearnResultValueCellComponent,
         LearnResultFocusButtonComponent,
         LearnResultChartComponent,
+        LearnResultColumnPickerComponent,
       ],
       providers: [
         {
@@ -57,10 +60,10 @@ describe('LearnTasksComponent', () => {
   });
 
   it('handleNewData', () => {
-    component.experimentTasks = [{}];
+    component.tasksOfExperiments = [{}];
     component.errorMessage = undefined;
     component.handleNewData({ data: learnTasks, error: 'error' });
-    expect(component.experimentTasks).toEqual(learnTasks);
+    expect(component.tasksOfExperiments).toEqual(learnTasks);
     expect(component.errorMessage!).toBe('error');
   });
 });

@@ -1,30 +1,39 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+type ThemeClass = ThemeService['themes'][number]['class'];
+
 /** Service to change and observe the current theme. */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   /** Key for localstorage. */
-  private readonly KEY = 'DWF-isDarkTheme';
-  /** Subject of whether the current theme is the dark theme. */
-  private readonly _isDarkTheme$: BehaviorSubject<boolean>;
+  private readonly KEY = 'DWF-theme';
+  /** List of the implemented themes. */
+  readonly themes = [
+    { name: 'Light theme', class: 'default-theme' },
+    { name: 'Dark theme', class: 'dark-theme' },
+  ] as const;
+  /** Subject of the current theme's class name. */
+  private readonly _theme$: BehaviorSubject<ThemeClass>;
 
-  /** Observabe of whether the current theme is the dark theme. */
-  get isDarkTheme$(): Observable<boolean> {
-    return this._isDarkTheme$.asObservable();
+  /** Observabe of the current theme's class name. */
+  get theme$(): Observable<ThemeClass> {
+    return this._theme$.asObservable();
   }
 
-  /** Gets from localstorage whether the current theme is the dark theme and sets up [_isDarkTheme$]{@link ThemeService#_isDarkTheme$} with the result. */
+  /** Gets the current theme from localstorage and sets up [_theme$]{@link ThemeService#_theme$} with it. */
   constructor() {
-    this._isDarkTheme$ = new BehaviorSubject<boolean>(localStorage.getItem(this.KEY) === 'true');
+    this._theme$ = new BehaviorSubject<ThemeClass>(
+      (localStorage.getItem(this.KEY) as ThemeClass | null) ?? 'default-theme'
+    );
   }
 
   /**
-   * Set the current theme.
-   * @param isDarkTheme Whether the theme is dark.
+   * Sets the current theme.
+   * @param theme Theme's class name.
    */
-  setDarkTheme(isDarkTheme: boolean) {
-    this._isDarkTheme$.next(isDarkTheme);
-    localStorage.setItem(this.KEY, this._isDarkTheme$.value.toString());
+  setTheme(theme: ThemeClass) {
+    this._theme$.next(theme);
+    localStorage.setItem(this.KEY, this._theme$.value);
   }
 }

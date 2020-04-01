@@ -1,4 +1,4 @@
-import { Result, StdDevIndex } from '@app/data/models/result';
+import { Result, stdDevIndex } from '@app/data/models/result';
 
 /** Represents an Experiment Result value and its corresponding standard deviation inside tables. */
 export class ValueCell {
@@ -64,7 +64,7 @@ export function toValueCell<TKey1 extends keyof Result, TKey2 extends Exclude<ke
 ): ValueCell {
   return new ValueCell(
     taskResult?.[type][param] as number | undefined,
-    taskResult?.[type].std_dev[StdDevIndex[param as keyof typeof StdDevIndex]],
+    taskResult?.[type].std_dev[stdDevIndex[param as keyof typeof stdDevIndex]],
     lowerBetter
   );
 }

@@ -10,7 +10,7 @@ import { ObservableDataResolved } from '@app/data/models/observable-data-resolve
   styleUrls: ['./learn-tasks.component.scss'],
 })
 export class LearnTasksComponent implements OnInit {
-  experimentTasks: Experiment['tasks'][];
+  tasksOfExperiments: Experiment['tasks'][];
   errorMessage?: string;
   observableDataResolved: ObservableDataResolved<Experiment['tasks'][]>;
 
@@ -18,12 +18,12 @@ export class LearnTasksComponent implements OnInit {
 
   ngOnInit() {
     this.observableDataResolved = this.route.snapshot.data.learnTasks;
-    this.experimentTasks = this.observableDataResolved.resolved.data;
+    this.tasksOfExperiments = this.observableDataResolved.resolved.data;
     this.errorMessage = this.observableDataResolved.resolved.error;
   }
 
   handleNewData(data: DataResolved<Experiment['tasks'][]>) {
-    this.experimentTasks = data.data;
+    this.tasksOfExperiments = data.data;
     this.errorMessage = data.error;
   }
 }

@@ -6,8 +6,8 @@ export interface LearnResultChartData<
 > {
   /** An array of tuples of the tasks and their hash in a [hash, task] format. */
   taskEntries: HashWithTask[];
-  /** The type inside of the task's `Result`. */
-  resultType: ResultType;
-  /** An array of result parameters of the picked type to display on the chart. */
-  resultParams: Exclude<keyof NonNullable<Task['learn_result']>[ResultType], 'std_dev'>[];
+  /** The result set name inside of the task's `Result`. */
+  resultSet: ResultType;
+  /** An array of result parameters of the picked set to display on the chart. */
+  resultSetParams: Exclude<keyof NonNullable<Task['learn_result']>[ResultType], 'std_dev'>[];
 }
