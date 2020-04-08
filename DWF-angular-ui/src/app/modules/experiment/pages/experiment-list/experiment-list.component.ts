@@ -50,7 +50,10 @@ export class ExperimentListComponent implements OnInit {
     this.errorMessage = this.observableDataResolved.resolved.error;
   }
 
-  /** Creates a pipeline that handles data change, filtering, sorting and paging and produces the data to be rendered */
+  /**
+   * Creates a pipeline that handles data change, filtering, sorting and paging and sets up the data to render in a resolved promise to
+   * guard against making template changes within a change detection run.
+   */
   ngOnInit(): void {
     const filteredData$ = combineLatest([this.experiments$, this.filter$]).pipe(
       map(([data, filter]) => this.filterData(data, filter))

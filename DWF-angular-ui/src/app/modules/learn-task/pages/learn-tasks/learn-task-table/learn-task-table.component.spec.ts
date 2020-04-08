@@ -62,9 +62,9 @@ describe('LearnTaskTableComponent', () => {
   });
 
   it('masterToggle should toggle selected rows', () => {
-    component.masterToggle();
+    component.checkboxMasterToggle();
     expect(component.selectedRows.selected.length).toBe(component.dataSource.data.length);
-    component.masterToggle();
+    component.checkboxMasterToggle();
     expect(component.selectedRows.selected.length).toBe(0);
   });
 

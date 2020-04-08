@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Task } from '@app/data/models/experiment';
-import { NgxEchartsModule } from 'ngx-echarts';
+import { NgxEchartsCoreModule } from 'ngx-echarts/core';
 import { LearnResultChartComponent } from './learn-result-chart.component';
 
 describe('LearnResultChartComponent', () => {
@@ -9,7 +9,7 @@ describe('LearnResultChartComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [NgxEchartsModule],
+      imports: [NgxEchartsCoreModule],
       declarations: [LearnResultChartComponent],
     }).compileComponents();
   }));

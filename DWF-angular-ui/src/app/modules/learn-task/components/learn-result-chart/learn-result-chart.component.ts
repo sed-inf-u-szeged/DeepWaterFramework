@@ -26,7 +26,7 @@ export class LearnResultChartComponent {
     legend: {
       tooltip: {
         show: true,
-        formatter: (params: EChartOption.Tooltip.Format) => this.chartTooltipData[params.name!],
+        formatter: ({ name }: { name: string }) => this.chartTooltipData[name],
       },
     },
     toolbox: {
@@ -35,6 +35,7 @@ export class LearnResultChartComponent {
     },
     xAxis: { type: 'category' },
     yAxis: {},
+    grid: { containLabel: true, right: 0, left: 0 },
   };
   /** Current application theme. */
   readonly theme$: Observable<string>;
@@ -104,6 +105,7 @@ export class LearnResultChartComponent {
       },
       series: data.taskEntries.map(_ => ({ type: 'bar' })),
       grid: {
+        ...this.baseOption.grid,
         top: 10 * Math.ceil(data.taskEntries.length / 7) + '%',
       },
     };
