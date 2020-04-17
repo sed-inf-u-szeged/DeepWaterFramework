@@ -1,0 +1,31 @@
+<app-page-header
+  pageTitle="Learn Tasks of Experiments by {{ tasksBy }}: {{ strategyName }}"
+  [errorMessage]="errorMessage"
+>
+  <app-refresh-button
+    [observableDataResolved]="observableDataResolved"
+    (newData)="handleNewData($event)"
+  ></app-refresh-button>
+</app-page-header>
+
+<div fxLayout="column" fxLayoutGap="16px">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Learn Tasks</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-learn-tasks-by-strategy-table
+        [data]="{ hashWithTasks: hashWithTasks, config: config }"
+      ></app-learn-tasks-by-strategy-table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Test parameter results for {{ boxplotFor }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-strategy-boxplot [data]="{ hashWithTasks: hashWithTasks, config: boxplotConfig }"></app-strategy-boxplot>
+    </mat-card-content>
+  </mat-card>
+</div>

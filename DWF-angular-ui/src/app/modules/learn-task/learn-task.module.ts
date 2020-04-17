@@ -10,16 +10,16 @@ import { LearnResultColumnPickerComponent } from './components/learn-result-colu
 import { LearnResultChartComponent } from './components/learn-result-chart/learn-result-chart.component';
 import { BestResultsChartComponent } from './pages/learn-tasks/best-results-chart/best-results-chart.component';
 import { LearnTasksComponent } from './pages/learn-tasks/learn-tasks.component';
-import { LearnTasksByAlgorithmComponent } from './pages/learn-tasks-by-algorithm/learn-tasks-by-algorithm.component';
+import { LearnTasksByConfigStrategyComponent } from './pages/learn-tasks-by-config-strategy/learn-tasks-by-config-strategy.component';
 import { LearnTasksCompareComponent } from './pages/learn-tasks-compare/learn-tasks-compare.component';
 import { LearnTaskTableComponent } from './pages/learn-tasks/learn-task-table/learn-task-table.component';
-import { LearnTasksByAlgorithmTableComponent } from './pages/learn-tasks-by-algorithm/learn-tasks-by-algorithm-table/learn-tasks-by-algorithm-table.component';
-import { PresetBoxplotComponent } from './pages/learn-tasks-by-algorithm/preset-boxplot/preset-boxplot.component';
+import { LearnTasksByStrategyTableComponent } from './pages/learn-tasks-by-config-strategy/learn-tasks-by-strategy-table/learn-tasks-by-strategy-table.component';
+import { StrategyBoxplotComponent } from './pages/learn-tasks-by-config-strategy/strategy-boxplot/strategy-boxplot.component';
 
 @NgModule({
   imports: [SharedModule, LearnTaskRoutingModule, NgxEchartsCoreModule, DragDropModule],
   declarations: [
-    LearnTasksByAlgorithmComponent,
+    LearnTasksByConfigStrategyComponent,
     LearnResultChartComponent,
     LearnResultValueCellComponent,
     LearnResultFocusButtonComponent,
@@ -29,9 +29,8 @@ import { PresetBoxplotComponent } from './pages/learn-tasks-by-algorithm/preset-
     LearnTasksComponent,
     LearnTasksCompareComponent,
     LearnTaskTableComponent,
-    LearnTasksByAlgorithmTableComponent,
-    PresetBoxplotComponent,
+    LearnTasksByStrategyTableComponent,
+    StrategyBoxplotComponent,
   ],
-  providers: [],
 })
 export class LearnTaskModule {}

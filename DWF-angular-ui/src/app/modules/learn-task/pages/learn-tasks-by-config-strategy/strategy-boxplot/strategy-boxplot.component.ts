@@ -5,6 +5,7 @@ import { Result } from '@app/data/models/result';
 import { EChartOption } from 'echarts';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { LearnTaskConfig } from '../learn-task-config';
 
 /** Data for the boxplot chart. */
 interface BoxplotData {
@@ -18,12 +19,12 @@ interface BoxplotData {
 
 /** Boxplot component to select and display test parameter results. */
 @Component({
-  selector: 'app-preset-boxplot',
-  templateUrl: './preset-boxplot.component.html',
-  styleUrls: ['./preset-boxplot.component.scss'],
+  selector: 'app-strategy-boxplot',
+  templateUrl: './strategy-boxplot.component.html',
+  styleUrls: ['./strategy-boxplot.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PresetBoxplotComponent implements OnInit {
+export class StrategyBoxplotComponent implements OnInit {
   /** Chart's base setup. */
   readonly baseChartOption: EChartOption = {
     backgroundColor: 'transparent',
@@ -54,20 +55,20 @@ export class PresetBoxplotComponent implements OnInit {
     'missed_issues',
   ];
 
+  /** The task config to use the strategy from. */
+  config: LearnTaskConfig;
   /** An array of tuples of the tasks and their hash in a [hash, task] format. */
-  private _hashWithTasks: HashWithTask[];
-  /** Accessor for {@link PresetBoxplotComponent#_hashWithTasks} that updates the chart on change. */
-  @Input() set hashWithTasks(hashWithTasks: HashWithTask[]) {
-    this._hashWithTasks = hashWithTasks;
+  private hashWithTasks: HashWithTask[];
+  /** Input data that updates the chart on change. */
+  @Input() set data({ hashWithTasks, config }: { hashWithTasks: HashWithTask[]; config: LearnTaskConfig }) {
+    this.hashWithTasks = hashWithTasks;
+    this.config = config;
     this.updateChartData();
-  }
-  get hashWithTasks(): HashWithTask[] {
-    return this._hashWithTasks;
   }
 
   /** The currently selected test result parameter. */
   private _selectedParam: Exclude<keyof Result['test'], 'std_dev'>;
-  /** Accessor for {@link PresetBoxplotComponent#_selectedParam} that updates the chart on change. */
+  /** Accessor for {@link StrategyBoxplotComponent#_selectedParam} that updates the chart on change. */
   set selectedParam(param: Exclude<keyof Result['test'], 'std_dev'>) {
     this._selectedParam = param;
     this.updateChartData();
@@ -77,14 +78,14 @@ export class PresetBoxplotComponent implements OnInit {
   }
 
   /**
-   * Constructs a new `PresetBoxplotComponent` and maps the application's theme into the correct chart theme name.
+   * Constructs a new `StrategyBoxplotComponent` and maps the application's theme into the correct chart theme name.
    * @param themeService Theme service for observing the current app theme.
    */
   constructor(themeService: ThemeService) {
     this.theme$ = themeService.theme$.pipe(map(theme => (theme === 'dark-theme' ? 'dark' : 'light')));
   }
 
-  /** Selects `accuracy` as selected parameter on component init. */
+  /** Selects `fmes` as selected parameter on component init. */
   ngOnInit(): void {
     this.selectedParam = 'fmes';
   }
@@ -103,24 +104,24 @@ export class PresetBoxplotComponent implements OnInit {
   }
 
   /**
-   * Gets the hash and the selected parameter's value of every task by presets.
-   * @returns The hash and value of every task by preset.
+   * Gives the hash and the selected parameter's value of every task by the current config's strategy.
+   * @returns The hash and value of every task by the config's strategy.
    */
-  getPresetData(): { [preset: string]: { hash: string; value: number }[] } {
-    const presetData: { [preset: string]: { hash: string; value: number }[] } = {};
+  getConfigStrategyData(): { [strategy: string]: { hash: string; value: number }[] } {
+    const strategyData: { [strategy: string]: { hash: string; value: number }[] } = {};
     for (const [hash, task] of this.hashWithTasks) {
       const value = task.learn_result?.test[this.selectedParam];
-      const preset = task.assemble_config.strategy_name;
+      const strategy = task[this.config].strategy_name;
       if (value != null) {
         const item = { hash: hash.substr(0, 5), value };
-        if (presetData[preset] != null) {
-          presetData[preset].push(item);
+        if (strategyData[strategy] != null) {
+          strategyData[strategy].push(item);
         } else {
-          presetData[preset] = [item];
+          strategyData[strategy] = [item];
         }
       }
     }
-    return presetData;
+    return strategyData;
   }
 
   /**
@@ -132,8 +133,8 @@ export class PresetBoxplotComponent implements OnInit {
     const outliers: BoxplotData['outliers'] = [];
     const axisNames: BoxplotData['axisNames'] = [];
 
-    for (const [preset, arr] of Object.entries(this.getPresetData())) {
-      axisNames.push(preset);
+    for (const [config, arr] of Object.entries(this.getConfigStrategyData())) {
+      axisNames.push(config);
 
       const ascArray = arr.slice().sort((a, b) => a.value - b.value);
       const q1 = this.quantile(ascArray, 0.25);

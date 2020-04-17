@@ -8,17 +8,17 @@ import { HashWithTask } from '@app/data/models/experiment';
 import { SharedModule } from '@app/shared/shared.module';
 import { of } from 'rxjs';
 import { NgxEchartsCoreModule } from 'ngx-echarts/core';
-import { LearnTasksByAlgorithmComponent } from './learn-tasks-by-algorithm.component';
-import { LearnTasksByAlgorithmTableComponent } from './learn-tasks-by-algorithm-table/learn-tasks-by-algorithm-table.component';
-import { PresetBoxplotComponent } from './preset-boxplot/preset-boxplot.component';
+import { LearnTasksByConfigStrategyComponent } from './learn-tasks-by-config-strategy.component';
+import { LearnTasksByStrategyTableComponent } from './learn-tasks-by-strategy-table/learn-tasks-by-strategy-table.component';
+import { StrategyBoxplotComponent } from './strategy-boxplot/strategy-boxplot.component';
 import { LearnResultHeatmapButtonComponent } from '../../components/learn-result-heatmap-button/learn-result-heatmap-button.component';
 import { LearnResultValueCellComponent } from '../../components/learn-result-value-cell/learn-result-value-cell.component';
 import { LearnResultFocusButtonComponent } from '../../components/learn-result-focus-button/learn-result-focus-button.component';
 import { LearnResultColumnPickerComponent } from '../../components/learn-result-column-picker/learn-result-column-picker.component';
 
-describe('LearnTasksByAlgorithmComponent', () => {
-  let component: LearnTasksByAlgorithmComponent;
-  let fixture: ComponentFixture<LearnTasksByAlgorithmComponent>;
+describe('LearnTasksByConfigStrategyComponent', () => {
+  let component: LearnTasksByConfigStrategyComponent;
+  let fixture: ComponentFixture<LearnTasksByConfigStrategyComponent>;
   const learnTasksByAlgorithm: HashWithTask[] = EXPERIMENTS.flatMap(experiment =>
     Object.entries(experiment.tasks).filter(([_hash, task]) => task.learn_config.strategy_id === 'lc_strategy_id')
   );
@@ -27,13 +27,13 @@ describe('LearnTasksByAlgorithmComponent', () => {
     TestBed.configureTestingModule({
       imports: [SharedModule, NoopAnimationsModule, RouterTestingModule, DragDropModule, NgxEchartsCoreModule],
       declarations: [
-        LearnTasksByAlgorithmComponent,
-        LearnTasksByAlgorithmTableComponent,
+        LearnTasksByConfigStrategyComponent,
+        LearnTasksByStrategyTableComponent,
         LearnResultHeatmapButtonComponent,
         LearnResultValueCellComponent,
         LearnResultFocusButtonComponent,
         LearnResultColumnPickerComponent,
-        PresetBoxplotComponent,
+        StrategyBoxplotComponent,
       ],
       providers: [
         {
@@ -41,10 +41,11 @@ describe('LearnTasksByAlgorithmComponent', () => {
           useValue: {
             snapshot: {
               data: {
-                learnTasksByAlgorithm: {
+                learnTasksByConfigStrategy: {
                   resolved: { data: learnTasksByAlgorithm },
                   observable: of({ data: learnTasksByAlgorithm }),
                 },
+                config: 'assemble_config',
               },
               paramMap: convertToParamMap({ experimentIds: '1,2,3' }),
             },
@@ -55,7 +56,7 @@ describe('LearnTasksByAlgorithmComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LearnTasksByAlgorithmComponent);
+    fixture = TestBed.createComponent(LearnTasksByConfigStrategyComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

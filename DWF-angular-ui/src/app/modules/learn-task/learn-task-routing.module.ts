@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LearnTasksByAlgorithmComponent } from './pages/learn-tasks-by-algorithm/learn-tasks-by-algorithm.component';
-import { LearnTasksByAlgorithmResolver } from './pages/learn-tasks-by-algorithm/learn-tasks-by-algorithm.resolver.service';
+import { LearnTasksByConfigStrategyComponent } from './pages/learn-tasks-by-config-strategy/learn-tasks-by-config-strategy.component';
+import { LearnTasksByConfigStrategyResolver } from './pages/learn-tasks-by-config-strategy/learn-tasks-by-config-strategy.resolver.service';
 import { LearnTasksComponent } from './pages/learn-tasks/learn-tasks.component';
 import { LearnTasksResolver } from './pages/learn-tasks/learn-tasks.resolver.service';
 import { LearnTasksCompareComponent } from './pages/learn-tasks-compare/learn-tasks-compare.component';
@@ -17,9 +17,16 @@ const LEARN_TASK_ROUTES: Routes = [
         resolve: { learnTasks: LearnTasksResolver },
       },
       {
-        path: 'by-algorithm/:algorithmId',
-        component: LearnTasksByAlgorithmComponent,
-        resolve: { learnTasksByAlgorithm: LearnTasksByAlgorithmResolver },
+        path: 'by-preset/:strategyId',
+        data: { config: 'assemble_config' },
+        component: LearnTasksByConfigStrategyComponent,
+        resolve: { learnTasksByConfigStrategy: LearnTasksByConfigStrategyResolver },
+      },
+      {
+        path: 'by-algorithm/:strategyId',
+        data: { config: 'learn_config' },
+        component: LearnTasksByConfigStrategyComponent,
+        resolve: { learnTasksByConfigStrategy: LearnTasksByConfigStrategyResolver },
       },
       {
         path: 'compare/:learnTaskIds',

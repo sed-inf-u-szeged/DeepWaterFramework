@@ -1,35 +1,41 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { HashWithTask } from '@app/data/models/experiment';
 import { LinkCell } from '@app/shared/models/link-cell';
 import { ValueCell } from '@app/shared/models/value-cell';
+import { Union } from 'ts-toolbelt';
 import { ColumnPickerOptions } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
 import { FocusState } from '../../../components/learn-result-focus-button/focus-state';
 import {
   LearnResultTableService,
   EveryResultSetParam,
 } from '../../../services/learn-result-table/learn-result-table.service';
+import { LearnTaskConfig } from '../learn-task-config';
 
-type LinkCells = Record<'hash' | 'preset', LinkCell>;
+type LinkCells = Record<'hash' | 'preset', LinkCell> | Record<'hash' | 'algorithm', LinkCell>;
 type ValueCells = Record<string, ValueCell>;
 type TableRow = LinkCells & ValueCells & Record<string, string | number>;
 
-/** Table component to display tasks hash, preset, learn config parameters and test results. */
+/** Table component to display tasks hash, preset, config parameters and test results. */
 @Component({
-  selector: 'app-learn-tasks-by-algorithm-table',
-  templateUrl: './learn-tasks-by-algorithm-table.component.html',
-  styleUrls: ['./learn-tasks-by-algorithm-table.component.scss'],
+  selector: 'app-learn-tasks-by-strategy-table',
+  templateUrl: './learn-tasks-by-strategy-table.component.html',
+  styleUrls: ['./learn-tasks-by-strategy-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [{ provide: LearnResultTableService, useFactory: () => new LearnResultTableService(['test']) }],
+  viewProviders: [
+    {
+      provide: LearnResultTableService,
+      useFactory() {
+        return new LearnResultTableService(['test']);
+      },
+    },
+  ],
 })
-export class LearnTasksByAlgorithmTableComponent {
+export class LearnTasksByStrategyTableComponent {
   /** Name of the columns containing `Result` learn config parameters. */
   paramColumns: string[] = [];
   /** Name of the columns containing `LinkCell`s. */
-  readonly linkColumns: (keyof LinkCells)[] = ['hash', 'preset'];
-  /** Column names to always display. */
-  readonly baseColumnsToDisplay: string[] = ['radio', ...this.linkColumns];
+  linkColumns: Union.Keys<LinkCells>[];
   /** Name of the columns containing `ValueCell`s. */
   valueColumns: (keyof ValueCells)[] = this.tableService.toColumnNames(this.tableService.allParams);
   /** Name of the columns to display. */
@@ -52,47 +58,51 @@ export class LearnTasksByAlgorithmTableComponent {
     defaultAllSelected: true,
   };
 
-  /** The array of tasks and their hashes to create the tables data from. */
-  @Input() set hashWithTasks(hashWithTasks: HashWithTask[]) {
+  /** Input data to create the tables data from. */
+  @Input() set data({ hashWithTasks, config }: { hashWithTasks: HashWithTask[]; config: LearnTaskConfig }) {
+    const mapToLinkCells = this.createLinkCellsMapper(config);
     this.dataSource.data = hashWithTasks.map(
       ([hash, task]) =>
         ({
-          ...this.mapToLinkCells([hash, task]),
+          ...mapToLinkCells([hash, task]),
           ...this.tableService.mapToValueCells(task.learn_result),
-          ...task.learn_config.strategy_parameters,
+          ...task[config].strategy_parameters,
         } as TableRow)
     );
-    if (hashWithTasks.length > 0) {
-      this.paramColumns = Object.keys(hashWithTasks[0][1].learn_config.strategy_parameters);
-      this.columnsToDisplay = [...this.baseColumnsToDisplay, ...this.paramColumns, ...this.valueColumns];
-      this.columnsToExport = [...this.linkColumns, ...this.paramColumns, ...this.valueColumns];
-    }
+    this.paramColumns = hashWithTasks.length > 0 ? Object.keys(hashWithTasks[0][1][config].strategy_parameters) : [];
+    this.columnsToDisplay = [...this.linkColumns, ...this.paramColumns, 'radio', ...this.valueColumns];
+    this.columnsToExport = [...this.linkColumns, ...this.paramColumns, ...this.valueColumns];
     this.tableService.data = this.dataSource.data;
   }
 
   /**
-   * Constructs a new `LearnTasksByAlgorithmTableComponent` and sets up the sortingDataAccessor for the dataSource.
-   * @param route `ActivatedRoute` to get the currently opened Experiments ids.
+   * Constructs a new `LearnTasksByStrategyTableComponent` and sets up the sortingDataAccessor for the dataSource.
    * @param tableService `LearnResultTableService` to produce `ValueCells` and help with `ValueCell` features.
    */
-  constructor(private route: ActivatedRoute, public tableService: LearnResultTableService) {
+  constructor(public tableService: LearnResultTableService) {
     this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
   }
 
   /**
-   * Produces the `LinkCells` part of a `TableRow`.
-   * @param param [hash, task] tuple to create the `LinkCells` from.
-   * @returns The `LinkCells`.
+   * Creates the function that produces the `LinkCells` part of a `TableRow`.
+   * @param config The displayed config.
+   * @returns A function to produce `LinkCells`.
    */
-  mapToLinkCells([hash, task]: HashWithTask): LinkCells {
-    const experimentIds: string = this.route.snapshot.paramMap.get('experimentIds')!;
-    return {
-      hash: new LinkCell(hash.substr(0, 5), '../../', { expandRowByHash: hash }),
-      preset: new LinkCell(
-        task.assemble_config.strategy_name,
-        `/assemble-configs/of-experiments/${experimentIds}/by-preset/${task.assemble_config.strategy_id}`
-      ),
-    };
+  createLinkCellsMapper(config: LearnTaskConfig): ([hash, task]: HashWithTask) => LinkCells {
+    const [otherConfigName, otherConfig] =
+      config === 'assemble_config'
+        ? (['algorithm', 'learn_config'] as const)
+        : (['preset', 'assemble_config'] as const);
+    this.linkColumns = ['hash', otherConfigName];
+
+    return ([hash, task]: HashWithTask) =>
+      ({
+        hash: new LinkCell(hash.substr(0, 5), '../../', { expandRowByHash: hash }),
+        [otherConfigName]: new LinkCell(
+          task[otherConfig].strategy_name,
+          `../../by-${otherConfigName}/${task[otherConfig].strategy_id}`
+        ),
+      } as LinkCells);
   }
 
   /**
@@ -116,7 +126,7 @@ export class LearnTasksByAlgorithmTableComponent {
    */
   onColumnPickerChange(columns: EveryResultSetParam[]): void {
     this.valueColumns = this.tableService.toColumnNames(columns);
-    this.columnsToDisplay = [...this.baseColumnsToDisplay, ...this.paramColumns, ...this.valueColumns];
+    this.columnsToDisplay = [...this.linkColumns, ...this.paramColumns, 'radio', ...this.valueColumns];
     this.columnsToExport = [...this.linkColumns, ...this.paramColumns, ...this.valueColumns];
   }
 }

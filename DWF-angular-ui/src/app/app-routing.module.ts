@@ -8,13 +8,10 @@ const APP_ROUTES: Routes = [
     loadChildren: () => import('./modules/experiment/experiment.module').then(m => m.ExperimentModule),
   },
   {
-    path: 'assemble-configs',
-    loadChildren: () => import('./modules/assemble-task/assemble-task.module').then(m => m.AssembleTaskModule),
-  },
-  {
     path: 'learn-tasks',
     loadChildren: () => import('./modules/learn-task/learn-task.module').then(m => m.LearnTaskModule),
   },
+  { path: '**', redirectTo: '' },
 ];
 
 @NgModule({

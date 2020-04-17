@@ -2,7 +2,6 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, ChangeDetectionStrategy, Input, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { ActivatedRoute } from '@angular/router';
 import { Experiment, HashWithTask, Task } from '@app/data/models/experiment';
 import { LinkCell } from '@app/shared/models/link-cell';
 import { ValueCell } from '@app/shared/models/value-cell';
@@ -53,7 +52,7 @@ export class LearnTaskTableComponent implements AfterViewInit {
   /** Name of the columns to export. */
   columnsToExport: (keyof TableRow)[] = [...this.baseColumnsToExport, ...this.valueColumns];
   /** Column names to always display. */
-  readonly baseColumnsToDisplay = ['select' as const, 'radio' as const, ...this.linkColumns] as const;
+  readonly baseColumnsToDisplay = ['select' as const, ...this.linkColumns, 'radio' as const] as const;
   /** Name of the columns to display. */
   columnsToDisplay: (keyof TableRow)[] = [...this.baseColumnsToDisplay, ...this.valueColumns];
   /** Data source of the table. */
@@ -91,7 +90,7 @@ export class LearnTaskTableComponent implements AfterViewInit {
    * @param route `ActivatedRoute` to get the currently opened Experiments ids.
    * @param tableService `LearnResultTableService` to produce `ValueCells` and help with `ValueCell` features.
    */
-  constructor(private readonly route: ActivatedRoute, public readonly tableService: LearnResultTableService) {
+  constructor(public readonly tableService: LearnResultTableService) {
     this.dataSource.sortingDataAccessor = (data: TableRow, sortHeaderId: keyof TableRow) =>
       (data[sortHeaderId] as LinkCell | ValueCell).value;
     this.dataSource.filterPredicate = this.filterPredicate;
@@ -155,12 +154,8 @@ export class LearnTaskTableComponent implements AfterViewInit {
    * @returns The `LinkCells`.
    */
   mapToLinkCells(task: Task): LinkCells {
-    const experimentIds: string = this.route.snapshot.paramMap.get('experimentIds')!;
     return {
-      preset: new LinkCell(
-        task.assemble_config.strategy_name,
-        `/assemble-configs/of-experiments/${experimentIds}/by-preset/${task.assemble_config.strategy_id}`
-      ),
+      preset: new LinkCell(task.assemble_config.strategy_name, `by-preset/${task.assemble_config.strategy_id}`),
       algorithm: new LinkCell(task.learn_config.strategy_name, `by-algorithm/${task.learn_config.strategy_id}`),
     };
   }

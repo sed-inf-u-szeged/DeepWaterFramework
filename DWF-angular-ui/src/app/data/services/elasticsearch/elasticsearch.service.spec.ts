@@ -63,13 +63,6 @@ describe('ElasticsearchService', () => {
       .flush(mockSearchResponse);
   });
 
-  it('getOnlyAssembleConfigs', () => {
-    service.getOnlyAssembleConfigs(['1', '2']).subscribe(response => expect(response).toEqual(mockSearchResponse));
-    http
-      .expectOne('/api/experiments_1,experiments_2/_search?size=10000&ignore_unavailable=true')
-      .flush(mockSearchResponse);
-  });
-
   it('getOnlyTasks', () => {
     service.getOnlyTasks(['1', '2']).subscribe(response => expect(response).toEqual(mockSearchResponse));
     http

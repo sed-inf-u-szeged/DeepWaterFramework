@@ -22,5 +22,4 @@ export interface Task {
 
 export type PartailExperiment = Object.Optional<Experiment, keyof Experiment, 'deep'>;
 export type HashWithTask = [string, Task];
-export type OnlyAssembleConfig = Object.P.Pick<Experiment, ['tasks', string, 'assemble_config']>;
 export type OnlyTasks = Pick<Experiment, 'tasks'>;

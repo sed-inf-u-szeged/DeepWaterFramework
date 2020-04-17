@@ -5,21 +5,21 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ValueCell } from '@app/shared/models/value-cell';
 import { LearnResultTableService } from '@app/modules/learn-task/services/learn-result-table/learn-result-table.service';
 import { SharedModule } from '@app/shared/shared.module';
-import { LearnTasksByAlgorithmTableComponent } from './learn-tasks-by-algorithm-table.component';
+import { LearnTasksByStrategyTableComponent } from './learn-tasks-by-strategy-table.component';
 import { LearnResultHeatmapButtonComponent } from '../../../components/learn-result-heatmap-button/learn-result-heatmap-button.component';
 import { LearnResultValueCellComponent } from '../../../components/learn-result-value-cell/learn-result-value-cell.component';
 import { LearnResultFocusButtonComponent } from '../../../components/learn-result-focus-button/learn-result-focus-button.component';
 import { LearnResultColumnPickerComponent } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
 
 describe('LearnTasksByAlgorithmTableComponent', () => {
-  let component: LearnTasksByAlgorithmTableComponent;
-  let fixture: ComponentFixture<LearnTasksByAlgorithmTableComponent>;
+  let component: LearnTasksByStrategyTableComponent;
+  let fixture: ComponentFixture<LearnTasksByStrategyTableComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [SharedModule, RouterTestingModule, NoopAnimationsModule, DragDropModule],
       declarations: [
-        LearnTasksByAlgorithmTableComponent,
+        LearnTasksByStrategyTableComponent,
         LearnResultHeatmapButtonComponent,
         LearnResultValueCellComponent,
         LearnResultFocusButtonComponent,
@@ -30,7 +30,7 @@ describe('LearnTasksByAlgorithmTableComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LearnTasksByAlgorithmTableComponent);
+    fixture = TestBed.createComponent(LearnTasksByStrategyTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

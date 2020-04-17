@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Experiment, OnlyAssembleConfig, OnlyTasks, PartailExperiment } from '@app/data/models/experiment';
+import { Experiment, OnlyTasks, PartailExperiment } from '@app/data/models/experiment';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 
@@ -54,15 +54,6 @@ export class ElasticsearchService {
     return this.search<T>(hashes.map(hash => `experiments_${hash}`).join(','), body, {
       ignore_unavailable: 'true',
     });
-  }
-
-  /**
-   * Executes a search query for certain experiments_{hash} indexes and returns only their tasks.*.assemble_config fields.
-   * @param hashes An array of the hash parts of the experiments_{hash} indexes.
-   * @returns The `Observable` search response of experiment indexes with only their tasks.*.assemble_config fields for every hit.
-   */
-  getOnlyAssembleConfigs(hashes: string[]): Observable<SearchResponse<OnlyAssembleConfig>> {
-    return this.getExperiments<OnlyAssembleConfig>(hashes, { _source: 'tasks.*.assemble_config' });
   }
 
   /**
