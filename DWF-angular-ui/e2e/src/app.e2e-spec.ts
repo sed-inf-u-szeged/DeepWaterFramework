@@ -10,7 +10,7 @@ describe('workspace-project App', () => {
 
   it('should display welcome message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('DWF-angular-ui app is running!');
+    expect(browser.driver.getTitle()).toBe('DWFAngularUi');
   });
 
   afterEach(async () => {

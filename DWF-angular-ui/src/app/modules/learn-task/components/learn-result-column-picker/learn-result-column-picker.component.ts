@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Output, Input } from '@angular/core';
-import { moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ThemeService } from '@app/core/services/theme/theme.service';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ThemeService } from '@app/core/services/theme.service';
 
 /** Column represetation inside column picker. */
 interface ColumnPickerItem<T> {

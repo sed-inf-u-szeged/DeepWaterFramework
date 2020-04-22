@@ -50,7 +50,7 @@
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="{{ column }}" *ngFor="let column of valueColumns" appHeat>
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of valueColumns">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
       <ng-container
         *ngIf="{
@@ -72,13 +72,9 @@
     </ng-container>
 
     <ng-container matColumnDef="expandedRowCol">
-      <td mat-cell *matCellDef="let task" [attr.colspan]="columnsToDisplay.length">
-        <div
-          class="tasks-table__parameters"
-          *ngIf="task === expandedRow"
-          [@detailExpand]="task == expandedRow ? 'expanded' : 'collapsed'"
-        >
-          <div class="params-table-wrapper" *ngFor="let parameter of task.parameters | keyvalue">
+      <td mat-cell *matCellDef="let row" [attr.colspan]="columnsToDisplay.length">
+        <div class="tasks-table__parameters" [@detailExpand]="row === expandedRow ? 'expanded' : 'collapsed'">
+          <div class="params-table-wrapper" *ngFor="let parameter of row.parameters | keyvalue">
             <table class="params-table">
               <caption>
                 <h3 class="mat-h3">{{ parameter.key }}</h3>
@@ -110,17 +106,30 @@
   </table>
 
   <ng-container footer-actions>
-    <button
-      mat-raised-button
-      [routerLink]="['compare', selectedRows.selected | joinHashes]"
-      [disabled]="selectedRows.selected.length < 2"
-      matBadge="{{ selectedRows.selected.length }}"
-      matBadgeColor="accent"
-      [matBadgeDisabled]="selectedRows.selected.length < 2"
-    >
-      <mat-icon>compare_arrows</mat-icon>
-      Compare selected
-    </button>
+    <ng-template [ngIf]="selectedRows.selected.length < 2" [ngIfElse]="validLink">
+      <button
+        mat-raised-button
+        [disabled]="true"
+        matBadge="{{ selectedRows.selected.length }}"
+        matBadgeColor="accent"
+        [matBadgeDisabled]="true"
+      >
+        <mat-icon>compare_arrows</mat-icon>
+        Compare selected
+      </button>
+    </ng-template>
+    <ng-template #validLink>
+      <button
+        mat-raised-button
+        [routerLink]="['compare', selectedRows.selected | joinHashes]"
+        matBadge="{{ selectedRows.selected.length }}"
+        matBadgeColor="accent"
+      >
+        <mat-icon>compare_arrows</mat-icon>
+        Compare selected
+      </button>
+    </ng-template>
+
     <app-learn-result-focus-button
       [dataSize]="dataSource.data.length"
       (focusChange)="focusState = $event"

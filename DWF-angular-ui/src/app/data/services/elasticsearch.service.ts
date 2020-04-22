@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Experiment, OnlyTasks, PartailExperiment } from '@app/data/models/experiment';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { environment } from 'environments/environment';
 
 /** Service to get data from elasticsearch */
 @Injectable({ providedIn: 'root' })
@@ -25,7 +26,9 @@ export class ElasticsearchService {
     body: any = {},
     params: { [param: string]: string | string[] } = {}
   ): Observable<SearchResponse<T>> {
-    return this.http.post<SearchResponse<T>>(`/api/${index}/_search`, body, { params: { size: '10000', ...params } });
+    return this.http.post<SearchResponse<T>>(`${environment.apiUrl}/${index}/_search`, body, {
+      params: { size: '10000', ...params },
+    });
   }
 
   /**

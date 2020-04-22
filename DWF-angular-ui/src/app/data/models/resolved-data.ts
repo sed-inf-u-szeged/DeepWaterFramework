@@ -1,5 +1,5 @@
 /** Holds data with optional error message. */
-export interface DataResolved<T> {
+export interface ResolvedData<T> {
   /** Data. */
   readonly data: T;
   /** Error message. */

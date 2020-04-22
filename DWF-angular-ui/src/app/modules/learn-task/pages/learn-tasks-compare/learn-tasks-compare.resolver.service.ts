@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { DataResolved } from '@app/data/models/data-resolved';
+import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
+import { ResolvedData } from '@app/data/models/resolved-data';
 import { Experiment, HashWithTask } from '@app/data/models/experiment';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
-import { ElasticsearchService } from '@app/data/services/elasticsearch/elasticsearch.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
+import { ElasticsearchService } from '@app/data/services/elasticsearch.service';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class LearnTasksCompareResolver implements Resolve<ObservableDataResolved<HashWithTask[]>> {
+@Injectable({ providedIn: 'root' })
+export class LearnTasksCompareResolver implements Resolve<ResolvedAndObservable<HashWithTask[]>> {
   constructor(private es: ElasticsearchService) {}
 
   getTaskSummary(tasks: Experiment['tasks'][], ids: string[]): { tasks: HashWithTask[]; missingTaskHashes: string[] } {
@@ -39,7 +37,7 @@ export class LearnTasksCompareResolver implements Resolve<ObservableDataResolved
     return resolvedError ? `${resolvedError}\n${missingHashError}` : missingHashError;
   }
 
-  getLearnTasks$(experiments: string[], learnTaskIds: string[]): Observable<DataResolved<HashWithTask[]>> {
+  getLearnTasks$(experiments: string[], learnTaskIds: string[]): Observable<ResolvedData<HashWithTask[]>> {
     return this.es.getOnlyTasks(experiments).pipe(
       map(response => {
         const tasks = response.hits.hits.map(hit => hit._source.tasks);
@@ -48,11 +46,12 @@ export class LearnTasksCompareResolver implements Resolve<ObservableDataResolved
         const missingIndexes = this.es.checkMissingExperimentIndexes(experiments, response);
         const error = this.getErrorMessage(summary.missingTaskHashes, missingIndexes.message);
         return { data, ...(error && { error }) };
-      })
+      }),
+      catchError((error: Error) => of({ data: [] as HashWithTask[], error: error.message }))
     );
   }
 
-  resolve(route: ActivatedRouteSnapshot, _: RouterStateSnapshot): Observable<ObservableDataResolved<HashWithTask[]>> {
+  resolve(route: ActivatedRouteSnapshot, _: RouterStateSnapshot): Observable<ResolvedAndObservable<HashWithTask[]>> {
     const learnTaskIds = route.paramMap.get('learnTaskIds')!.split(',');
     const experimentIds = route.paramMap.get('experimentIds')!.split(',');
     return this.getLearnTasks$(experimentIds, learnTaskIds).pipe(

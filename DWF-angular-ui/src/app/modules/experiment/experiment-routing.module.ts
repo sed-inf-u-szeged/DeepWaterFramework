@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ExperimentListComponent } from './pages/experiment-list/experiment-list.component';
+import { RouterModule, Routes } from '@angular/router';
 import { ExperimentListResolver } from './pages/experiment-list/experiment-list-resolver.service';
+import { ExperimentListComponent } from './pages/experiment-list/experiment-list.component';
 
 const EXPERIMENT_ROUTES: Routes = [
   {
@@ -15,6 +15,10 @@ const EXPERIMENT_ROUTES: Routes = [
     path: '',
     redirectTo: 'list',
     pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: 'list',
   },
 ];
 

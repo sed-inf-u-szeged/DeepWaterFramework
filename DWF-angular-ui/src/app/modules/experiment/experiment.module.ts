@@ -5,7 +5,7 @@ import { ExperimentRoutingModule } from './experiment-routing.module';
 import { ExperimentListComponent } from './pages/experiment-list/experiment-list.component';
 
 @NgModule({
-  imports: [ExperimentRoutingModule, MarkdownModule.forRoot(), SharedModule],
+  imports: [SharedModule, MarkdownModule.forRoot(), ExperimentRoutingModule],
   declarations: [ExperimentListComponent],
 })
 export class ExperimentModule {}

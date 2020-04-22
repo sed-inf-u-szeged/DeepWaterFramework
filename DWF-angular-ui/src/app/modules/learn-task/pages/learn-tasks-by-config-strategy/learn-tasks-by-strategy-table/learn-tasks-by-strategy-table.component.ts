@@ -1,20 +1,20 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { HashWithTask } from '@app/data/models/experiment';
-import { LinkCell } from '@app/shared/models/link-cell';
-import { ValueCell } from '@app/shared/models/value-cell';
+import { mapValues } from 'lodash-es';
 import { Union } from 'ts-toolbelt';
 import { ColumnPickerOptions } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
 import { FocusState } from '../../../components/learn-result-focus-button/focus-state';
-import {
-  LearnResultTableService,
-  EveryResultSetParam,
-} from '../../../services/learn-result-table/learn-result-table.service';
+import { SimpleCell } from '../../../models/simple-cell';
+import { LinkCell } from '../../../models/link-cell';
+import { ValueCell } from '../../../models/value-cell';
+import { EveryResultSetParam, LearnResultTableService } from '../../../services/learn-result-table.service';
 import { LearnTaskConfig } from '../learn-task-config';
 
 type LinkCells = Record<'hash' | 'preset', LinkCell> | Record<'hash' | 'algorithm', LinkCell>;
 type ValueCells = Record<string, ValueCell>;
-type TableRow = LinkCells & ValueCells & Record<string, string | number>;
+type ParamCells = Record<string, SimpleCell>;
+type TableRow = LinkCells & ValueCells & ParamCells;
 
 /** Table component to display tasks hash, preset, config parameters and test results. */
 @Component({
@@ -66,7 +66,7 @@ export class LearnTasksByStrategyTableComponent {
         ({
           ...mapToLinkCells([hash, task]),
           ...this.tableService.mapToValueCells(task.learn_result),
-          ...task[config].strategy_parameters,
+          ...mapValues(task[config].strategy_parameters, value => new SimpleCell(value)),
         } as TableRow)
     );
     this.paramColumns = hashWithTasks.length > 0 ? Object.keys(hashWithTasks[0][1][config].strategy_parameters) : [];
@@ -80,7 +80,8 @@ export class LearnTasksByStrategyTableComponent {
    * @param tableService `LearnResultTableService` to produce `ValueCells` and help with `ValueCell` features.
    */
   constructor(public tableService: LearnResultTableService) {
-    this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+    this.dataSource.sortingDataAccessor = (data: TableRow, sortHeaderId: keyof TableRow) =>
+      (data[sortHeaderId] as ValueCell | LinkCell | SimpleCell).sortingValue;
   }
 
   /**
@@ -103,21 +104,6 @@ export class LearnTasksByStrategyTableComponent {
           `../../by-${otherConfigName}/${task[otherConfig].strategy_id}`
         ),
       } as LinkCells);
-  }
-
-  /**
-   * Data accessor function for `MatTableDataSource`.
-   * @param data Table row that is being accessed.
-   * @param sortHeaderId The name of the column.
-   * @returns For `ValueCell`s and `LinkCell`s their value, for anything else it tries to converts to number, if can't just leaves as is.
-   */
-  sortingDataAccessor(data: TableRow, sortHeaderId: keyof TableRow): string | number {
-    const cell = data[sortHeaderId] as LinkCell | ValueCell | string | number;
-    if (cell instanceof ValueCell || cell instanceof LinkCell) {
-      return cell.value;
-    }
-    const valueAsNumber = Number(cell);
-    return isNaN(valueAsNumber) ? cell : valueAsNumber;
   }
 
   /**

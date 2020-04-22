@@ -1,9 +1,9 @@
-import { Component, ViewChild, Input, ChangeDetectionStrategy, ContentChild } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { ChangeDetectionStrategy, Component, ContentChild, Input, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import json2csv, { Parser } from 'json2csv';
 import { saveAs } from 'file-saver';
+import json2csv, { Parser } from 'json2csv';
 
 /** A shell component for wrapping mat-table, adds csv export, filter, sort and pagination features to it. */
 @Component({

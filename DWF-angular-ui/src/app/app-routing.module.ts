@@ -11,7 +11,7 @@ const APP_ROUTES: Routes = [
     path: 'learn-tasks',
     loadChildren: () => import('./modules/learn-task/learn-task.module').then(m => m.LearnTaskModule),
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'experiments' },
 ];
 
 @NgModule({

@@ -1,26 +1,26 @@
 import {
   async,
   ComponentFixture,
-  TestBed,
+  discardPeriodicTasks,
   fakeAsync,
   flushMicrotasks,
-  discardPeriodicTasks,
+  TestBed,
 } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { SharedModule } from '@app/shared/shared.module';
 import { EXPERIMENTS } from '@app/data/mocks/mock-experiments';
-import { DataResolved } from '@app/data/models/data-resolved';
+import { ResolvedData } from '@app/data/models/resolved-data';
+import { SharedModule } from '@app/shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { of } from 'rxjs';
-import { ExperimentListComponent } from './experiment-list.component';
 import { ExperimentListItem } from './experiment-list-item';
+import { ExperimentListComponent } from './experiment-list.component';
 
 describe('ExperimentListComponent', () => {
   let component: ExperimentListComponent;
   let fixture: ComponentFixture<ExperimentListComponent>;
-  const dataResolved: DataResolved<ExperimentListItem[]> = {
+  const dataResolved: ResolvedData<ExperimentListItem[]> = {
     data: EXPERIMENTS.map((exp, i) => ({
       indexHash: `index${i}`,
       name: exp.name,

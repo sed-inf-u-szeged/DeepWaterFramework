@@ -4,20 +4,20 @@ import { Result } from './result';
 import { Object } from 'ts-toolbelt';
 
 export interface Experiment {
-  name: string;
-  markdown: string;
-  tasks: {
-    [hash: string]: Task;
+  readonly name: string;
+  readonly markdown: string;
+  readonly tasks: {
+    readonly [hash: string]: Task;
   };
-  created_ts: string;
+  readonly created_ts: string;
 }
 
 export interface Task {
-  assemble_config: AssembleConfig;
-  learn_config: LearnConfig;
-  assemble_result: string;
-  learn_result: Result | null;
-  created_ts: string;
+  readonly assemble_config: AssembleConfig;
+  readonly learn_config: LearnConfig;
+  readonly assemble_result: string;
+  readonly learn_result: Result | null;
+  readonly created_ts: string;
 }
 
 export type PartailExperiment = Object.Optional<Experiment, keyof Experiment, 'deep'>;

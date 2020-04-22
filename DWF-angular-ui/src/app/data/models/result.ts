@@ -1,49 +1,49 @@
 /** Results for the data sets. */
 export interface Result {
   /** Development set's results. */
-  dev: {
-    tp: number;
-    tn: number;
-    fp: number;
-    fn: number;
-    accuracy: number;
-    precision: number;
-    recall: number;
-    fmes: number;
-    mcc: number;
-    covered_issues: number;
-    missed_issues: number;
-    completeness: number;
-    std_dev: number[];
+  readonly dev: {
+    readonly tp: number;
+    readonly tn: number;
+    readonly fp: number;
+    readonly fn: number;
+    readonly accuracy: number;
+    readonly precision: number;
+    readonly recall: number;
+    readonly fmes: number;
+    readonly mcc: number;
+    readonly covered_issues: number;
+    readonly missed_issues: number;
+    readonly completeness: number;
+    readonly std_dev: number[];
   };
   /** Test set's results. */
-  test: {
-    tp: number;
-    tn: number;
-    fp: number;
-    fn: number;
-    accuracy: number;
-    precision: number;
-    recall: number;
-    fmes: number;
-    mcc: number;
-    covered_issues: number;
-    missed_issues: number;
-    completeness: number;
-    std_dev: number[];
+  readonly test: {
+    readonly tp: number;
+    readonly tn: number;
+    readonly fp: number;
+    readonly fn: number;
+    readonly accuracy: number;
+    readonly precision: number;
+    readonly recall: number;
+    readonly fmes: number;
+    readonly mcc: number;
+    readonly covered_issues: number;
+    readonly missed_issues: number;
+    readonly completeness: number;
+    readonly std_dev: number[];
   };
   /** Training set's results. */
-  train: {
-    tp: number;
-    tn: number;
-    fp: number;
-    fn: number;
-    accuracy: number;
-    precision: number;
-    recall: number;
-    fmes: number;
-    mcc: number;
-    std_dev: number[];
+  readonly train: {
+    readonly tp: number;
+    readonly tn: number;
+    readonly fp: number;
+    readonly fn: number;
+    readonly accuracy: number;
+    readonly precision: number;
+    readonly recall: number;
+    readonly fmes: number;
+    readonly mcc: number;
+    readonly std_dev: number[];
   };
 }
 

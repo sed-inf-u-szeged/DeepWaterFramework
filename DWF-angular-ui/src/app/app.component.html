@@ -1,6 +1,6 @@
 <div class="theme-wrapper" [class]="currentTheme">
   <div class="mat-typography mat-app-background">
-    <mat-toolbar class="mat-elevation-z6" color="primary" style="position: relative; z-index: 2;" role="heading">
+    <mat-toolbar class="mat-elevation-z6" color="primary" role="heading">
       <a mat-button routerLink="/">DWF-angular-ui</a>
       <div style="flex: 1"></div>
       <button [matMenuTriggerFor]="themeMenu" mat-icon-button>
@@ -18,7 +18,7 @@
         </button>
       </mat-menu>
     </mat-toolbar>
-    <mat-progress-bar *ngIf="isLoading" mode="indeterminate" style="position: absolute;"></mat-progress-bar>
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
     <div class="page-container">
       <router-outlet></router-outlet>
     </div>

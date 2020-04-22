@@ -1,5 +1,4 @@
 <header class="page-header">
-  {{ pageTitle }}
   <mat-icon
     *ngIf="!!errorMessage"
     color="warn"
@@ -10,6 +9,7 @@
   >
     error
   </mat-icon>
+  {{ pageTitle }}
   <div class="page-header__actions" fxLayout fxLayoutGap="16px">
     <ng-content></ng-content>
   </div>

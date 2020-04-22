@@ -1,24 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { DataResolved } from '@app/data/models/data-resolved';
+import { ResolvedData } from '@app/data/models/resolved-data';
 import { HashWithTask } from '@app/data/models/experiment';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
-import { ElasticsearchService } from '@app/data/services/elasticsearch/elasticsearch.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
+import { ElasticsearchService } from '@app/data/services/elasticsearch.service';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { LearnTaskConfig } from './learn-task-config';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class LearnTasksByConfigStrategyResolver implements Resolve<ObservableDataResolved<HashWithTask[]>> {
+@Injectable({ providedIn: 'root' })
+export class LearnTasksByConfigStrategyResolver implements Resolve<ResolvedAndObservable<HashWithTask[]>> {
   constructor(private es: ElasticsearchService) {}
 
   getLearnTasks(
     experiments: string[],
     config: LearnTaskConfig,
     strategyId: string
-  ): Observable<DataResolved<HashWithTask[]>> {
+  ): Observable<ResolvedData<HashWithTask[]>> {
     return this.es.getOnlyTasks(experiments).pipe(
       map(response => {
         const data = response.hits.hits.flatMap(hit =>
@@ -29,11 +27,12 @@ export class LearnTasksByConfigStrategyResolver implements Resolve<ObservableDat
           .filter(Boolean)
           .join('\n');
         return { data, ...(error && { error }) };
-      })
+      }),
+      catchError((error: Error) => of({ data: [] as HashWithTask[], error: error.message }))
     );
   }
 
-  resolve(route: ActivatedRouteSnapshot, _: RouterStateSnapshot): Observable<ObservableDataResolved<HashWithTask[]>> {
+  resolve(route: ActivatedRouteSnapshot, _: RouterStateSnapshot): Observable<ResolvedAndObservable<HashWithTask[]>> {
     const experimentIds = route.paramMap.get('experimentIds')!.split(',');
     const config: LearnTaskConfig = route.data.config;
     const strategyId = route.paramMap.get('strategyId')!;

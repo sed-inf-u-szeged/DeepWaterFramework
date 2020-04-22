@@ -3,11 +3,6 @@ import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 
-import { RefreshButtonComponent } from './components/refresh-button/refresh-button.component';
-import { MatTableShellComponent } from './components/mat-table-shell/mat-table-shell.component';
-import { JoinHashesPipe } from './pipes/join-hashes.pipe';
-import { PageHeaderComponent } from './components/page-header/page-header.component';
-
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -25,16 +20,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { FilterInputComponent } from './components/filter-input/filter-input.component';
+import { PageHeaderComponent } from './components/page-header/page-header.component';
+import { RefreshButtonComponent } from './components/refresh-button/refresh-button.component';
+import { JoinHashesPipe } from './pipes/join-hashes.pipe';
 
 @NgModule({
-  declarations: [
-    MatTableShellComponent,
-    RefreshButtonComponent,
-    JoinHashesPipe,
-    PageHeaderComponent,
-    FilterInputComponent,
-  ],
+  declarations: [FilterInputComponent, PageHeaderComponent, RefreshButtonComponent, JoinHashesPipe],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -51,12 +44,6 @@ import { FilterInputComponent } from './components/filter-input/filter-input.com
     CommonModule,
     FlexLayoutModule,
     FormsModule,
-
-    MatTableShellComponent,
-    PageHeaderComponent,
-    RefreshButtonComponent,
-    JoinHashesPipe,
-    FilterInputComponent,
 
     MatBadgeModule,
     MatButtonModule,
@@ -75,6 +62,11 @@ import { FilterInputComponent } from './components/filter-input/filter-input.com
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
+
+    FilterInputComponent,
+    PageHeaderComponent,
+    RefreshButtonComponent,
+    JoinHashesPipe,
   ],
 })
 export class SharedModule {}

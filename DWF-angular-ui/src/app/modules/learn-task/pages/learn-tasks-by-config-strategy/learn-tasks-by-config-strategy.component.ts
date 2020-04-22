@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { DataResolved } from '@app/data/models/data-resolved';
+import { ResolvedData } from '@app/data/models/resolved-data';
 import { HashWithTask } from '@app/data/models/experiment';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
 import { LearnTaskConfig } from './learn-task-config';
 
 /** Page component for learn tasks of a specific config's startegy. */
@@ -27,14 +27,14 @@ export class LearnTasksByConfigStrategyComponent {
   /** Error message to display. */
   errorMessage?: string;
   /** The resolved array of [hash, task] tuples and it's observable query to reuse. */
-  readonly observableDataResolved: ObservableDataResolved<HashWithTask[]>;
+  readonly resolvedAndObservable: ResolvedAndObservable<HashWithTask[]>;
 
   /**
    * Constructs a new `LearnTasksByConfigStrategyComponent` and gets the resolved data from the route snapshot.
    * @param route The `ActivatedRoute` to get the resolved data from.
    */
   constructor(route: ActivatedRoute) {
-    this.observableDataResolved = route.snapshot.data.learnTasksByConfigStrategy;
+    this.resolvedAndObservable = route.snapshot.data.learnTasksByConfigStrategy;
     this.config = route.snapshot.data.config;
     if (this.config === 'assemble_config') {
       this.tasksBy = 'preset';
@@ -45,14 +45,14 @@ export class LearnTasksByConfigStrategyComponent {
       this.boxplotFor = 'presets';
       this.boxplotConfig = 'assemble_config';
     }
-    this.handleNewData(this.observableDataResolved.resolved);
+    this.handleNewData(this.resolvedAndObservable.resolved);
   }
 
   /**
    * Handles the new data on init and from polling.
    * @param newData The new resolved data.
    */
-  handleNewData(newData: DataResolved<HashWithTask[]>): void {
+  handleNewData(newData: ResolvedData<HashWithTask[]>): void {
     if (newData.data.length) {
       this.strategyName = newData.data[0][1][this.config].strategy_name;
     }

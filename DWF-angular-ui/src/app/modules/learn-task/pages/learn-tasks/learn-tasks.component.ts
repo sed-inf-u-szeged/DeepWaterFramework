@@ -1,8 +1,8 @@
-import { ActivatedRoute } from '@angular/router';
 import { Component } from '@angular/core';
-import { Experiment } from '@app/data/models/experiment';
-import { DataResolved } from '@app/data/models/data-resolved';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
+import { ActivatedRoute } from '@angular/router';
+import { ResolvedData } from '@app/data/models/resolved-data';
+import { HashWithTask } from '@app/data/models/experiment';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
 
 /** Page component for learn tasks. */
 @Component({
@@ -11,28 +11,28 @@ import { ObservableDataResolved } from '@app/data/models/observable-data-resolve
   styleUrls: ['./learn-tasks.component.scss'],
 })
 export class LearnTasksComponent {
-  /** An array of experiment tasks to pass to child components. */
-  tasksOfExperiments: Experiment['tasks'][];
+  /** An array of [hash, task] tuples to pass to child components. */
+  hashWithTasks: HashWithTask[];
   /** Error message to display. */
   errorMessage?: string;
-  /** The resolved array of experiment tasks and it's observable query to reuse. */
-  observableDataResolved: ObservableDataResolved<Experiment['tasks'][]>;
+  /** The resolved array of [hash, task] tuples and it's observable query to reuse. */
+  resolvedAndObservable: ResolvedAndObservable<HashWithTask[]>;
 
   /**
    * Constructs a new `LearnTasksComponent` and gets the resolved data from the route snapshot.
    * @param route The `ActivatedRoute` to get the resolved data from.
    */
   constructor(route: ActivatedRoute) {
-    this.observableDataResolved = route.snapshot.data.learnTasks;
-    this.handleNewData(this.observableDataResolved.resolved);
+    this.resolvedAndObservable = route.snapshot.data.learnTasks;
+    this.handleNewData(this.resolvedAndObservable.resolved);
   }
 
   /**
    * Handles the new data on init and from polling.
    * @param data The new resolved data.
    */
-  handleNewData(data: DataResolved<Experiment['tasks'][]>) {
-    this.tasksOfExperiments = data.data;
+  handleNewData(data: ResolvedData<HashWithTask[]>) {
+    this.hashWithTasks = data.data;
     this.errorMessage = data.error;
   }
 }

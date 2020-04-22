@@ -1,17 +1,18 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EXPERIMENTS } from '@app/data/mocks/mock-experiments';
-import { LinkCell } from '@app/shared/models/link-cell';
-import { ValueCell } from '@app/shared/models/value-cell';
 import { SharedModule } from '@app/shared/shared.module';
 import { LearnTaskTableComponent } from './learn-task-table.component';
+import { LearnResultColumnPickerComponent } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
+import { LearnResultFocusButtonComponent } from '../../../components/learn-result-focus-button/learn-result-focus-button.component';
 import { LearnResultHeatmapButtonComponent } from '../../../components/learn-result-heatmap-button/learn-result-heatmap-button.component';
 import { LearnResultValueCellComponent } from '../../../components/learn-result-value-cell/learn-result-value-cell.component';
-import { LearnResultFocusButtonComponent } from '../../../components/learn-result-focus-button/learn-result-focus-button.component';
-import { LearnResultColumnPickerComponent } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
-import { LearnResultTableService } from '../../../services/learn-result-table/learn-result-table.service';
+import { MatTableShellComponent } from '../../../components/mat-table-shell/mat-table-shell.component';
+import { LinkCell } from '../../../models/link-cell';
+import { ValueCell } from '../../../models/value-cell';
+import { LearnResultTableService } from '../../../services/learn-result-table.service';
 
 describe('LearnTaskTableComponent', () => {
   let component: LearnTaskTableComponent;
@@ -19,14 +20,15 @@ describe('LearnTaskTableComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule, NoopAnimationsModule, DragDropModule],
+      imports: [DragDropModule, RouterTestingModule, NoopAnimationsModule, SharedModule],
       providers: [LearnResultTableService],
       declarations: [
         LearnTaskTableComponent,
+        LearnResultColumnPickerComponent,
+        LearnResultFocusButtonComponent,
         LearnResultHeatmapButtonComponent,
         LearnResultValueCellComponent,
-        LearnResultFocusButtonComponent,
-        LearnResultColumnPickerComponent,
+        MatTableShellComponent,
       ],
     }).compileComponents();
   }));
@@ -34,7 +36,7 @@ describe('LearnTaskTableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LearnTaskTableComponent);
     component = fixture.componentInstance;
-    component.tasksOfExperiments = EXPERIMENTS.map(experiment => experiment.tasks);
+    component.hashWithTasks = EXPERIMENTS.flatMap(experiment => Object.entries(experiment.tasks));
     fixture.detectChanges();
   });
 

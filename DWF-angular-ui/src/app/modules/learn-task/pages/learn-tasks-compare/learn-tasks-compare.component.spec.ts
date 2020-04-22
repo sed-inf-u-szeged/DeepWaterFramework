@@ -56,9 +56,9 @@ describe('LearnTasksCompareComponent', () => {
   });
 
   it('handleNewData', () => {
-    component.tasks = [];
+    component.hashWithTasks = [];
     component.handleNewData({ data: learnTasksCompare, error: 'error' });
-    expect(component.tasks).toEqual(learnTasksCompare);
+    expect(component.hashWithTasks).toEqual(learnTasksCompare);
     expect(component.errorMessage).toBe('error');
   });
 });

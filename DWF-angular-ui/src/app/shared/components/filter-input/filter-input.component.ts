@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter, OnDestroy, Input } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
-import { debounceTime, pluck, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, pluck } from 'rxjs/operators';
 
 /**
  * A component that displays an input field, and outputs it's value on each keyup event debounced by 300ms,

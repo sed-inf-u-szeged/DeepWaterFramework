@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
-import { Experiment, HashWithTask } from '@app/data/models/experiment';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { HashWithTask } from '@app/data/models/experiment';
 import { LearnResultChartData } from '../../../components/learn-result-chart/learn-result-chart-data';
 
 /**
@@ -22,11 +22,11 @@ export class BestResultsChartComponent {
   /** Chart data for {@link LearnResultChartComponent}. */
   chartData: LearnResultChartData;
 
-  /** The array of experiment tasks to create the chart data from. */
-  @Input() set tasksOfExperiments(tasksOfExperiments: Experiment['tasks'][]) {
+  /** The array of [hash, task] tuples to create the chart data from. */
+  @Input() set hashWithTasks(hashWithTasks: HashWithTask[]) {
     this.chartData = {
       ...this.baseChartData,
-      taskEntries: Object.values(this.getBestTasksByPresetPlusAlgorithm(tasksOfExperiments)),
+      taskEntries: Object.values(this.getBestTasksByPresetPlusAlgorithm(hashWithTasks)),
     };
   }
 
@@ -35,16 +35,14 @@ export class BestResultsChartComponent {
    * @param tasksOfExperiments Array to find the best tasks in.
    * @returns Array of object where the key is the combination and the value is the best task of that combination.
    */
-  getBestTasksByPresetPlusAlgorithm(tasksOfExperiments: Experiment['tasks'][]): { [combo: string]: HashWithTask } {
+  getBestTasksByPresetPlusAlgorithm(tasksOfExperiments: HashWithTask[]): { [combo: string]: HashWithTask } {
     const bestResults: { [combo: string]: HashWithTask } = {};
-    for (const tasks of tasksOfExperiments) {
-      for (const [hash, task] of Object.entries(tasks)) {
-        const combo = `${task.assemble_config.strategy_name} ${task.learn_config.strategy_name}`;
-        const bestResult = bestResults.key?.[1].learn_result?.test.fmes;
-        const currResult = task.learn_result?.test.fmes;
-        if (currResult != null && (bestResult == null || bestResult < currResult)) {
-          bestResults[combo] = [hash, task];
-        }
+    for (const [hash, task] of tasksOfExperiments) {
+      const combo = `${task.assemble_config.strategy_name} ${task.learn_config.strategy_name}`;
+      const bestResult = bestResults.key?.[1].learn_result?.test.fmes;
+      const currResult = task.learn_result?.test.fmes;
+      if (currResult != null && (bestResult == null || bestResult < currResult)) {
+        bestResults[combo] = [hash, task];
       }
     }
     return bestResults;

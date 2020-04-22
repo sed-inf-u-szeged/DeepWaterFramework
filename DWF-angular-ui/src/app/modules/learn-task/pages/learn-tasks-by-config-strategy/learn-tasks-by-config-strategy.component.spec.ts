@@ -6,15 +6,16 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { EXPERIMENTS } from '@app/data/mocks/mock-experiments';
 import { HashWithTask } from '@app/data/models/experiment';
 import { SharedModule } from '@app/shared/shared.module';
-import { of } from 'rxjs';
 import { NgxEchartsCoreModule } from 'ngx-echarts/core';
+import { of } from 'rxjs';
 import { LearnTasksByConfigStrategyComponent } from './learn-tasks-by-config-strategy.component';
 import { LearnTasksByStrategyTableComponent } from './learn-tasks-by-strategy-table/learn-tasks-by-strategy-table.component';
 import { StrategyBoxplotComponent } from './strategy-boxplot/strategy-boxplot.component';
+import { LearnResultColumnPickerComponent } from '../../components/learn-result-column-picker/learn-result-column-picker.component';
+import { LearnResultFocusButtonComponent } from '../../components/learn-result-focus-button/learn-result-focus-button.component';
 import { LearnResultHeatmapButtonComponent } from '../../components/learn-result-heatmap-button/learn-result-heatmap-button.component';
 import { LearnResultValueCellComponent } from '../../components/learn-result-value-cell/learn-result-value-cell.component';
-import { LearnResultFocusButtonComponent } from '../../components/learn-result-focus-button/learn-result-focus-button.component';
-import { LearnResultColumnPickerComponent } from '../../components/learn-result-column-picker/learn-result-column-picker.component';
+import { MatTableShellComponent } from '../../components/mat-table-shell/mat-table-shell.component';
 
 describe('LearnTasksByConfigStrategyComponent', () => {
   let component: LearnTasksByConfigStrategyComponent;
@@ -25,15 +26,16 @@ describe('LearnTasksByConfigStrategyComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, NoopAnimationsModule, RouterTestingModule, DragDropModule, NgxEchartsCoreModule],
+      imports: [DragDropModule, NoopAnimationsModule, RouterTestingModule, SharedModule, NgxEchartsCoreModule],
       declarations: [
         LearnTasksByConfigStrategyComponent,
         LearnTasksByStrategyTableComponent,
+        StrategyBoxplotComponent,
+        LearnResultColumnPickerComponent,
+        LearnResultFocusButtonComponent,
         LearnResultHeatmapButtonComponent,
         LearnResultValueCellComponent,
-        LearnResultFocusButtonComponent,
-        LearnResultColumnPickerComponent,
-        StrategyBoxplotComponent,
+        MatTableShellComponent,
       ],
       providers: [
         {

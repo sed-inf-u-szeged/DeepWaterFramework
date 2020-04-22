@@ -1,8 +1,8 @@
 import { Injectable, Optional, Inject } from '@angular/core';
 import { Task } from '@app/data/models/experiment';
 import { Result } from '@app/data/models/result';
-import { ValueCell, toValueCell } from '@app/shared/models/value-cell';
-import { HeatmapRange } from '../../../learn-task/components/learn-result-value-cell/heatmap-range';
+import { ValueCell, toValueCell } from '@app/modules/learn-task/models/value-cell';
+import { HeatmapRange } from '../components/learn-result-value-cell/heatmap-range';
 import { once } from 'lodash-es';
 import { Union } from 'ts-toolbelt';
 
@@ -164,17 +164,14 @@ export class LearnResultTableService {
       let best = -Infinity;
 
       data.forEach(({ [col]: { value } }) => {
-        if (!isFinite(value)) return;
+        if (value == null) return;
         if (value < worst) worst = value;
         if (value > best) best = value;
       });
 
       if (this.lowerBetterColumns.has(col)) [worst, best] = [best, worst];
 
-      acc[col] = {
-        worst: isFinite(worst) ? worst : undefined,
-        best: isFinite(best) ? best : undefined,
-      };
+      acc[col] = { worst, best };
       return acc;
     }, {} as ValueColumnsHeatmapRange);
   }

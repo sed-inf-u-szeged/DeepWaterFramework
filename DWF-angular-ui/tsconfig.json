@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": true,
     "paths": {
-      "@app/*": ["src/app/*"],
+      "@app/*": ["app/*"],
       "@env": ["environments/*"]
     }
   },

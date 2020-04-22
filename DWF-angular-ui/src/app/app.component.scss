@@ -11,3 +11,12 @@
 .page-container {
   padding: 16px;
 }
+
+mat-toolbar {
+  position: relative;
+  z-index: 2;
+}
+
+mat-progress-bar {
+  position: absolute;
+}

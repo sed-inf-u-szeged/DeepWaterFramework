@@ -1,17 +1,17 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { TestBed, async, ComponentFixture } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { By } from '@angular/platform-browser';
-import { CoreModule } from '@app/core/core.module';
-import { SharedModule } from '@app/shared/shared.module';
 import {
-  RouterEvent,
-  Router,
-  NavigationStart,
   NavigationEnd,
+  NavigationStart,
   ResolveStart,
+  Router,
+  RouterEvent,
   RouterStateSnapshot,
 } from '@angular/router';
+import { CoreModule } from '@app/core/core.module';
+import { SharedModule } from '@app/shared/shared.module';
 import { ReplaySubject } from 'rxjs';
 import { AppComponent } from './app.component';
 

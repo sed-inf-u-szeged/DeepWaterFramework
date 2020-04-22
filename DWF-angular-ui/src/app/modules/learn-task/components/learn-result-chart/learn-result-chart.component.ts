@@ -1,6 +1,6 @@
 import { Component, Input, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ThemeService } from '@app/core/services/theme/theme.service';
+import { ThemeService } from '@app/core/services/theme.service';
 import { Task } from '@app/data/models/experiment';
 import { EChartOption } from 'echarts';
 import { round } from 'lodash-es';
@@ -35,7 +35,7 @@ export class LearnResultChartComponent {
     },
     xAxis: { type: 'category' },
     yAxis: {},
-    grid: { containLabel: true, right: 0, left: 0 },
+    grid: { containLabel: true, right: 0, bottom: 0, left: 0 },
   };
   /** Current application theme. */
   readonly theme$: Observable<string>;

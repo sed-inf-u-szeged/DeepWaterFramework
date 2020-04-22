@@ -1,16 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
-  NavigationStart,
-  NavigationEnd,
   NavigationCancel,
+  NavigationEnd,
   NavigationError,
+  NavigationStart,
   Router,
   RouterEvent,
 } from '@angular/router';
-import { ThemeService } from '@app/core/services/theme/theme.service';
-import { filter } from 'rxjs/operators';
+import { ThemeService } from '@app/core/services/theme.service';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 /** Top level component. */
 @Component({

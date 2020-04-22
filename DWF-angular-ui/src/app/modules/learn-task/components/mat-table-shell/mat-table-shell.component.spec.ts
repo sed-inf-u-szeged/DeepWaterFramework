@@ -3,10 +3,10 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '@app/shared/shared.module';
-import { LinkCell } from '@app/shared/models/link-cell';
-import { ValueCell } from '@app/shared/models/value-cell';
 import * as FileSaver from 'file-saver';
 import { MatTableShellComponent } from './mat-table-shell.component';
+import { LinkCell } from '../../models/link-cell';
+import { ValueCell } from '../../models/value-cell';
 
 describe('MatTableShellComponent', () => {
   let component: MatTableShellComponent;
@@ -57,7 +57,7 @@ describe('MatTableShellComponent', () => {
     const dataSource = new MatTableDataSource([...testData]);
     dataSource.sortingDataAccessor = (data, header: 'col1' | 'col2'): string | number => {
       const cell = data[header];
-      return cell instanceof ValueCell ? cell.value : String(cell);
+      return cell instanceof ValueCell ? cell.sortingValue : String(cell);
     };
     component.dataSource = dataSource;
     component.dataSource.sort = new MatSort();

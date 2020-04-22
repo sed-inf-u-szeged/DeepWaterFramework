@@ -1,17 +1,14 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component, ChangeDetectionStrategy, Input, AfterViewInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Experiment, HashWithTask, Task } from '@app/data/models/experiment';
-import { LinkCell } from '@app/shared/models/link-cell';
-import { ValueCell } from '@app/shared/models/value-cell';
-import { MatTableShellComponent } from '@app/shared/components/mat-table-shell/mat-table-shell.component';
-import { FocusState } from '../../../components/learn-result-focus-button/focus-state';
-import {
-  EveryResultSetParam,
-  LearnResultTableService,
-} from '../../../services/learn-result-table/learn-result-table.service';
+import { HashWithTask, Task } from '@app/data/models/experiment';
 import { ColumnPickerOptions } from '../../../components/learn-result-column-picker/learn-result-column-picker.component';
+import { FocusState } from '../../../components/learn-result-focus-button/focus-state';
+import { MatTableShellComponent } from '../../../components/mat-table-shell/mat-table-shell.component';
+import { LinkCell } from '../../../models/link-cell';
+import { ValueCell } from '../../../models/value-cell';
+import { EveryResultSetParam, LearnResultTableService } from '../../../services/learn-result-table.service';
 
 type LinkCells = Record<'preset' | 'algorithm', LinkCell>;
 type ValueCells = Record<string, ValueCell>;
@@ -75,11 +72,9 @@ export class LearnTaskTableComponent implements AfterViewInit {
   /** Whether the heatmap enabled. */
   heatmapEnabled = false;
 
-  /** The array of experiment tasks to create the tables data from. */
-  @Input() set tasksOfExperiments(tasksOfExperiments: Experiment['tasks'][]) {
-    this.dataSource.data = tasksOfExperiments.flatMap(tasks =>
-      Object.entries(tasks).map(taskEntry => this.mapToTableRow(taskEntry))
-    );
+  /** The array of [hash, task] tuples to create the tables data from. */
+  @Input() set hashWithTasks(hashWithTasks: HashWithTask[]) {
+    this.dataSource.data = hashWithTasks.map(taskEntry => this.mapToTableRow(taskEntry));
     this.tableService.data = this.dataSource.data;
   }
   /** Reference to the table shell component. */
@@ -92,7 +87,7 @@ export class LearnTaskTableComponent implements AfterViewInit {
    */
   constructor(public readonly tableService: LearnResultTableService) {
     this.dataSource.sortingDataAccessor = (data: TableRow, sortHeaderId: keyof TableRow) =>
-      (data[sortHeaderId] as LinkCell | ValueCell).value;
+      (data[sortHeaderId] as LinkCell | ValueCell).sortingValue;
     this.dataSource.filterPredicate = this.filterPredicate;
   }
 

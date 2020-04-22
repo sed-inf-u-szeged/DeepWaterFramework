@@ -1,14 +1,14 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { SelectionModel } from '@angular/cdk/collections';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
-import { DataResolved } from '@app/data/models/data-resolved';
-import { ExperimentListItem } from './experiment-list-item';
+import { ActivatedRoute } from '@angular/router';
+import { ResolvedData } from '@app/data/models/resolved-data';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
 import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ExperimentListItem } from './experiment-list-item';
 
-type SortTypes = ExperimentListComponent['sortTypes'];
+type SortType = ExperimentListComponent['sortTypes'][number];
 
 /** Component to display experiments as a list with sortings, paging and filter features. */
 @Component({
@@ -20,7 +20,7 @@ export class ExperimentListComponent implements OnInit {
   /** Error message to display. */
   errorMessage?: string;
   /** The resolved and the observable data. */
-  observableDataResolved: ObservableDataResolved<ExperimentListItem[]>;
+  resolvedAndObservable: ResolvedAndObservable<ExperimentListItem[]>;
   /** Supported sorting types for the list. */
   readonly sortTypes = ['Name (A to Z)', 'Name (Z to A)', 'Date (newest first)', 'Date (oldest first)'] as const;
   /** Page size options for the paginator. */
@@ -33,7 +33,7 @@ export class ExperimentListComponent implements OnInit {
   /** Subject of the filter string. */
   readonly filter$ = new BehaviorSubject<string>('');
   /** Subject of the active sort type. */
-  readonly activeSortType$ = new BehaviorSubject<SortTypes[number]>('Name (A to Z)');
+  readonly activeSortType$ = new BehaviorSubject<SortType>('Name (A to Z)');
   /** The filtered, sorted, paginated data that should be rendered. */
   render$: Observable<Readonly<ExperimentListItem[]>>;
 
@@ -45,9 +45,9 @@ export class ExperimentListComponent implements OnInit {
    * @param route Information about the activated route.
    */
   constructor(route: ActivatedRoute) {
-    this.observableDataResolved = route.snapshot.data.experimentList;
-    this.experiments$ = new BehaviorSubject<Readonly<ExperimentListItem[]>>(this.observableDataResolved.resolved.data);
-    this.errorMessage = this.observableDataResolved.resolved.error;
+    this.resolvedAndObservable = route.snapshot.data.experimentList;
+    this.experiments$ = new BehaviorSubject<Readonly<ExperimentListItem[]>>(this.resolvedAndObservable.resolved.data);
+    this.errorMessage = this.resolvedAndObservable.resolved.error;
   }
 
   /**
@@ -98,16 +98,16 @@ export class ExperimentListComponent implements OnInit {
    * @param data The data to sort.
    * @param sortType The sort type.
    */
-  sortData(data: Readonly<ExperimentListItem[]>, sortType: SortTypes[number]): Readonly<ExperimentListItem[]> {
+  sortData(data: Readonly<ExperimentListItem[]>, sortType: SortType): Readonly<ExperimentListItem[]> {
     switch (sortType) {
       case 'Name (A to Z)':
         return data;
       case 'Name (Z to A)':
         return data.slice().reverse();
       case 'Date (newest first)':
-        return data.slice().sort((a, b) => a.created.getTime() - b.created.getTime());
-      case 'Date (oldest first)':
         return data.slice().sort((a, b) => b.created.getTime() - a.created.getTime());
+      case 'Date (oldest first)':
+        return data.slice().sort((a, b) => a.created.getTime() - b.created.getTime());
     }
   }
 
@@ -125,7 +125,7 @@ export class ExperimentListComponent implements OnInit {
    * Handles the event when the {@link RefreshButtonComponent} emits new data.
    * @param newData New data emitted by the {@link RefreshButtonComponent}.
    */
-  handleNewData(newData: DataResolved<ExperimentListItem[]>): void {
+  handleNewData(newData: ResolvedData<ExperimentListItem[]>): void {
     this.experiments$.next(newData.data);
     this.errorMessage = newData.error;
   }

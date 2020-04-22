@@ -1,6 +1,6 @@
 <app-page-header [pageTitle]="'Experiments'" [errorMessage]="errorMessage">
   <app-refresh-button
-    [observableDataResolved]="observableDataResolved"
+    [resolvedAndObservable]="resolvedAndObservable"
     (newData)="handleNewData($event)"
   ></app-refresh-button>
 </app-page-header>
@@ -56,17 +56,23 @@
     </mat-accordion>
 
     <div fxLayout fxLayoutAlign="space-between center" class="list-footer">
-      <button
-        mat-raised-button
-        [routerLink]="['/learn-tasks', 'of-experiments', selectedExperiments.selected | joinHashes]"
-        [disabled]="selectedExperiments.selected.length === 0"
-        matBadge="{{ selectedExperiments.selected.length }}"
-        matBadgeColor="accent"
-        [matBadgeDisabled]="selectedExperiments.selected.length === 0"
-      >
-        <mat-icon>navigate_next</mat-icon>
-        Open selected
-      </button>
+      <ng-template [ngIf]="selectedExperiments.selected.length === 0" [ngIfElse]="validLink">
+        <button mat-raised-button [disabled]="true" matBadge="0" matBadgeColor="accent" [matBadgeDisabled]="true">
+          <mat-icon>navigate_next</mat-icon>
+          Open selected
+        </button>
+      </ng-template>
+      <ng-template #validLink>
+        <a
+          mat-raised-button
+          [routerLink]="['/learn-tasks', 'of-experiments', selectedExperiments.selected | joinHashes]"
+          matBadge="{{ selectedExperiments.selected.length }}"
+          matBadgeColor="accent"
+        >
+          <mat-icon>navigate_next</mat-icon>
+          Open selected
+        </a>
+      </ng-template>
       <mat-paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
     </div>
   </div>

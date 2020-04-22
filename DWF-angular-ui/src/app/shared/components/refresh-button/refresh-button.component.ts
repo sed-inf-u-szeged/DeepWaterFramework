@@ -1,9 +1,9 @@
-import { Component, OnInit, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ObservableDataResolved } from '@app/data/models/observable-data-resolved';
-import { Subscription, interval, defer, Subject } from 'rxjs';
-import { exhaustMap, switchMap, startWith, distinctUntilChanged, skip, finalize, tap, take, map } from 'rxjs/operators';
+import { ResolvedAndObservable } from '@app/data/models/resolved-and-observable';
 import { isEqual } from 'lodash-es';
+import { defer, interval, Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, exhaustMap, finalize, map, skip, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 /**
  * Component that displays a refresh button and polls its input observable periodically
@@ -15,10 +15,10 @@ import { isEqual } from 'lodash-es';
   styleUrls: ['./refresh-button.component.scss'],
 })
 export class RefreshButtonComponent implements OnInit, OnDestroy {
-  /** The `ObservableDataResolved` that has the initial data and the query to repeat. */
-  @Input() observableDataResolved: ObservableDataResolved<any>;
+  /** The `resolvedAndObservable` that has the initial data and the query to repeat. */
+  @Input() resolvedAndObservable: ResolvedAndObservable<any>;
   /** The polled data that is different from the last one. */
-  @Output() newData = new EventEmitter<ObservableDataResolved<any>['resolved']>();
+  @Output() newData = new EventEmitter<ResolvedAndObservable<any>['resolved']>();
   /** Whether the component waits on a query. */
   isLoading = false;
   /** Whether the component should display the update button. */
@@ -41,10 +41,10 @@ export class RefreshButtonComponent implements OnInit, OnDestroy {
     this.refresh$.pipe(
       exhaustMap(() => {
         this.isLoading = true;
-        return defer(() => this.observableDataResolved.observable).pipe(finalize(() => (this.isLoading = false)));
+        return defer(() => this.resolvedAndObservable.observable).pipe(finalize(() => (this.isLoading = false)));
       }),
-      startWith(this.observableDataResolved.resolved),
-      distinctUntilChanged<ObservableDataResolved<any>['resolved']>(isEqual),
+      startWith(this.resolvedAndObservable.resolved),
+      distinctUntilChanged<ResolvedAndObservable<any>['resolved']>(isEqual),
       skip(1),
       tap(() => this.showUpdateNotifications()),
       switchMap(newData =>

@@ -1,6 +1,6 @@
 <app-page-header pageTitle="Learn Tasks of Experiments" [errorMessage]="errorMessage">
   <app-refresh-button
-    [observableDataResolved]="observableDataResolved"
+    [resolvedAndObservable]="resolvedAndObservable"
     (newData)="handleNewData($event)"
   ></app-refresh-button>
 </app-page-header>
@@ -11,7 +11,7 @@
       <mat-card-title>Learn Tasks</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <app-learn-task-table [tasksOfExperiments]="tasksOfExperiments"></app-learn-task-table>
+      <app-learn-task-table [hashWithTasks]="hashWithTasks"></app-learn-task-table>
     </mat-card-content>
   </mat-card>
 
@@ -20,7 +20,7 @@
       <mat-card-title>Best test results by preset + algorithm</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <app-best-results-chart [tasksOfExperiments]="tasksOfExperiments"></app-best-results-chart>
+      <app-best-results-chart [hashWithTasks]="hashWithTasks"></app-best-results-chart>
     </mat-card-content>
   </mat-card>
 </div>

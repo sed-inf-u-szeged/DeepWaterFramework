@@ -7,7 +7,7 @@ export class ValueCell {
   /** Text used when value or standard deviation is not available. */
   static readonly NOT_AVAILABLE = 'n/a' as const;
   /** Numeric value of the result. */
-  readonly value: number;
+  readonly value: number | undefined;
   /** String representation of the value rounded to 3 decimal if its not an integer or the not availabe text. */
   readonly valueFixed: string;
   /** String representation of the standard deviation rounded to 3 decimal if its not an integer or the not availabe text. */
@@ -16,6 +16,8 @@ export class ValueCell {
   readonly valueWithStdDev: string;
   /** Whether the lower value means better result. */
   readonly lowerBetter: boolean;
+  /** Value used to order `ValueCell`s. */
+  readonly sortingValue: number;
 
   /**
    * Constructs a new `ValueCell`.
@@ -25,13 +27,14 @@ export class ValueCell {
    */
   constructor(value?: number, stdDev?: number, lowerBetter = false) {
     if (value != null) {
-      this.value = value;
+      this.sortingValue = value;
       this.valueFixed = value.toFixed(value % 1 && 3);
     } else {
-      this.value = lowerBetter ? Infinity : -Infinity;
+      this.sortingValue = lowerBetter ? Infinity : -Infinity;
       this.valueFixed = ValueCell.NOT_AVAILABLE;
     }
 
+    this.value = value;
     this.stdDevFixed = `${ValueCell.PLUS_MINUS_SIGN} ${
       stdDev != null ? stdDev.toFixed(stdDev % 1 && 3) : ValueCell.NOT_AVAILABLE
     }`;

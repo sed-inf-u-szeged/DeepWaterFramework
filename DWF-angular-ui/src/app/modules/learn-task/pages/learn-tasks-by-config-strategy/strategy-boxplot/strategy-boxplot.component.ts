@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ThemeService } from '@app/core/services/theme/theme.service';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ThemeService } from '@app/core/services/theme.service';
 import { HashWithTask } from '@app/data/models/experiment';
 import { Result } from '@app/data/models/result';
 import { EChartOption } from 'echarts';
@@ -32,7 +32,7 @@ export class StrategyBoxplotComponent implements OnInit {
     toolbox: { show: true, feature: { saveAsImage: { show: true, title: 'Save' } } },
     xAxis: {},
     yAxis: { type: 'value', scale: true },
-    grid: { containLabel: true, top: 50, right: 0, left: 0 },
+    grid: { containLabel: true, top: 50, right: 0, bottom: 0, left: 0 },
   };
   /** The chart options object passed to the chart as input. */
   chartOption: EChartOption;
