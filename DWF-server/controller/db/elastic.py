@@ -90,6 +90,20 @@ def delete_document(index, id):
         return None
 
 
+def delete_documents(index, query):
+    try:
+        size = es.search(index=index)['hits']['total']['value']
+        results = es.search(index=index, body=query, size=size)['hits']['hits']
+        success = True
+        for d in results:
+            success = es.delete(index=index, id=d['_id'], refresh='true')['_id'] and success
+
+        return success
+
+    except Exception as e:
+        return None
+
+
 def search_documents(index, query, mapper):
     try:
         size = es.search(index=index)['hits']['total']['value']

@@ -31,3 +31,7 @@ def list_tasks():
 
 def update_task(changes, task_id):
     return db.update_task(changes, task_id)
+
+
+def delete_tasks_by_experiment(exp_id):
+    return db.delete_exp_tasks(exp_id)

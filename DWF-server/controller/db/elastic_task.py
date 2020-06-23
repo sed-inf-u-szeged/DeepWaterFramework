@@ -52,3 +52,7 @@ def get_all_task():
 
 def update_task(fields, task_id):
     return es.update_document(t_idx, task_id, fields)
+
+
+def delete_exp_tasks(exp_id):
+    return es.delete_documents(t_idx, es.dict_query(flatten({'experiment_id': exp_id})))

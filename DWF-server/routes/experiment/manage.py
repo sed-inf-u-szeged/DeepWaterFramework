@@ -73,6 +73,7 @@ class Manage(Resource):
                     scheduler.remove_experiment(hash)
 
                 success = success and es.delete_experiment(hash)
+                success = success and ts.delete_tasks_by_experiment(hash)
                 if ess.get_experiment_summary(hash):
                     success = success and ess.delete_experiment_summary(hash)
 

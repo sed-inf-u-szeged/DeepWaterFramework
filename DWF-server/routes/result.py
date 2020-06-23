@@ -65,6 +65,9 @@ class Result(Resource):
                 success = task_store.update_task(change, task_id)
                 parent_tasks = [(t_id, ts.get_task_by_id(t_id)) for t_id in task.parent_tasks]
                 for p_task_id, p_task in parent_tasks:
+                    if not p_task:
+                        continue
+
                     change = p_task.completed(task_id)
                     success = ts.update_task(change, p_task_id) and success
                     if p_task.experiment_id in experiments:
@@ -73,7 +76,8 @@ class Result(Resource):
                     else:
                         if p_task.learn_task_id:
                             exp = es.get_experiment(p_task.experiment_id)
-                            scheduler.check_experiment(p_task.experiment_id, exp.priority)
+                            if exp:
+                                scheduler.check_experiment(p_task.experiment_id, exp.priority)
 
                         exp_sum = ess.get_experiment_summary(p_task.experiment_id)
                         if exp_sum:
