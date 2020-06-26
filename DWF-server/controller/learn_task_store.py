@@ -45,5 +45,4 @@ def rerun_task(task_id, assemble_task_id):
 
     new_l_task = LearnTask(l_task.assemble_config, assemble_task_id, l_task.learn_config)
     new_l_task.make_runnable()
-    new_l_task.add_parent(task_id)
     return new_learn_task(new_l_task)

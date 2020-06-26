@@ -17,7 +17,6 @@ class LearnTask:
         self.progress = None
         self.log = None
         self.up_to_date = True
-        self.parent_tasks = []
 
     @classmethod
     def from_es_data(cls, task):
@@ -34,16 +33,7 @@ class LearnTask:
         res.completed_ts = task['completed_ts']
         res.progress = task['progress']
         res.log = task['log']
-        res.parent_tasks = task['parent_tasks']
         return res
-
-    def add_parent(self, parent_task_id):
-        if parent_task_id and parent_task_id not in self.parent_tasks:
-            self.parent_tasks.append(parent_task_id)
-
-        return {
-            'parent_tasks': self.parent_tasks,
-        }
 
     def make_obsolete(self):
         if self.up_to_date:
@@ -53,12 +43,8 @@ class LearnTask:
             'up_to_date': self.up_to_date
         }
 
-    def stop(self, parent_task_id):
-        if not parent_task_id or parent_task_id not in self.parent_tasks:
-            return None
-
-        self.parent_tasks.remove(parent_task_id)
-        if self.state != "completed" and len(self.parent_tasks) == 0:
+    def stop(self):
+        if self.state != "completed":
             self.state = "generated"
             self.assigned_to = None
             self.result = None

@@ -56,5 +56,4 @@ def rerun_task(task_id):
 
     new_a_task = AssembleTask(a_task.assemble_config)
     new_a_task.make_runnable()
-    new_a_task.add_parent(task_id)
     return new_assemble_task(new_a_task)

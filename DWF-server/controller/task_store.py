@@ -21,6 +21,14 @@ def search_task_by_dict(dict):
     return db.search_task_by_dict(dict)
 
 
+def get_assembling_parents(a_id):
+    return [(t_id, t) for t_id, t in db.get_all_task_by_dict({'assemble_task_id': a_id}) if t.state != "generated"]
+
+
+def get_learning_parents(l_id):
+    return [(t_id, t) for t_id, t in db.get_all_task_by_dict({'learn_task_id': l_id}) if t.state != "generated"]
+
+
 def search_task_by_order(exp_id):
     return db.search_task_by_order(exp_id)
 

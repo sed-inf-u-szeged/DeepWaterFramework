@@ -63,11 +63,8 @@ class Result(Resource):
                 task = task_store.get_task_by_id(task_id)
                 change = task.completed(result)
                 success = task_store.update_task(change, task_id)
-                parent_tasks = [(t_id, ts.get_task_by_id(t_id)) for t_id in task.parent_tasks]
-                for p_task_id, p_task in parent_tasks:
-                    if not p_task:
-                        continue
-
+                parents = ts.get_assembling_parents(task_id) if job_type == "assembling" else ts.get_learning_parents(task_id)
+                for p_task_id, p_task in parents:
                     change = p_task.completed(task_id)
                     success = ts.update_task(change, p_task_id) and success
                     if p_task.experiment_id in experiments:

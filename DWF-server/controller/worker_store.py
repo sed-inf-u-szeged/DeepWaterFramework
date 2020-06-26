@@ -37,10 +37,13 @@ def assign_task_to_worker(worker_id, worker):
 
 def _remove_task(worker_id, worker):
     try:
-        task = ats.get_task_by_id(worker.current_task_id) or lts.get_task_by_id(worker.current_task_id)
-        task_changes = task.revoke_assign_from(worker_id)
-        success = ats.update_task(task_changes, worker.current_task_id) or lts.update_task(task_changes, worker.current_task_id)
-        parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+        a_task = ats.get_task_by_id(worker.current_task_id)
+        if not a_task:
+            l_task = lts.get_task_by_id(worker.current_task_id)
+
+        task_changes = (a_task or l_task).revoke_assign_from(worker_id)
+        success = ats.update_task(task_changes, worker.current_task_id) if a_task else lts.update_task(task_changes, worker.current_task_id)
+        parents = ts.get_assembling_parents(worker.current_task_id) if a_task else ts.get_learning_parents(worker.current_task_id)
         for pt_id, parent in parents:
             t_change = parent.make_runnable(True)
             success = ts.update_task(t_change, pt_id) and success
@@ -67,9 +70,9 @@ def _assign_parent_task(worker_id, worker):
             return None
 
         task_id, task = ts.search_task_by_order(scheduled_experiment)
-        assigned_task_id, experiment_ids = _assign_task(worker_id, task.assemble_task_id, ats)
+        assigned_task_id, experiment_ids = _assign_task(worker_id, task.assemble_task_id, ats, True)
         if not assigned_task_id:
-            assigned_task_id, experiment_ids = _assign_task(worker_id, task.learn_task_id, lts)
+            assigned_task_id, experiment_ids = _assign_task(worker_id, task.learn_task_id, lts, False)
 
         if not assigned_task_id:
             return None
@@ -88,14 +91,14 @@ def _assign_parent_task(worker_id, worker):
     return task_dict
 
 
-def _assign_task(worker_id, task_id, task_store):
+def _assign_task(worker_id, task_id, task_store, assembling):
     task = task_store.get_task_by_id(task_id)
     if task.state != "runnable":
         return None, None
 
     task_changes = task.assign_to(worker_id)
     task_result_id = task_store.update_task(task_changes, task_id)
-    parents = [(pt_id, ts.get_task_by_id(pt_id)) for pt_id in task.parent_tasks]
+    parents = ts.get_assembling_parents(task_id) if assembling else ts.get_learning_parents(task_id)
     experiment_ids = {p.experiment_id for _, p in parents}
     parent_success = True
     for pt_id, parent in parents:

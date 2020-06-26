@@ -301,24 +301,22 @@ class Manage(Resource):
 
         t_change = task.make_runnable()
         a_task = ats.get_task_by_id(task.assemble_task_id)
-        a_task_change = a_task.add_parent(task_id)
+        success = True
         if a_task.is_completed():
             t_change.update(task.completed(task.assemble_task_id))
 
         else:
-            a_task_change.update(a_task.make_runnable())
+            a_task_change = a_task.make_runnable()
+            success = ats.update_task(a_task_change, task.assemble_task_id)
 
-        success = ats.update_task(a_task_change, task.assemble_task_id)
         if success and task.learn_task_id:
             l_task = lts.get_task_by_id(task.learn_task_id)
-            l_task_change = l_task.add_parent(task_id)
             if l_task.is_completed():
                 t_change = task.completed(task.learn_task_id)
 
             else:
-                l_task_change.update(l_task.make_runnable())
-
-            success = lts.update_task(l_task_change, task.learn_task_id)
+                l_task_change = l_task.make_runnable()
+                success = lts.update_task(l_task_change, task.learn_task_id)
 
         if success:
             success = ts.update_task(t_change, task_id)
@@ -341,19 +339,23 @@ class Manage(Resource):
         if task.state != "running":
             return None
 
-        self._stop_sub_task(task_id, task.assemble_task_id, ats)
-
-        if task.learn_task_id:
-            self._stop_sub_task(task_id, task.learn_task_id, lts)
-
         task_changes = task.stop()
-        return ts.update_task(task_changes, task_id)
+        success = ts.update_task(task_changes, task_id)
+        self._stop_sub_task(task.assemble_task_id, ats, True)
+        if task.learn_task_id:
+            self._stop_sub_task(task.learn_task_id, lts, False)
+
+        return success
 
     @staticmethod
-    def _stop_sub_task(parent_task_id, sub_task_id, task_store):
+    def _stop_sub_task(sub_task_id, task_store, assembling):
         sub_task = task_store.get_task_by_id(sub_task_id)
         worker_id = sub_task.assigned_to
-        sub_task_changes = sub_task.stop(parent_task_id)
+        parents = ts.get_assembling_parents(sub_task_id) if assembling else ts.get_learning_parents(sub_task_id)
+        if not parents:
+            return
+
+        sub_task_changes = sub_task.stop()
         if sub_task_changes:
             task_store.update_task(sub_task_changes, sub_task_id)
             if not sub_task.assigned_to:

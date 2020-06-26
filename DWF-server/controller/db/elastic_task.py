@@ -50,6 +50,10 @@ def get_all_task():
     return es.search_documents(t_idx, {'query': {'match_all': {}}}, Task.from_es_data)
 
 
+def get_all_task_by_dict(dict):
+    return es.search_documents(t_idx, es.dict_query(flatten(dict)), Task.from_es_data)
+
+
 def update_task(fields, task_id):
     return es.update_document(t_idx, task_id, fields)
 
