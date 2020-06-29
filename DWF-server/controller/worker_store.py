@@ -1,6 +1,7 @@
 from threading import Lock
 from controller.db import worker_db as db
 from model import Worker
+from controller import experiment_store as es
 from controller import task_store as ts
 from controller import assemble_task_store as ats
 from controller import learn_task_store as lts
@@ -47,6 +48,8 @@ def _remove_task(worker_id, worker):
         for pt_id, parent in parents:
             t_change = parent.make_runnable(True)
             success = ts.update_task(t_change, pt_id) and success
+            exp = es.get_experiment(parent.experiment_id)
+            scheduler.add_experiment(parent.experiment_id, exp.priority)
 
         return success
 

@@ -19,6 +19,14 @@ def generate_assemble_configs(form_data):
     return generate_configs(form_data, [("label", "BUG", str)], 'assembler_strategies')
 
 
+def float_or_string(value):
+    try:
+        return float(value)
+
+    except:
+        return value
+
+
 def generate_configs(form_data, shared_parameter_labels, strategy_type):
     strategy_id = form_data['selected_strategy']
     strategy = [conf for conf in strategies_config[strategy_type] if conf["strategy_id"] == strategy_id][0]
@@ -45,10 +53,24 @@ def generate_configs(form_data, shared_parameter_labels, strategy_type):
         StrategyConfig(
             strategy_id,
             strategy_name,
-            params,
+            check_types(params, {p["parameter_id"]: p.get("type", "") for p in strategy["parameters"]}),
             shared_parameters
         ) for params in strategy_parameters_list
     ]
+
+
+def check_types(parameters, types):
+    return {k: check_type(v, types.get(k, '')) for k, v in parameters.items()}
+
+
+def check_type(parameter, type):
+    if type == "int":
+        return int(parameter)
+
+    elif type == "float":
+        return float(parameter)
+
+    return parameter
 
 
 def distinct_configs(config_list):
@@ -106,7 +128,7 @@ def get_parameter_values(parameters_dump):
             values = v.split('_||_||_')
 
         else:
-            values = [v]
+            values = [float_or_string(v)]
 
         if not values:
             continue
