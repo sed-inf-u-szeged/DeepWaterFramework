@@ -11,12 +11,15 @@ HASH_PICKLE = 'client_hash'
 CONFIG_PATH = os.path.join(ABS_PATH, 'config.json')
 CPARAMS_PATH = os.path.join(ABS_PATH, 'client_params.json')
 
+
 class ClientStatus(IntEnum):
     IDLE = 0
     WORKING = 1
 
+
 class Signals(IntEnum):
     STOP_TASK = 0
+
 
 def create_sandbox(dirname='sandbox'):
     if not os.path.isdir(dirname):
@@ -26,20 +29,22 @@ def create_sandbox(dirname='sandbox'):
 def load_config(path=CONFIG_PATH):
     with open(path, 'r') as config_file:
         config = json.load(config_file)
-    config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
 
+    config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
     return config
 
 
-def load_cparams(path = CPARAMS_PATH):
+def load_cparams(path=CPARAMS_PATH):
     with open(path) as cparams_file:
         cparams = json.load(cparams_file)
+
     return cparams
 
 
 def get_stored_hash():
     if os.path.exists(HASH_PICKLE):
         return pickle.load(open(HASH_PICKLE, 'rb'))
+
     return ''
 
 
@@ -57,7 +62,7 @@ def get_module(path, module_name):
         sys.path.insert(0, path)
 
     return __import__(module_name)
-    
+
 
 def strip_prefix(path):
     prefix = config['STORAGE_PREFIX']
@@ -75,13 +80,16 @@ def merge_params(cparams, params):
 
     client_info['util_path'] = ABS_PATH
     merged_params['dwf_client_info'] = client_info
-    
+
     return {**merged_params, **cparams}
+
 
 def get_client_name(default):
     if 'NAME' in config and config['NAME']:
         return config['NAME']
+
     return default
+
 
 client_info['client_id'] = get_stored_hash()
 config = load_config()

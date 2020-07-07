@@ -6,7 +6,6 @@ config = load_config()
 def calc_features(args):
     cparams = load_cparams()['calc_features']
     params = merge_params(cparams, args)
-
     get_module(config['FA_PATH'], 'fa').main(params)
 
 
@@ -21,7 +20,6 @@ def is_sarg_path(strategy_name, sarg_name):
 
 def fix_paths(strategy_name, args):
     sargs = (arg.strip() for arg in args.split('--'))
-
     fixed_sargs = ''
     for sarg in sargs:
         if sarg and len(sarg.split(' ')) == 2:

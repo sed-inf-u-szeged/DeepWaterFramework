@@ -1,32 +1,32 @@
 {
-    "NAME": "",
-    "SERVER_URL": "http://localhost:4000",
-    "API_ENDPOINTS": {
-        "REGISTER": "/register",
-        "GET_TASK": "/get_task",
-        "PING" : "/ping",
-        "STATUS": "/status",
-        "RESULT": "/result",
-        "ERROR" : "/error"
+  "NAME": "",
+  "SERVER_URL": "http://localhost:4000",
+  "API_ENDPOINTS": {
+    "REGISTER": "/register",
+    "GET_TASK": "/get_task",
+    "PING": "/ping",
+    "STATUS": "/status",
+    "RESULT": "/result",
+    "ERROR": "/error"
+  },
+  "RETRY_INTVAL": 30,
+  "PING_INTVAL": 30,
+  "DBH_PATH": "../DeepBugHunter/",
+  "FA_PATH": "../FeatureAssembler/",
+  "STRATEGIES_PATH": "strategies",
+  "STORAGE_PREFIX": "//sedstor.inf.u-szeged.hu/common/team/columbus/projects/kutatas/Deep-Water",
+  "VERSIONING": [
+    {
+      "PATH": "",
+      "NAME": "sklearn"
     },
-    "RETRY_INTVAL": 30,
-    "PING_INTVAL": 30,
-    "DBH_PATH": "../DeepBugHunter/",
-    "FA_PATH": "../FeatureAssembler/",
-    "STRATEGIES_PATH": "strategies",
-    "STORAGE_PREFIX": "//sedstor.inf.u-szeged.hu/common/team/columbus/projects/kutatas/Deep-Water",
-    "VERSIONING": [
-        {
-            "PATH": "",
-            "NAME": "sklearn"
-        },
-        {
-            "PATH": "",
-            "NAME": "tensorflow"
-        },
-        {
-            "PATH": "",
-            "NAME": "dwf_client"
-        }
-    ]
+    {
+      "PATH": "",
+      "NAME": "tensorflow"
+    },
+    {
+      "PATH": "",
+      "NAME": "dwf_client"
+    }
+  ]
 }

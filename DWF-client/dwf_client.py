@@ -15,13 +15,13 @@ from time import sleep
 from dwf_client_util import util
 from dwf_client_util import server
 from dwf_client_util import worker
+
 ClientStatus = util.ClientStatus
 
 client_id = ''
 args = None
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
-                   
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Start a DWF Client instance.")
     parser.add_argument('--reinit', help='reinitailize client id', action='store_true', default=False)
@@ -30,8 +30,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info("Client started...")
-    
-    #Sandbox creation for DNN and CNN
+
+    # Sandbox creation for DNN and CNN
     util.create_sandbox()
 
     if args.reinit:
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         client_id = util.get_stored_hash()
         if client_id == '':
             logging.info(f"Registering to server \'{util.config['SERVER_URL']}\'")
-            client_id = server.register(client_name = args.name)
+            client_id = server.register(client_name=args.name)
 
         else:
             logging.info(f"Client id is set to locally stored value ")
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         process_manager = worker.ProcessManager(client_id, args.debug)
         process_manager.launch()
-        
+
     except ConnectionError as e:
         logging.info(f"Can't connect to server. Error message: \n {str(e)}\n Client is exiting...")
         if args.debug:

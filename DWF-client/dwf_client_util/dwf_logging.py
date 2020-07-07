@@ -14,10 +14,10 @@ class LogHandler(Handler):
         FIELDS = ['message', 'hash', 'progress']
         record = record.__dict__
         log = {}
-
         for field in FIELDS:
             if field not in record:
                 return
+
             else:
                 log[field] = record[field]
 
