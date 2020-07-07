@@ -1,0 +1,65 @@
+<app-mat-table-shell [dataSource]="dataSource" [columnsToExport]="columnsToExport">
+  <ng-container header-actions>
+    <app-learn-result-column-picker
+      [columnOptions]="columnOptions"
+      (columns)="onColumnPickerChange($event)"
+    ></app-learn-result-column-picker>
+  </ng-container>
+
+  <table mat-table matSort [dataSource]="dataSource">
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of linkColumns">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
+      <td mat-cell *matCellDef="let task">
+        <a mat-button [routerLink]="task[column].linkUrl" [state]="task[column].state">{{ task[column] }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="radio">
+      <mat-radio-group [(ngModel)]="referencedRow">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-radio-button [value]="undefined" [checked]="!referencedRow"></mat-radio-button>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-radio-button [value]="row"></mat-radio-button>
+        </td>
+      </mat-radio-group>
+    </ng-container>
+
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of paramColumns">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
+      <td mat-cell *matCellDef="let task">{{ task[column] }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="{{ column }}" *ngFor="let column of valueColumns">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
+      <ng-container
+        *ngIf="{
+          referencedRow: referencedRow && referencedRow[column],
+          unfocusThreshold: focusState.checked ? tableService.sortedValueColumns[column][focusState.index!] : undefined,
+          heatmapRange: heatmapEnabled ? tableService.valueColumnsHeatmapRange[column] : undefined
+        } as columnData"
+      >
+        <td
+          app-learn-result-value-cell
+          mat-cell
+          *matCellDef="let task"
+          [display]="task[column]"
+          [compareTo]="columnData.referencedRow"
+          [unfocusThreshold]="columnData.unfocusThreshold"
+          [heatmapRange]="columnData.heatmapRange"
+        ></td>
+      </ng-container>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let task; columns: columnsToDisplay"></tr>
+  </table>
+
+  <ng-container footer-actions>
+    <app-learn-result-focus-button
+      [dataSize]="dataSource.data.length"
+      (focusChange)="focusState = $event"
+    ></app-learn-result-focus-button>
+    <app-learn-result-heatmap-button (enabled)="heatmapEnabled = $event"></app-learn-result-heatmap-button>
+  </ng-container>
+</app-mat-table-shell>

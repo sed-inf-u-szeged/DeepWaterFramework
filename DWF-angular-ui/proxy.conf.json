@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "http://10.3.7.79:9200",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

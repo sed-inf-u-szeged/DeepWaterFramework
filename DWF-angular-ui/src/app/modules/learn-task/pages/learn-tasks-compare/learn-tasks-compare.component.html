@@ -1,0 +1,32 @@
+<app-page-header pageTitle="Compare tasks by {{ resultSet }} results" [errorMessage]="errorMessage">
+  <span>
+    <button mat-flat-button [matMenuTriggerFor]="menu" color="primary">
+      <mat-icon>bar_chart</mat-icon>
+      {{ resultSet }}
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="updateCharts('test')">test</button>
+      <button mat-menu-item (click)="updateCharts('dev')">dev</button>
+      <button mat-menu-item (click)="updateCharts('train')">train</button>
+    </mat-menu>
+  </span>
+  <app-refresh-button
+    [resolvedAndObservable]="resolvedAndObservable"
+    (newData)="handleNewData($event)"
+  ></app-refresh-button>
+</app-page-header>
+
+<div fxLayout="column" fxLayoutGap="16px">
+  <mat-card>
+    <mat-card-content>
+      <app-learn-result-chart [data]="chart1Data"></app-learn-result-chart>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-content>
+      <app-learn-result-chart [data]="chart2Data"></app-learn-result-chart>
+    </mat-card-content>
+  </mat-card>
+</div>

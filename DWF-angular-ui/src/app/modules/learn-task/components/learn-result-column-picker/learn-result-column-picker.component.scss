@@ -1,0 +1,52 @@
+@import '~@angular/material/theming';
+
+.learn-result-column-picker-menu {
+  min-width: 200px;
+
+  &__draggable-row {
+    overflow: hidden;
+    width: 100%;
+    padding: 0px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+
+    mat-icon,
+    mat-checkbox {
+      vertical-align: top;
+    }
+
+    mat-icon {
+      opacity: 0.16;
+      transition: opacity 0.5s;
+      margin-right: 8px;
+      cursor: grab;
+    }
+
+    &:hover {
+      mat-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.cdk-drag-preview {
+  .learn-result-column-picker-menu__draggable-row {
+    @include mat-elevation(5);
+    mat-icon {
+      opacity: 1;
+    }
+  }
+}
+
+.cdk-drop-list-dragging .cdk-drag,
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}

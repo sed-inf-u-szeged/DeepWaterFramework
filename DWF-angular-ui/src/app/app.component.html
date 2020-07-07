@@ -1,0 +1,26 @@
+<div class="theme-wrapper" [class]="currentTheme">
+  <div class="mat-typography mat-app-background">
+    <mat-toolbar class="mat-elevation-z6" color="primary" role="heading">
+      <a mat-button routerLink="/">DWF-angular-ui</a>
+      <div style="flex: 1"></div>
+      <button [matMenuTriggerFor]="themeMenu" mat-icon-button>
+        <mat-icon>format_color_fill</mat-icon>
+      </button>
+      <mat-menu #themeMenu>
+        <button mat-menu-item *ngFor="let theme of themeService.themes" (click)="themeService.setTheme(theme.class)">
+          <ng-container *ngIf="currentTheme === theme.class; else notCurrentTheme">
+            <mat-icon color="accent">radio_button_checked</mat-icon>
+          </ng-container>
+          <ng-template #notCurrentTheme>
+            <mat-icon>radio_button_unchecked</mat-icon>
+          </ng-template>
+          {{ theme.name }}
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+    <div class="page-container">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

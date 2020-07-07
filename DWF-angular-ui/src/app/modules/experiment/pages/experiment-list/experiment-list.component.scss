@@ -1,0 +1,31 @@
+@import '~@angular/material/theming';
+
+.mat-expansion-panel-header {
+  &-title,
+  &-description {
+    flex-basis: 0;
+  }
+
+  &-description {
+    align-items: center;
+  }
+}
+
+.list-header {
+  position: relative;
+  &__sort {
+    padding-bottom: 1.25rem;
+    padding-left: 16px;
+
+    &--absolute {
+      position: absolute;
+      right: 0;
+    }
+  }
+}
+
+.list-footer {
+  mat-paginator {
+    background: unset;
+  }
+}

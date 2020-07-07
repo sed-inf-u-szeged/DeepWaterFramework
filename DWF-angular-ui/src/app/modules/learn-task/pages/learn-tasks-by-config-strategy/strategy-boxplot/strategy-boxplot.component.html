@@ -1,0 +1,12 @@
+<div fxLayout fxLayoutAlign="center">
+  <mat-form-field appearance="outline">
+    <mat-label>Parameter</mat-label>
+    <mat-select [(ngModel)]="selectedParam">
+      <mat-option *ngFor="let param of paramOptions" [value]="param">
+        {{ param }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="chart" echarts [options]="chartOption" [theme]="(theme$ | async) || 'light'"></div>

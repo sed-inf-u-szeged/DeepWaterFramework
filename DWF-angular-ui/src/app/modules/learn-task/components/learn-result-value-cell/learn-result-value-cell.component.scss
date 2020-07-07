@@ -1,0 +1,42 @@
+@import '~@angular/material/theming';
+
+:host {
+  --heat-color-rgb: 47, 94, 196;
+  white-space: nowrap;
+
+  &.transparent,
+  &.transparent-inner > * {
+    opacity: 0.3;
+  }
+
+  &.transparent-inner {
+    opacity: unset;
+  }
+
+  &.borderless {
+    border-bottom-color: transparent !important;
+  }
+}
+
+.label {
+  border-radius: 4px;
+  padding: 3px 4px;
+  font-size: smaller;
+
+  &--better,
+  &--worse {
+    color: $light-primary-text;
+  }
+
+  &--better {
+    background-color: mat-color(mat-palette($mat-green, 600));
+  }
+
+  &--worse {
+    background-color: mat-color(mat-palette($mat-red, 600));
+  }
+
+  &--na {
+    background-color: rgba(0, 0, 0, 0.26);
+  }
+}
