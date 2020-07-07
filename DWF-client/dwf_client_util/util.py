@@ -1,84 +1,95 @@
-from server import send_to_endpoint
 import sys
 import os
 import json
+import pickle
+from enum import IntEnum
 
 config = None
 client_info = {}
 ABS_PATH = os.path.dirname(os.path.abspath(__file__))
+HASH_PICKLE = 'client_hash'
+CONFIG_PATH = os.path.join(ABS_PATH, 'config.json')
+CPARAMS_PATH = os.path.join(ABS_PATH, 'client_params.json')
 
 
-def load_config(path = 'dwf_client_util/config.json'):
+class ClientStatus(IntEnum):
+    IDLE = 0
+    WORKING = 1
+
+
+class Signals(IntEnum):
+    STOP_TASK = 0
+
+
+def create_sandbox(dirname='sandbox'):
+    if not os.path.isdir(dirname):
+        os.mkdir(dirname)
+
+
+def load_config(path=CONFIG_PATH):
     with open(path, 'r') as config_file:
         config = json.load(config_file)
-    config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
 
+    config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
     return config
 
-config = load_config()
+
+def load_cparams(path=CPARAMS_PATH):
+    with open(path) as cparams_file:
+        cparams = json.load(cparams_file)
+
+    return cparams
+
+
+def get_stored_hash():
+    if os.path.exists(HASH_PICKLE):
+        return pickle.load(open(HASH_PICKLE, 'rb'))
+
+    return ''
+
+
+def store_hash(hash):
+    pickle.dump(hash, open(HASH_PICKLE, 'ab'))
+
+
+def delete_hash():
+    if os.path.isfile(HASH_PICKLE):
+        os.remove(HASH_PICKLE)
+
 
 def get_module(path, module_name):
-    if path: 
+    if path:
         sys.path.insert(0, path)
-    
+
     return __import__(module_name)
-    
+
+
 def strip_prefix(path):
     prefix = config['STORAGE_PREFIX']
-    if(path.startswith(prefix)):
+    if path.startswith(prefix):
         return path[len(prefix):].strip(os.sep)
 
+
 def prepend_prefix(path):
-    return os.path.join(config['STORAGE_PREFIX'], os.path.normpath(path).strip(os.sep))
+    return os.path.join(config['STORAGE_PREFIX'], os.path.normpath(path).strip(os.sep)).replace('\\', os.sep)
+
 
 def merge_params(cparams, params):
-    merged_params = {} 
+    merged_params = {}
     merged_params['strategy'] = params['strategy']
 
     client_info['util_path'] = ABS_PATH
     merged_params['dwf_client_info'] = client_info
-    
-    return {**merged_params, **cparams}    
 
-def calc_features(args):
-    with open(os.path.join(ABS_PATH, 'client_params.json'), 'r') as cparams_file:
-        cparams = json.load(cparams_file)['calc_features']
+    return {**merged_params, **cparams}
 
-    params = merge_params(cparams, args)
-    
-    #TODO temporal workaround for prefix management in ASTEmbedding--->
-    if(params['strategy'][0].startswith('ASTEmbedding')):
-        sargs = [arg.strip() for arg in params['strategy'][1].split('--')]
 
-        new_sargs = ''
-        for sarg in sargs:
-            
-            if sarg:
-                sarg_splt = sarg.split(' ')
-                if sarg_splt[0] == 'outputDir' or sarg_splt[0] == 'astFile' or sarg_splt[0] == 'bugFile' or sarg_splt[0] == 'metricsFile':
-                    sarg_splt[1] = prepend_prefix(sarg_splt[1])
-                new_sargs += f'--{sarg_splt[0]} {sarg_splt[1]} '
-            
-        new_sargs = new_sargs.strip()
-        params['strategy'][1] = new_sargs
-    # <----
+def get_client_name(default):
+    if 'NAME' in config and config['NAME']:
+        return config['NAME']
 
-    get_module(config['FA_PATH'], 'fa').main(params)
-        
+    return default
 
-def learn(args):
-    with open(os.path.join(ABS_PATH, 'client_params.json'), 'r') as cparams_file:
-        cparams = json.load(cparams_file)['DBH']
-    
-    params = {**args['shared'], **merge_params(cparams, args)}
-    params['preprocess'] = args['preprocess']
 
-    params['csv'] = prepend_prefix(params['csv'])
-    get_module(config['DBH_PATH'], 'dbh').main(params)
-    
-def process_task(task):        
-        if task['type'] == 'feature_assembling':
-            calc_features(task['parameters'])
-        if task['type'] == 'learning':
-            learn(task['parameters'])
-            
+client_info['client_id'] = get_stored_hash()
+config = load_config()

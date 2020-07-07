@@ -1,6 +1,7 @@
 from . import elastic as es
 from config import es_workers_index as w_idx
 from model import Worker
+from model.obj_flatten import flatten
 
 
 def register_worker(worker):
@@ -30,4 +31,8 @@ def update_worker(fields, worker_id):
 
 
 def get_all_worker():
-    return es.search_documents(w_idx, {'query': {'match_all': {}}}, Worker.from_es_data)
+    return es.search_documents(w_idx, es.dict_query(flatten({'deleted': False})), Worker.from_es_data)
+
+
+def get_all_worker_id():
+    return es.search_document_ids(w_idx, {'query': {'match_all': {}}})

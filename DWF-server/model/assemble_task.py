@@ -3,9 +3,10 @@ from model.obj_flatten import flatten
 
 
 class AssembleTask:
-    def __init__(self, assemble_config):
+    def __init__(self, assemble_config, order_in_exp=0):
         self.assemble_config = assemble_config
-        # state is "generated", "runnable", "running" or "completed"
+        self.order_in_exp = order_in_exp
+        # state values: "generated", "runnable", "running", "completed"
         self.state = "generated"
         self.assigned_to = None
         self.result_file_path = None
@@ -14,11 +15,13 @@ class AssembleTask:
         self.progress = None
         self.log = None
         self.up_to_date = True
-        self.parent_tasks = []
 
     @classmethod
     def from_es_data(cls, task):
-        res = cls(task['assemble_config'])
+        res = cls(
+            assemble_config=task['assemble_config'],
+            order_in_exp=task['order_in_exp'],
+        )
         res.state = task['state']
         res.assigned_to = task['assigned_to']
         res.result_file_path = task['result_file_path']
@@ -26,16 +29,7 @@ class AssembleTask:
         res.completed_ts = task['completed_ts']
         res.progress = task['progress']
         res.log = task['log']
-        res.parent_tasks = task['parent_tasks']
         return res
-
-    def add_parent(self, parent_task_id):
-        if parent_task_id:
-            self.parent_tasks.append(parent_task_id)
-
-        return {
-            'parent_tasks': self.parent_tasks,
-        }
 
     def make_obsolete(self):
         if self.up_to_date:
@@ -43,6 +37,24 @@ class AssembleTask:
 
         return {
             'up_to_date': self.up_to_date
+        }
+
+    def stop(self):
+        if self.state != "completed":
+            self.state = "generated"
+            self.assigned_to = None
+            self.result_file_path = None
+            self.completed_ts = None
+            self.progress = None
+            self.log = None
+
+        return {
+            'state': self.state,
+            'assigned_to': self.assigned_to,
+            'result_file_path': self.result_file_path,
+            'completed_ts': self.completed_ts,
+            'progress': self.progress,
+            'log': self.log,
         }
 
     def make_runnable(self):
@@ -108,6 +120,10 @@ class AssembleTask:
             'progress': self.progress,
             'log': self.log,
         }
+
+    def set_order_in_exp(self, order_in_exp):
+        self.order_in_exp = order_in_exp
+        return {'order_in_exp': self.order_in_exp}
 
     def flatten(self):
         return flatten({

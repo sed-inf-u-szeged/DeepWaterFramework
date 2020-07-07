@@ -1,256 +1,170 @@
 from requests import post, get
+import time
+
+BASE_URL = 'http://localhost:4000'
+NEW_EXPERIMENT_URL = BASE_URL + '/experiment/new'
+GET_EXPERIMENT_URL = BASE_URL + '/experiment/get'
 
 
-def post_request(route, json):
-    resp = post('http://localhost:4000' + route, json=json)
-    return resp.json(), resp.status_code
+def new_experiment(name):
+    try:
+        resp = post(NEW_EXPERIMENT_URL, data={'experiment_name': name, 'markdown': f"{name}'s markdown", 'experiment_priority': 1, })
+        if resp.status_code == 200:
+            print('create experiment OK')
+            resp = get(f'{GET_EXPERIMENT_URL}/{name}')
+            if resp.status_code == 200:
+                print('get experiment OK')
+                return resp.text
+
+    except Exception as e:
+        pass
+
+    return False
 
 
-def ping_with_hash(hash):
-    return post_request('/ping', {'hash': hash})
-
-
-def send_status_message(hash, progress=None, msg=None):
-    json = {'hash': hash}
-    if progress != None:
-        json['progress'] = progress
-
-    if msg:
-        json['message'] = msg
-
-    return post_request('/status', json)
-
-
-def send_result(hash, type, result=None):
-    json = {'hash': hash, "type": type}
-    if result:
-        json['result'] = result
-
-    return post_request('/result', json)
-
-
-def true_test_ping():
-    json, status = ping_with_hash('')
-    if status != 200 or 'hash' not in json or not json['hash']:
-        print(f'Failed test_ping with empty hash. Statuscode: {status}, json: {json}')
-        return False
-
-    task = json['task']
-    hash = json['hash']
-    json, status = ping_with_hash(hash)
-    if status != 200 or 'hash' not in json or not json['hash'] or task != json['task']:
-        print(f'Failed test_ping with {hash}. Statuscode: {status}, json: {json}')
-        return False
-
-    print('Successful true_test_ping.')
-    return True
-
-
-def false_test_ping():
-    json, status = ping_with_hash('asd123456')
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_ping with nonexistent hash. Statuscode: {status}, json: {json}')
-        return False
-
-    print('Successful false_test_ping.')
-    return True
-
-
-def true_test_status():
-    json, status = ping_with_hash('')
-    if status != 200 or 'hash' not in json or not json['hash'] or not json['task']:
-        print(f'Failed test_status at ping server step. Statuscode: {status}, json: {json}')
-        return False
-
-    hash = json['hash']
-    json, status = send_status_message(hash, 0, 'DBH started...')
-    if status != 200 or 'hash' not in json or not json['hash']:
-        print(f'Failed test_status. Statuscode: {status}, json: {json}')
-        return False
-
-    # fail on progress is not type of float
-    json, status = send_status_message(hash, 'asd', 'asd')
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_status without message. Statuscode: {status}, json: {json}')
-        return False
-
-    # fail on message is missing
-    json, status = send_status_message(hash, 0)
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_status without message. Statuscode: {status}, json: {json}')
-        return False
-
-    # fail on progress is missing
-    json, status = send_status_message(hash, msg='Fold completed 1/10')
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_status without progress. Statuscode: {status}, json: {json}')
-        return False
-
-    print('Successful true_test_status.')
-    return True
-
-
-def false_test_status():
-    json, status = ping_with_hash('')
-    if status != 200 or 'hash' not in json or not json['hash'] or json['task']:
-        print(f'Failed test_status at ping server step. Statuscode: {status}, json: {json}')
-        return False
-
-    json, status = send_status_message(json['hash'], 'DBH started...')
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_status with no task assigned. Statuscode: {status}, json: {json}')
-        return False
-
-    json, status = send_status_message('asd123', 'DBH started...')
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_status with nonexistent hash. Statuscode: {status}, json: {json}')
-        return False
-
-    print('Successful false_test_status.')
-    return True
-
-
-def true_test_result():
-    json, status = ping_with_hash('')
-    if status != 200 or 'hash' not in json or not json['hash'] or not json['task']:
-        print(f'Failed test_result at ping server step. Statuscode: {status}, json: {json}')
-        return False
-
-    json, status = send_result(json['hash'], 'dbh', {
-        "train": {
-            "tp": 110638,
-            "tn": 263847,
-            "fp": 50735,
-            "fn": 82204,
-            "accuracy": 0.7380119978558219,
-            "precision": 0.6856041593078962,
-            "recall": 0.573723566442965,
-            "fmes": 0.6246940367937306
-        },
-        "dev": {
-            "tp": 4352,
-            "tn": 29250,
-            "fp": 5710,
-            "fn": 3558,
-            "accuracy": 0.783811523209521,
-            "precision": 0.4325183860063282,
-            "recall": 0.5501896333747786,
-            "fmes": 0.48430892006558734
-        },
-        "test": {
-            "tp": 4927,
-            "tn": 32505,
-            "fp": 6333,
-            "fn": 3853,
-            "accuracy": 0.7860892939643022,
-            "precision": 0.4375666074596469,
-            "recall": 0.5611617312066501,
-            "fmes": 0.4917165619423501
+def add_configs(i, exp_id):
+    try:
+        assembling_data = {
+            'label': 'BUG',
+            'manual_file_input_file_path': '\\test\\dataset.csv',
+            'ASTEmbedding_outputDir': '\\test\\output\\test_framework',
+            'ASTEmbedding_astFile': '\\input\\ast.csv',
+            'ASTEmbedding_bugFile': '\\input\\bugsu.csv',
+            'ASTEmbedding_metricsFile': '\\input\\metrics.csv',
+            'ASTEmbedding_model': 'none',
+            'ASTEmbedding_window_size': '10',
+            'ASTEmbedding_vector_size': '50',
+            'ASTEmbedding_max_epochs': '1',
+            'ASTEmbedding_seed': f'12345',
+            'ASTEmbedding_dm': '0'
         }
-    })
-    if status != 200 or 'hash' not in json or not json['hash']:
-        print(f'Failed test_result. Statuscode: {status}, json: {json}')
+        add_assemble_config(assembling_data, 'manual_file_input', exp_id)
+
+        assembling_data['label'] = 'bug'
+        add_assemble_config(assembling_data, 'ASTEmbedding', exp_id)
+
+        learning_data = {
+            'resample_amount': '50',
+            'seed': f'{i}',
+            'resample': 'up',
+            'preprocess_features': 'standardize',
+            'preprocess_labels': 'binarize',
+            'cdnnc_layers': '5',
+            'cdnnc_neurons': '250',
+            'cdnnc_batch': '100',
+            'cdnnc_lr': '0.1',
+            'cdnnc_beta': '0.0005',
+            'forest_n-estimators': '100',
+            'forest_max-depth': '10',
+            'forest_criterion': 'entropy',
+            'knn_n_neighbors': '18',
+            'logistic_C': '2.0',
+            'logistic_tol': '0.0001',
+            'logistic_solver': 'liblinear',
+            'logistic_penalty': 'l2',
+            'sdnnc_layers': '5',
+            'sdnnc_neurons': '200',
+            'sdnnc_batch': '100',
+            'sdnnc_epochs': '10',
+            'sdnnc_lr': '0.05',
+            'svm_C': '2.6',
+            'svm_gamma': '0.02',
+            'svm_kernel': 'rbf',
+            'tree_max-depth_from': '5',
+            'tree_max-depth_to': '10',
+            'tree_max-depth_step': '1',
+        }
+        add_learn_config(learning_data, 'bayes', exp_id)
+        # add_learn_config(learning_data, 'cdnnc', exp_id)
+        # add_learn_config(learning_data, 'forest', exp_id)
+        add_learn_config(learning_data, 'linear', exp_id)
+        # add_learn_config(learning_data, 'logistic', exp_id)
+        # add_learn_config(learning_data, 'knn', exp_id)
+        # add_learn_config(learning_data, 'sdnnc', exp_id)
+        # add_learn_config(learning_data, 'svm', exp_id)
+        add_learn_config(learning_data, 'tree', exp_id)
+        add_learn_config(learning_data, 'zeror', exp_id)
+        return True
+
+    except Exception as e:
+        print('add_configs error')
+        print(e)
         return False
 
-    json, status = send_result(json['hash'], "dbh")
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_result without result. Statuscode: {status}, json: {json}')
+
+def add_config(config_type, data, strategy, exp_id):
+    data['selected_strategy'] = strategy
+    resp = post(f'{BASE_URL}/experiment/{exp_id}/add_{config_type}_config', data=data)
+    if resp.status_code != 200:
+        raise Exception(f'add {strategy} {config_type} error')
+
+    print(f'add {strategy} {config_type} OK')
+
+
+def add_learn_config(data, strategy, exp_id):
+    add_config('learning', data, strategy, exp_id)
+
+
+def add_assemble_config(data, strategy, exp_id):
+    add_config('assembler', data, strategy, exp_id)
+
+
+def generate_tasks(exp_id):
+    resp = post(f'{BASE_URL}/experiment/{exp_id}', json={'command': 'generate_tasks'})
+    if resp.status_code != 200:
+        print('generate tasks error')
         return False
 
-    print('Successful true_test_result.')
+    print('generate tasks OK')
     return True
 
 
-def false_test_result():
-    json, status = ping_with_hash('')
-    if status != 200 or 'hash' not in json or not json['hash'] or json['task']:
-        print(f'Failed test_result at ping server step. Statuscode: {status}, json: {json}')
+def run_tasks(exp_id):
+    resp = post(f'{BASE_URL}/experiment/{exp_id}', json={'command': 'run_all'})
+    if resp.status_code != 200:
+        print('run tasks error')
         return False
 
-    json, status = send_result(json['hash'], "dbh", {
-        "train": {
-            "tp": 110638,
-            "tn": 263847,
-            "fp": 50735,
-            "fn": 82204,
-            "accuracy": 0.7380119978558219,
-            "precision": 0.6856041593078962,
-            "recall": 0.573723566442965,
-            "fmes": 0.6246940367937306
-        },
-        "dev": {
-            "tp": 4352,
-            "tn": 29250,
-            "fp": 5710,
-            "fn": 3558,
-            "accuracy": 0.783811523209521,
-            "precision": 0.4325183860063282,
-            "recall": 0.5501896333747786,
-            "fmes": 0.48430892006558734
-        },
-        "test": {
-            "tp": 4927,
-            "tn": 32505,
-            "fp": 6333,
-            "fn": 3853,
-            "accuracy": 0.7860892939643022,
-            "precision": 0.4375666074596469,
-            "recall": 0.5611617312066501,
-            "fmes": 0.4917165619423501
-        }
-    })
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_result with no task assigned. Statuscode: {status}, json: {json}')
-        return False
-
-    json, status = send_result('asd123456', "dbh", {
-        "train": {
-            "tp": 110638,
-            "tn": 263847,
-            "fp": 50735,
-            "fn": 82204,
-            "accuracy": 0.7380119978558219,
-            "precision": 0.6856041593078962,
-            "recall": 0.573723566442965,
-            "fmes": 0.6246940367937306
-        },
-        "dev": {
-            "tp": 4352,
-            "tn": 29250,
-            "fp": 5710,
-            "fn": 3558,
-            "accuracy": 0.783811523209521,
-            "precision": 0.4325183860063282,
-            "recall": 0.5501896333747786,
-            "fmes": 0.48430892006558734
-        },
-        "test": {
-            "tp": 4927,
-            "tn": 32505,
-            "fp": 6333,
-            "fn": 3853,
-            "accuracy": 0.7860892939643022,
-            "precision": 0.4375666074596469,
-            "recall": 0.5611617312066501,
-            "fmes": 0.4917165619423501
-        }
-    })
-    if status == 200 or 'hash' in json:
-        print(f'Failed test_result with nonexistent hash. Statuscode: {status}, json: {json}')
-        return False
-
-    print('Successful false_test_result.')
+    print('run tasks OK')
     return True
+
+
+def create_experiment(i, name, task_gen, task_run):
+    exp_id = new_experiment(name)
+    while not exp_id:
+        print("couldn't create experiment, try again in 5s...")
+        time.sleep(5)
+        exp_id = new_experiment(name)
+
+    success = add_configs(i, exp_id)
+
+    if task_gen:
+        success = success and generate_tasks(exp_id)
+        if task_run:
+            success = success and run_tasks(exp_id)
+
+    if success:
+        print(f'create {name} experiment OK')
+
+    else:
+        print(f'create {name} experiment failed')
+
+    return success
 
 
 if __name__ == '__main__':
-    results = []
+    test_cases = 12
+    test_results = []
+    for i in range(1, int(test_cases/3) + 1, 1):
+        res = create_experiment(i, f'Default parameters {i}', True, True)
+        test_results.append(res)
+    for i in range(1, int(test_cases/3) + 1, 1):
+        res = create_experiment(i, f'Tasks generated {i}', True, False)
+        test_results.append(res)
+    for i in range(1, int(test_cases/3) + 1, 1):
+        res = create_experiment(i, f'Configs added {i}', False, False)
+        test_results.append(res)
 
-    results.append(true_test_result())
-    results.append(true_test_status())
-    results.append(true_test_ping())
-    results.append(false_test_result())
-    results.append(false_test_status())
-    results.append(false_test_ping())
-
-    print(f'{sum(results)}/{len(results)} test succeeded!')
+    num_of_tests = len(test_results)
+    num_of_failed_tests = num_of_tests - sum(test_results)
+    print(f'{num_of_tests} test(s) run successfully, {num_of_failed_tests} failed')

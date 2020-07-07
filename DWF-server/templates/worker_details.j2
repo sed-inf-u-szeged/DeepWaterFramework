@@ -5,7 +5,7 @@
         <div class="container">
             <div class="jumbotron">
                 <h1 class="text-center" style="padding-bottom:30px;">
-                    Worker details:
+                    {{ worker.name}}'s details:
                 </h1>
             </div>
             <table class="table" style="border: 1px solid black;">
@@ -70,9 +70,15 @@
                     {% endfor -%}
                 </div>
                 <hr/>
-                <div class="row text-center">
-                    <a href="{{ request.url_root + 'worker_fixed/' + worker_id }}"><h3>Worker fixed, continue.</h3></a>
-                </div>
+                {% if worker.deleted %}
+                    <div class="row text-center">
+                        <h3 style="color: red;">This Worker is deleted.</h3>
+                    </div>
+                {% else %}
+                    <div class="row text-center">
+                        <a href="{{ request.url_root + 'worker_fixed/' + worker_id }}"><h3>Worker fixed, continue.</h3></a>
+                    </div>
+                {% endif %}
             {% endif %}
             {% if worker.current_task_id -%}
                 <div class="row">
@@ -102,7 +108,7 @@
             {%- else -%}
                 <div class="col-md-12"><h2>No task assigned to this worker.</h2></div>
             {%- endif %}
-            {% if worker.logs %}
+            {% if worker.log %}
                 <div>
                     <div style="padding-left: 2em;"><h3>Messages:</h3></div>
                     {% for l in worker.log -%}

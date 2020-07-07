@@ -1,5 +1,5 @@
 {% extends "base.j2" %}
-{% from 'form_macros.j2' import input_field %}
+{% from 'form_macros.j2' import input_field, select_input, triple_option_builder %}
 {% from 'animation_macros.j2' import img %}
 {% from 'experiment/experiment_macros.j2' import initAjax %}
 
@@ -11,18 +11,31 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='wmd.css') }}">
 {% endblock %}
 {% block content %}
-        {{ initAjax() }}
+    {{ initAjax() }}
     <div class="container">
         <div class="jumbotron">
-            <h1 class="text-center" style="padding-bottom:30px;">New Experiment</h1>
+            <h1 class="text-center" style="padding-bottom:30px;">
+                {%- if mode == "edit" -%}
+                    Edit
+                {%- elif mode == "copy" -%}
+                    Copy
+                {%- else -%}
+                    New
+                {%- endif -%}
+                &nbsp;Experiment</h1>
         </div>
         <form id="new_experiment_form" class="form" method="post" autocomplete="off">
-            {{ input_field(id="experiment_name", label="Experiment Name", type="text", required=True) }}
+            {{ input_field(id="experiment_name", label="Experiment Name", type="text", default_value=name, required=True) }}
             <div id="checkName"></div>
+            {{ select_input("experiment_priority", "Priority", priorities, triple_option_builder) }}
             <div class="form-group required">
-                <label for="markdown">Markdown</label>
+                <label for="wmd-input">Markdown</label>
                 <div id="wmd-button-bar"></div>
-                <textarea id="wmd-input" name="markdown" style="width: 100%;height: 100px;resize: vertical;"></textarea>
+                <textarea id="wmd-input" name="markdown" style="width: 100%;height: 100px;resize: vertical;">
+                    {%- if md -%}
+                        {{ md }}
+                    {%- endif -%}
+                </textarea>
                 <div id="wmd-preview" style="margin-bottom: 20px;background-color: #efefef;"></div>
             </div>
             <script type="text/javascript">
@@ -33,31 +46,42 @@
             <button id="submitBtn" type="submit" class="btn btn-default">Submit</button>
         </form>
     </div>
-        <script>
-            let submitBtn = document.getElementById("submitBtn");
-            let checkName = document.getElementById("checkName");
-            let experimentName = document.getElementById("experiment_name");
+    <script>
+        let submitBtn = document.getElementById("submitBtn");
+        let checkName = document.getElementById("checkName");
+        let experimentName = document.getElementById("experiment_name");
 
-            let checkingName = "";
+        let checkingName = "";
 
-            ajaxRequest.onreadystatechange = function () {
-                if (ajaxRequest.readyState === 4) {
-                    if (ajaxRequest.responseText === checkingName) {
-                        submitBtn.disabled = false;
-                        checkName.innerHTML = "{{ img('checked.svg', 30) }} name is available";
-                    } else if (ajaxRequest.responseText === "no") {
-                        checkName.innerHTML = "{{ img('cancel.svg', 30) }} name is not available";
-                    }
+        ajaxRequest.onreadystatechange = function () {
+            if (ajaxRequest.readyState === 4) {
+                if (ajaxRequest.responseText === checkingName) {
+                    submitBtn.disabled = false;
+                    checkName.innerHTML = "{{ img('checked.svg', 30) }} name is available";
+                } else if (ajaxRequest.responseText === "no") {
+                    checkName.innerHTML = "{{ img('cancel.svg', 30) }} name is not available";
                 }
-            };
-
-            function checkNameFunc(name) {
-                submitBtn.disabled = true;
-                checkingName = name;
-                checkName.innerHTML = "Checking name...";
-                sendPost("{{ request.url_root + "check_name" }}", {name});
             }
+        };
 
-            experimentName.onchange = (() => {checkNameFunc(experimentName.value)});
-        </script>
+        function checkNameFunc(name) {
+            {% if mode == "edit" %}
+                if (name === "{{ name }}") {
+                    submitBtn.disabled = false;
+                    checkName.innerHTML = "";
+                    return;
+                }
+            {% endif %}
+            submitBtn.disabled = true;
+            checkingName = name;
+            checkName.innerHTML = "Checking name...";
+            sendPost("{{ request.url_root + "check_name" }}", {name});
+        }
+
+        experimentName.onchange = (() => {
+            checkNameFunc(experimentName.value);
+        });
+
+        if (experimentName.value) checkNameFunc(experimentName.value);
+    </script>
 {%- endblock %}

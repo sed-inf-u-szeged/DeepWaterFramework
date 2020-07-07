@@ -1,4 +1,6 @@
 {% extends "base.j2" %}
+{% from 'experiment/experiment_macros.j2' import initAjax %}
+{% from 'table_macros.j2' import table_sort %}
 {% block content %}
     <div class="container">
         <div class="jumbotron">
@@ -7,32 +9,41 @@
             </h1>
         </div>
         {% if workers %}
-            <table class="table">
+            <table id="worker_list" class="table">
                 <colgroup>
                     <col span="1" style="width: 50%;">
-                    <col span="1" style="width: 50%;">
+                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 5%;">
                 </colgroup>
                 <tr>
-                    <th>ID</th>
-                    <th>Status</th>
+                    <th style="cursor: pointer;" onclick="sortTable(0, true)">Name</th>
+                    <th style="cursor: pointer;" onclick="sortTable(1, true)">Status</th>
+                    <th>Delete</th>
                 </tr>
                 {% for worker_id, worker in workers %}
                     <tr>
                         <td class="align-middle">
-                            <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker_id|e }}</b></a>
+                            <a href="{{ request.url_root + 'worker/' + worker_id }}"><b>{{ worker.name|e }}</b></a>
                         </td>
-                        {% if worker.is_working() %}
-                            <td class="align-middle">
-                                <b style="color: green;">Working</b>
-                            </td>
-                        {% elif worker.blocked_by_error %}
+                        {% if worker.blocked_by_error %}
                             <td class="align-middle">
                                 <b style="color: red;">ERROR!</b>
                             </td>
+                            <td>
+                                <input type="image" src="{{ url_for('static', filename='delete.svg') }}"
+                                       alt="delete" height="24" width="24"
+                                       onclick="delete_worker('{{ worker_id }}')">
+                            </td>
+                        {% elif worker.is_working() %}
+                            <td class="align-middle">
+                                <b style="color: green;">Working</b>
+                            </td>
+                            <td></td>
                         {% else %}
                             <td class="align-middle">
                                 <b class="worker_status" id="{{ worker.communication_ts }}"> . . . </b>
                             </td>
+                            <td></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -41,6 +52,8 @@
             <h2 class="text-center">No workers yet.</h2>
         {% endif %}
     </div>
+    {{ table_sort("worker_list") }}
+    {{ initAjax() }}
     <script>
         let statusTexts = document.getElementsByClassName("worker_status");
 
@@ -63,5 +76,19 @@
         window.addEventListener('load', function () {
             setWorkersStatus();
         });
+
+        ajaxRequest.onreadystatechange = function () {
+            if (ajaxRequest.readyState === 4) {
+                if (ajaxRequest.responseText === "delete_success") {
+                    location.reload(true);
+                } else if (ajaxRequest.responseText === "delete_failed") {
+                    alert("Delete worker failed!");
+                }
+            }
+        };
+
+        function delete_worker(worker_id) {
+            sendPost(`{{ request.url_root }}workers`, {command: 'delete_worker', worker_id});
+        }
     </script>
 {%- endblock %}

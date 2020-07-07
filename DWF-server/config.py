@@ -28,6 +28,3 @@ es_indices = [
 
 flask_port = 12345 if not local_mode else 4000
 flask_host = '0.0.0.0' if not local_mode else 'localhost'
-
-_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-_LOCK_FILE = os.path.join(_ROOT_DIR, 'db_init.lock')

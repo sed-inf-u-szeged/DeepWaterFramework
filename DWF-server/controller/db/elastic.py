@@ -7,8 +7,7 @@ es = Elasticsearch([{'host': config.es_host, 'port': 9200}])
 
 def create_document(index, doc):
     try:
-        document_id = es.index(index=index, body=doc, refresh='true')['_id']
-        return document_id
+        return es.index(index=index, body=doc, refresh='true')['_id']
 
     except Exception as e:
         return None
@@ -30,13 +29,16 @@ def search_one_document(index, query):
         return None
 
 
-def dict_query(dict):
+def dict_query(dict, sort=None):
     return {
         'query': {
             'bool': {
                 'must': list(map(lambda attr: {'term': {attr[0]: attr[1]}}, dict))
             }
-        }
+        },
+        'sort': [] if not sort else [
+            sort
+        ]
     }
 
 
@@ -80,11 +82,45 @@ def update_document(index, id, fields):
         return None
 
 
+def delete_document(index, id):
+    try:
+        return es.delete(index=index, id=id, refresh='true')['_id']
+
+    except Exception as e:
+        return None
+
+
+def delete_documents(index, query):
+    try:
+        size = es.search(index=index)['hits']['total']['value']
+        results = es.search(index=index, body=query, size=size)['hits']['hits']
+        success = True
+        for d in results:
+            success = es.delete(index=index, id=d['_id'], refresh='true')['_id'] and success
+
+        return success
+
+    except Exception as e:
+        return None
+
+
 def search_documents(index, query, mapper):
     try:
         size = es.search(index=index)['hits']['total']['value']
         results = es.search(index=index, body=query, size=size)['hits']['hits']
-        return list(map(lambda d: (d['_id'], mapper(d['_source'])), results))
+        return [(d['_id'], mapper(d['_source'])) for d in results]
+
+    except Exception as e:
+        pass
+
+    return []
+
+
+def search_document_ids(index, query):
+    try:
+        size = es.search(index=index)['hits']['total']['value']
+        results = es.search(index=index, body=query, size=size)['hits']['hits']
+        return [d['_id'] for d in results]
 
     except Exception as e:
         pass

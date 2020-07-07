@@ -1,8 +1,9 @@
 {%- extends "base.j2" -%}
+{% from 'table_macros.j2' import table_sort %}
 {%- block content -%}
     <div class="container">
         <div class="jumbotron">
-            <h1 class="text-center" style="padding-bottom:30px;">Experiment summary</h1>
+            <h1 class="text-center" style="padding-bottom:30px;">{{ experiment.name }}<br /> - <br />Summary</h1>
         </div>
         <div class="text-center">
             {%- if experiment -%}
@@ -23,15 +24,15 @@
                         <col span="1" style="width: 10%;">
                     </colgroup>
                     <tr>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(0)">task</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(1)">tp</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(2)">tn</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(3, true)">fp</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(4, true)">fn</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(5)">accuracy</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(6)">precision</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(7)">recall</th>
-                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(8)">fmes</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(0, false, true)">task</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(1, false, true)">tp</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(2, false, true)">tn</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(3, true, true)">fp</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(4, true, true)">fn</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(5, false, true)">accuracy</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(6, false, true)">precision</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(7, false, true)">recall</th>
+                        <th style="text-align:center; cursor: pointer;" onclick="sortTable(8, false, true)">fmes</th>
                     </tr>
                     {% for task in experiment.tasks %}
                         <tr>
@@ -47,9 +48,8 @@
                         </tr>
                     {% endfor %}
                 </table>
+                {{ table_sort("results_table") }}
                 <script>
-                    let results_table = document.getElementById("results_table");
-
                     markBestResults(1, true);
                     markBestResults(2, true);
                     markBestResults(3, false);
@@ -60,7 +60,7 @@
                     markBestResults(8, true);
 
                     function markBestResults(n, desc) {
-                        let rows = results_table.rows;
+                        let rows = table.rows;
                         let maxIs = [1], maxVal = parseFloat(rows[1].getElementsByTagName("TD")[n].innerHTML);
                         for (let i = 2; i < rows.length; i++) {
                             let value = parseFloat(rows[i].getElementsByTagName("TD")[n].innerHTML);
@@ -73,30 +73,6 @@
                         }
                         for (let i = 0; i < maxIs.length; i++)
                             rows[maxIs[i]].getElementsByTagName("TD")[n].style.backgroundColor = "#b3f5bc";
-                    }
-
-                    function sortTable(n, asc) {
-                        let rows, switching = true, i, x, y, shouldSwitch, dir = (asc ? "asc" : "desc"), switchCount = 0;
-                        while (switching) {
-                            switching = false;
-                            rows = results_table.rows;
-                            for (i = 1, shouldSwitch = false; i < (rows.length - 1) && !shouldSwitch; i++) {
-                                x = rows[i].getElementsByTagName("TD")[n];
-                                y = rows[i + 1].getElementsByTagName("TD")[n];
-                                if ((dir === "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) ||
-                                    (dir === "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase())) {
-                                    shouldSwitch = true;
-                                }
-                            }
-                            if (shouldSwitch) {
-                                rows[i - 1].parentNode.insertBefore(rows[i], rows[i - 1]);
-                                switching = true;
-                                switchCount++;
-                            } else if (switchCount === 0 && dir === (asc ? "asc" : "desc")) {
-                                dir = (!asc ? "asc" : "desc");
-                                switching = true;
-                            }
-                        }
                     }
                 </script>
             {%- else -%}

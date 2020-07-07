@@ -12,7 +12,6 @@ config = {
         {
             "parameter_id": "kernel",
             "label": "SVM kernel",
-            "type": "float",
             "selection_values": [
                 "linear",
                 "poly",

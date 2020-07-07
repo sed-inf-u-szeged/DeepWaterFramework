@@ -1,4 +1,4 @@
-from flask_restful import Resource
+from flask_restful import abort, Resource
 from flask import request, jsonify, make_response, g
 
 import config
@@ -11,15 +11,18 @@ class Error(Resource):
 
     def post(self):
         try:
-            response = {'hash': g.hash, 'success': True if self.remove_current_task(g.hash, request.json) else False}
-            return make_response(jsonify(response), 200)
+            success = self.remove_current_task(g.hash, request.json)
+            if not success:
+                abort(400, message="Couldn't report error!")
+
+            return make_response(jsonify({'hash': g.hash}), 200)
 
         except Exception as e:
             if config.debug_mode:
-                return make_response(str(e), 404)
+                return make_response(jsonify({'hash': '', 'error': str(e)}))
 
             else:
-                return make_response('', 404)
+                return make_response(jsonify({'hash': '', 'error': True}))
 
     @staticmethod
     def remove_current_task(worker_id, json):

@@ -40,8 +40,8 @@ class WorkerDetails(Resource):
             else:
                 task = lts.get_task_by_id(worker.current_task_id)
 
-            parent_tasks = [(t_id, ts.get_task_by_id(t_id)) for t_id in task.parent_tasks]
-            running_task_ids = [t_id for t_id, t in parent_tasks if t.state == "running"]
+            parents = ts.get_assembling_parents(worker.current_task_id) if result['is_assembling'] else ts.get_learning_parents(worker.current_task_id)
+            running_task_ids = [t_id for t_id, t in parents if t.state == "running"]
             result['task_ids'] = running_task_ids
             if len(running_task_ids) > 1:
                 result['is_working_on_multiple_tasks'] = True

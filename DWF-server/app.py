@@ -5,14 +5,21 @@ import os
 
 import config
 from routes import *
+from controller import worker_observer
+from controller import experiment_store as es
+from controller import task_scheduler
 
 app = Flask(__name__)
+worker_observer.init()
+task_scheduler.init(es.list_experiments())
 
 Bootstrap(app)
 
 api = Api(app)
 
 api.add_resource(Ping, '/ping')
+api.add_resource(GetTask, '/get_task')
+api.add_resource(Register, '/register')
 api.add_resource(Error, '/error')
 api.add_resource(Status, '/status')
 api.add_resource(Result, '/result')
@@ -21,11 +28,18 @@ api.add_resource(WorkerFixed, '/worker_fixed/<hash>')
 api.add_resource(WorkerList, '/workers')
 api.add_resource(TaskDetails, '/task/<hash>', endpoint="task_details")
 api.add_resource(experiment.New, '/experiment/new', endpoint="new_experiment")
+api.add_resource(experiment.New, '/experiment/<copy_id>/copy', endpoint="copy_experiment")
+api.add_resource(experiment.New, '/experiment/<edit_id>/edit', endpoint="edit_experiment")
 api.add_resource(experiment.Manage, '/experiment/<hash>', endpoint="manage_experiment")
 api.add_resource(experiment.List, '/', '/experiment/list', endpoint="list_experiments")
-api.add_resource(experiment.Summary, '/', '/experiment/<hash>/summary', endpoint="experiment_summary")
-api.add_resource(experiment.AddAssembleConfig, '/experiment/<hash>/add_assembler_config', endpoint="add_assembler_config")
-api.add_resource(experiment.AddLearnConfig, '/experiment/<hash>/add_learning_config', endpoint="add_learning_config")
+api.add_resource(experiment.Get, '/experiment/get/<name>', endpoint="get_experiment")
+api.add_resource(experiment.Summary, '/experiment/<hash>/summary', endpoint="experiment_summary")
+api.add_resource(experiment.AddAssembleConfig, '/experiment/<hash>/add_assembler_config', endpoint="add_assembling")
+api.add_resource(experiment.AddLearnConfig, '/experiment/<hash>/add_learning_config', endpoint="add_learning")
+api.add_resource(experiment.AddAssembleConfig, '/experiment/<hash>/edit_assembler_config/<edit_id>', endpoint="edit_assembling")
+api.add_resource(experiment.AddLearnConfig, '/experiment/<hash>/edit_learning_config/<edit_id>', endpoint="edit_learning")
+api.add_resource(experiment.AddAssembleConfig, '/experiment/<hash>/copy_assembler_config/<copy_id>', endpoint="copy_assembling")
+api.add_resource(experiment.AddLearnConfig, '/experiment/<hash>/copy_learning_config/<copy_id>', endpoint="copy_learning")
 api.add_resource(experiment.CountGeneratedConfigs, '/count_generated_configs', endpoint="count_generated_configs")
 api.add_resource(experiment.DeleteConfig, '/delete_config', endpoint="delete_config")
 api.add_resource(experiment.CheckName, '/check_name', endpoint="check_name")
@@ -75,4 +89,4 @@ def favicon(filename):
 
 
 if __name__ == '__main__':
-    app.run(host=config.flask_host, port=config.flask_port)
+    app.run(host=config.flask_host, port=config.flask_port, threaded=True)

@@ -30,3 +30,7 @@ def get_all_experiment():
 
 def update_experiment(changes, exp_id):
     return es.update_document(e_idx, exp_id, changes)
+
+
+def delete_experiment(exp_id):
+    return es.delete_document(e_idx, exp_id)

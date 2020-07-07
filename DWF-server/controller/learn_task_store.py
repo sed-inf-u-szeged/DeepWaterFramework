@@ -1,5 +1,5 @@
 from controller.db import learn_task_db as db
-from model import task_builder, AssembleTask
+from model import task_builder, AssembleTask, LearnTask
 from controller import assemble_task_store as ats
 
 
@@ -36,3 +36,13 @@ def get_unassigned_task():
 
 def update_task(changes, task_id):
     return db.update_task(changes, task_id)
+
+
+def rerun_task(task_id, assemble_task_id):
+    l_task = get_task_by_id(task_id)
+    l_task_changes = l_task.make_obsolete()
+    update_task(l_task_changes, task_id)
+
+    new_l_task = LearnTask(l_task.assemble_config, assemble_task_id, l_task.learn_config)
+    new_l_task.make_runnable()
+    return new_learn_task(new_l_task)
