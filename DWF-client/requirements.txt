@@ -1,11 +1,11 @@
 requests
-py-cpuinfo
+py-cpuinfo==7.0.0
 nvgpu
 psutil
 hurry.filesize
 paramiko
 
-tensorflow==1.15
+tensorflow==1.15.2
 sklearn
 numpy
 pandas

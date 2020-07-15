@@ -21,7 +21,7 @@ def get_platform_info():
     platform_info['os'] = platform.platform()
     cpu_info = json.loads(get_cpu_info_json())
     platform_info['cpu'] = {}
-    platform_info['cpu']['brand'] = cpu_info['brand']
+    platform_info['cpu']['brand'] = cpu_info['brand_raw']
     platform_info['cpu']['clock_speed'] = cpu_info['hz_actual']
     platform_info['cpu']['cores'] = cpu_info['count']
     platform_info['gpu_json_str'] = get_gpu_info()

@@ -8,11 +8,11 @@ pylint = "*"
 
 [packages]
 requests = "*"
-py-cpuinfo = "*"
+py-cpuinfo = "==7.0.0"
 nvgpu = "*"
 psutil = "*"
 paramiko = "*"
-tensorflow = "==1.15"
+tensorflow = "==1.15.2"
 sklearn = "*"
 numpy = "*"
 pandas = "*"
@@ -20,4 +20,4 @@ gensim = "*"
 "hurry.filesize" = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.6.7"
