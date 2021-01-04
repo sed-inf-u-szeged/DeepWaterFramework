@@ -1,0 +1,15 @@
+<span>
+  {{ display.valueFixed }}
+  <ng-container *ngIf="comparison.shouldDisplay; else noRefRow">
+    <span
+      *ngIf="comparison.difference != null"
+      class="label"
+      [ngClass]="comparison.isBetter == null ? 'label--na' : comparison.isBetter ? 'label--better' : 'label--worse'"
+    >
+      {{ comparison.difference }}
+    </span>
+  </ng-container>
+  <ng-template #noRefRow>
+    <span class="label">{{ display.stdDevFixed }}</span>
+  </ng-template>
+</span>

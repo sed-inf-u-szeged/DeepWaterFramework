@@ -1,0 +1,32 @@
+<button
+  mat-raised-button
+  [matMenuTriggerFor]="focusMenu"
+  [matBadge]="badgeNumber"
+  matBadgeColor="accent"
+  [disabled]="numberOptions.length === 0"
+>
+  <mat-icon>center_focus_strong</mat-icon>
+  Focus
+</button>
+<mat-menu #focusMenu="matMenu" yPosition="above">
+  <div class="learn-result-focus-button-menu" (click)="$event.stopPropagation()">
+    <div class="learn-result-focus-button-menu__toggle">
+      Enable
+      <mat-slide-toggle
+        [(ngModel)]="focusEnabled"
+        (ngModelChange)="onChange($event, focusedValueIndex)"
+        [disabled]="numberOptions.length === 0"
+      ></mat-slide-toggle>
+    </div>
+    <div class="learn-result-focus-button-menu__number-select">
+      <span>Focus on top: </span>
+      <mat-form-field>
+        <mat-select [(ngModel)]="focusedValueIndex" (ngModelChange)="onChange(focusEnabled, $event)">
+          <mat-option *ngFor="let i of numberOptions" [value]="i">
+            {{ i + 1 }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+</mat-menu>

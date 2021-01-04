@@ -1,0 +1,15 @@
+version: '3.0'
+services:
+  dwf-angular-ui:
+    image: dwf-angular-ui
+    build:
+      context: .
+      dockerfile: .docker/dwf-angular-ui.dockerfile
+    environment:
+      - DWF_LOCAL_MODE
+    ports:
+      - 4200:80
+    networks:
+      - dwf-network
+networks:
+  dwf-network:

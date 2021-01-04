@@ -39,6 +39,14 @@ services:
         constraints: [node.role == manager]
     networks:
       - dwf-network
+  dwf-angular-ui:
+    image: klmntoth/dwf-angular-ui:latest
+    environment:
+      - DWF_LOCAL_MODE
+    ports:
+      - 4200:80
+    networks:
+      - dwf-network
 volumes:
   esdata:
     driver: local

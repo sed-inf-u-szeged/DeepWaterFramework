@@ -1,0 +1,22 @@
+.theme-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-app-background {
+  flex: 1;
+}
+
+.page-container {
+  padding: 16px;
+}
+
+mat-toolbar {
+  position: relative;
+  z-index: 2;
+}
+
+mat-progress-bar {
+  position: absolute;
+}
