@@ -40,7 +40,7 @@ class WorkerDetails(Resource):
             else:
                 task = lts.get_task_by_id(worker.current_task_id)
 
-            parents = ts.get_assembling_parents(worker.current_task_id) if result['is_assembling'] else ts.get_learning_parents(worker.current_task_id)
+            parents = ts.get_assembling_parents(worker.current_task_id) if result.get('is_assembling', False) else ts.get_learning_parents(worker.current_task_id)
             running_task_ids = [t_id for t_id, t in parents if t.state == "running"]
             result['task_ids'] = running_task_ids
             if len(running_task_ids) > 1:
