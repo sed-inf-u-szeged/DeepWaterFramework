@@ -13,7 +13,7 @@ config = {
             "parameter_id": "learning-rate",
             "label": "Learning rate",
             "type": "float",
-            "default_value": 1.0,
+            "default_value": 0.5,
         },
         {
             "parameter_id": "max-depth",
