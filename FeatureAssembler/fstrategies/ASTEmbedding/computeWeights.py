@@ -99,6 +99,8 @@ def computeWeights(arguments):
         print ("Something went wrong in model loading/creation")
         return
 
+    filename = modelFileName
+
     bugs=dict()
     if (arguments.bugFile):
         print ("Reading bug information from "+arguments.bugFile)
@@ -106,7 +108,7 @@ def computeWeights(arguments):
         #print(bugs)
         
         bugName, extension =os.path.splitext(os.path.basename(arguments.bugFile))
-        filename=modelFileName+"_B#"+bugName
+        filename=filename+"_B#"+bugName
 
         metrics=dict()
         mheader=list()

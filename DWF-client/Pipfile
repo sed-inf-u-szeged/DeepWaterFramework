@@ -18,6 +18,8 @@ numpy = "*"
 pandas = "*"
 gensim = "*"
 "hurry.filesize" = "*"
+elasticsearch = "*"
+tensorflow-addons = "*"
 
 [requires]
 python_version = "3.6.7"

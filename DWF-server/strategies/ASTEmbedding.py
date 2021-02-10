@@ -76,6 +76,7 @@ config = {
         {
             "parameter_id": "dm",
             "label": "DM",
+            "type": "int",
             "required": True,
             "selection_values": [
                 0,
