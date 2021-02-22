@@ -39,16 +39,8 @@ def buildModel(arguments, d2v_model, tagged_data):
     print("Total words in corpus: {}".format(d2v_model.corpus_total_words))
     print("Total documents in corpus: {}".format(d2v_model.corpus_count))
 
-    for epoch in range(arguments.max_epochs):
-        print('iteration {0}'.format(epoch))
-        d2v_model.train(tagged_data,
-                    total_examples=d2v_model.corpus_count,
-                    epochs=d2v_model.epochs)
 
-        # decrease the learning rate
-        d2v_model.alpha -= 0.0002
-        # fix the learning rate, no decay
-        d2v_model.min_alpha = d2v_model.alpha
+    d2v_model.train(tagged_data, total_examples=d2v_model.corpus_count, epochs=d2v_model.epochs)
     astName, extension =os.path.splitext(os.path.basename(arguments.astFile))
     modelFileName="A#"+astName+"_DV#v"+str(d2v_model.vector_size)+"w"+str(d2v_model.window)+"e"+str(d2v_model.epochs)+"a"+str(int(d2v_model.dm))
     modelFile=arguments.outputDir+"/"+modelFileName+".model"
