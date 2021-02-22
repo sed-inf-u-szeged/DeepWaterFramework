@@ -112,6 +112,19 @@ def get_strategy_config_list(strategy_config, strategy_parameters):
     return distinct_configs([check_visibility_rules(strategy_config, config) for config in strategy_parameters_list])
 
 
+def my_range(start, end, step):
+    if 0.00001 > step > -0.00001 or end <= start:
+        return [start]
+
+    ret = [start]
+    current = start + step
+    while (step > 0 and current <= end) or (step < 0 and current >= end):
+        ret.append(current)
+        current = current + step
+
+    return ret
+
+
 def get_parameter_values(parameters_dump):
     strategy_parameters = {}
     for k, v in parameters_dump.items():
@@ -119,7 +132,7 @@ def get_parameter_values(parameters_dump):
             k = k.rstrip("_from")
             values = []
             if f'{k}_to' in parameters_dump and f'{k}_step' in parameters_dump:
-                values = list(range(int(v), int(parameters_dump[f'{k}_to']) + 1, int(parameters_dump[f'{k}_step'])))
+                values = my_range(float(v), float(parameters_dump[f'{k}_to']), float(parameters_dump[f'{k}_step']))
 
         elif k.endswith(('_to', '_step')):
             continue
