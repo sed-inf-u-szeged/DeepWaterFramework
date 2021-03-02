@@ -36,7 +36,6 @@ config = {
         {
             "parameter_id": "gamma",
             "label": "Kernel coefficient",
-            "type": "float",
             "visibility_rules": [
                 {
                     "field": "kernel",

@@ -84,9 +84,10 @@ class Result(Resource):
                         exp_change = exp_sum.set_assemble_result(p_task_id, result)
 
                     else:
-                        exp_change = exp_sum.set_learn_result(p_task_id, result)
+                        exp_change = exp_sum.set_learn_result(p_task_id, result) if exp_sum else None
 
-                    success = ess.update_experiment_summary(exp_change, p_task.experiment_id) and success
+                    if exp_change:
+                        success = ess.update_experiment_summary(exp_change, p_task.experiment_id) and success
 
                 return bool(success)
 
