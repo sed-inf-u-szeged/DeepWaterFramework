@@ -5,7 +5,8 @@ psutil
 hurry.filesize
 paramiko
 
-tensorflow==1.15.4
+tensorflow==2.4
+tensorflow-addons
 sklearn
 numpy
 pandas
