@@ -3,7 +3,7 @@ import numpy as np
 
 def computeAverage(model, ast):
     #print("computing ASTs' weights with the average weights of their words")
-    words=model.wv.index2word 
+    words=model.wv.index_to_key 
     #words=d2v_model.wv.index2word
     #print(words)
     size=len(model.wv.get_vector(words[0])) 
@@ -17,7 +17,7 @@ def computeAverage(model, ast):
 
 def computeAverageWithBest10(model, ast):
     #print("computing ASTs' weights with the average weights of their words")
-    words=model.wv.index2word
+    words=model.wv.index_to_key
     #words=d2v_model.wv.index2word
     #print(words)
     size=len(model.wv.get_vector(words[0]))
