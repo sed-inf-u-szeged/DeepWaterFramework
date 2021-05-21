@@ -1,10 +1,13 @@
 version: "3"
 services:
   dwf-server:
-    image: viszkoktamas93/dwf-server
+    image: dwf-server
+    depends_on:
+      - "elasticsearch"
     deploy:
       restart_policy:
-        condition: on-failure
+        delay: 15s
+        window: 180s
     volumes:
       - sedstorvol:/Deep-Water
     ports:
