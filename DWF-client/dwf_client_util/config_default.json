@@ -1,6 +1,6 @@
 {
   "NAME": "",
-  "SERVER_URL": "http://localhost:4000",
+  "SERVER_URL": "http://10.6.13.75:4000",
   "API_ENDPOINTS": {
     "REGISTER": "/register",
     "GET_TASK": "/get_task",
@@ -14,7 +14,7 @@
   "DBH_PATH": "../DeepBugHunter/",
   "FA_PATH": "../FeatureAssembler/",
   "STRATEGIES_PATH": "strategies",
-  "STORAGE_PREFIX": "//sedstor.inf.u-szeged.hu/common/team/columbus/projects/kutatas/Deep-Water",
+  "STORAGE_PREFIX": "F:/work/kutatas/dwf/inputs",
   "VERSIONING": [
     {
       "PATH": "",

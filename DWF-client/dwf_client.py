@@ -8,13 +8,9 @@ import sys
 import argparse
 import logging
 import traceback
-from multiprocessing import Process, Value, Pipe
 from requests.exceptions import ConnectionError
-from time import sleep
 
-from dwf_client_util import util
-from dwf_client_util import server
-from dwf_client_util import worker
+from dwf_client_util import util, server, worker
 
 ClientStatus = util.ClientStatus
 

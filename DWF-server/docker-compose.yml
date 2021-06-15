@@ -1,6 +1,7 @@
 version: "3"
 services:
   dwf-server:
+    build: .
     image: dwf-server
     depends_on:
       - "elasticsearch"

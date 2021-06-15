@@ -3,7 +3,33 @@
 Requests tasks from the DWF server via HTTP, reporting the progress and the results.
 If no task is available, retries again in a preconfigured time (default is 30 sec). 
 
-### Prerequisites
+## Prerequisites
+It is prefered to use DWF Client with miniconda for isolation and better support for older machines.
+
+  1. [Install miniconda](https://docs.conda.io/en/latest/miniconda.html)
+  2. In miniconda prompt (Windows) or in shell (Linux):  
+    
+    conda env create -f env.yml
+
+  Alternatively, however it is not recommended, you can also use native pip:
+
+    pip install -r requirements.txt
+
+## Running the client
+Before running the client, make sure that the configuration files are well specified. Refer  to the **Configurations** section for more information.
+
+If using conda:
+
+  1. Activate the environment
+  
+    conda activate dwf_client
+  
+  2. Run the client
+
+    python dwf_client.py
+
+
+## Prerequisites
 Pip and Python 3.6 is required (tensorflow doesn't support versions >= 3.7).
 It is also recommended to use pipenv to avoid package conflicts with other projects on the target machine. 
 
@@ -19,27 +45,19 @@ Alternatively, you can also use native pip, if a virtualized environment is not 
 
     pip install --trusted-host pypi.python.org -r requirements.txt
 
-### Running the client
-If using pipenv:
-
-    pipenv run python dwf_client.py
-
-If usig pip:
-
-    python dwf_client.py
-
-#### Switches
+### Switches
 - `--reinit`: Start client with it's state reset (use when server db is wiped).
 - `--debug`: Show traceback along with exception messages.
 - `--name=NAME`: Set client's name to NAME (this is given by the client user, may not be unique server wise)  
 
-### Configurations
-Can be found at subfolder `dwf_client_utils`.
+## Configurations
+Can be found in the main folder.
    
 - `client_params.json`: Parameters related to learning and embedding models.
 - `config.json`: Configurations related to the DWF client-server architecture.
 
-Set these accordingly before running the client.
+In practice, most of the time only `config.json` must be modified. The fields that probably should be modified: SERVER_URL, STORAGE_PREFIX.
+
 
 ## Advanced
 

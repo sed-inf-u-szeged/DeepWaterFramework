@@ -2,14 +2,18 @@ import sys
 import os
 import json
 import pickle
+import shutil
 from enum import IntEnum
+from pathlib import Path
 
 config = None
 client_info = {}
 ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 HASH_PICKLE = 'client_hash'
-CONFIG_PATH = os.path.join(ABS_PATH, 'config.json')
-CPARAMS_PATH = os.path.join(ABS_PATH, 'client_params.json')
+DEFAULT_CONFIG = 'config_default.json'
+DEFAULT_CPARAMS = 'client_params_default.json'
+CONFIG_PATH = 'config.json'
+CPARAMS_PATH = 'client_params.json'
 
 
 class ClientStatus(IntEnum):
@@ -24,6 +28,14 @@ class Signals(IntEnum):
 def create_sandbox(dirname='sandbox'):
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
+
+def copy_if_not_exists(src : Path, dest : Path):
+    if not dest.exists():
+        shutil.copy(src, dest)
+
+def init_config():
+    copy_if_not_exists(Path(ABS_PATH) / DEFAULT_CONFIG, Path(CONFIG_PATH))
+    copy_if_not_exists(Path(ABS_PATH) / DEFAULT_CPARAMS, Path(CPARAMS_PATH))
 
 
 def load_config(path=CONFIG_PATH):
@@ -92,4 +104,5 @@ def get_client_name(default):
 
 
 client_info['client_id'] = get_stored_hash()
+init_config()
 config = load_config()

@@ -3,3 +3,6 @@ output/
 client_hash
 sandbox/*
 .venv
+
+client_params.json
+config.json
