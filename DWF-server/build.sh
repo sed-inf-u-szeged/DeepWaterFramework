@@ -6,5 +6,5 @@ read -sp "Enter SAMBA Password: " s_pwd
 export SMB_USER=$s_usr
 export SMB_PASSWD=$s_pwd
 sudo sysctl -w vm.max_map_count=262144
-docker-compose up 
+docker-compose build 
 docker swarm init
