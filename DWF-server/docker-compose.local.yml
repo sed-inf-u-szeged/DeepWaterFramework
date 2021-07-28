@@ -1,0 +1,58 @@
+version: "3"
+services:
+  dwf-server:
+    build: .
+    image: dwf-server
+    depends_on:
+      - "elasticsearch"
+    deploy:
+      restart_policy:
+        delay: 15s
+        window: 180s
+    volumes:
+      - ./local_mount:/Deep-Water
+    ports:
+      - 4000:12345
+    networks:
+      - dwf-network
+  elasticsearch:
+    image: elasticsearch:7.5.2
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 127.0.0.1:9200:9200
+    networks:
+      - dwf-network
+  kibana:
+    image: kibana:7.5.2
+    ports:
+      - 5601:5601
+    networks:
+      - dwf-network
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - dwf-network
+  dwf-angular-ui:
+    image: klmntoth/dwf-angular-ui:latest
+    environment:
+      - DWF_LOCAL_MODE
+    ports:
+      - 4200:80
+    networks:
+      - dwf-network
+volumes:
+  esdata:
+    driver: local
+networks:
+  dwf-network:

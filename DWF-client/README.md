@@ -3,9 +3,13 @@
 Requests tasks from the DWF server via HTTP, reporting the progress and the results.
 If no task is available, retries again in a preconfigured time (default is 30 sec). 
 
-## Prerequisites
-It is prefered to use DWF Client with miniconda for isolation and better support for older machines.
+## Prerequisites for Docker
+The easiest way to setup the client is to use docker. If doing so:
+  1. [Install Docker](https://docs.docker.com/get-docker/)
+  2. [Install docker-compose](https://docs.docker.com/compose/install/)
 
+## Prerequisities for standard setups
+It is prefered to use DWF Client with miniconda for isolation and better support for older machines.
   1. [Install miniconda](https://docs.conda.io/en/latest/miniconda.html)
   2. In miniconda prompt (Windows) or in shell (Linux):  
     
@@ -16,11 +20,17 @@ It is prefered to use DWF Client with miniconda for isolation and better support
     pip install -r requirements.txt
 
 ## Running the client
-Before running the client, make sure that the configuration files are well specified. Refer  to the **Configurations** section for more information.
+Before running the client, make sure that the configuration files are well specified. Refer to the **Configurations** section for more information.
 
-If using conda:
+### Docker
+If the requirements in **Prerequisites for Docker** are fulfilled, you can start the client by:  
 
-  1. Activate the environment
+    docker-compose up [--scale dwf_client=NUMBER_OF_CLIENTS]
+
+Note that you can run multiple clients by the scale parameter of docker-compose up.
+
+### Standard setup
+  1. If using conda, activate the environment first:
   
     conda activate dwf_client
   
@@ -29,23 +39,7 @@ If using conda:
     python dwf_client.py
 
 
-## Prerequisites
-Pip and Python 3.6 is required (tensorflow doesn't support versions >= 3.7).
-It is also recommended to use pipenv to avoid package conflicts with other projects on the target machine. 
-
-Install pipenv:
-
-    pip install pipenv
-
-Then:
-
-    pipenv install --ignore-pipfile
-
-Alternatively, you can also use native pip, if a virtualized environment is not needed:
-
-    pip install --trusted-host pypi.python.org -r requirements.txt
-
-### Switches
+## Switches
 - `--reinit`: Start client with it's state reset (use when server db is wiped).
 - `--debug`: Show traceback along with exception messages.
 - `--name=NAME`: Set client's name to NAME (this is given by the client user, may not be unique server wise)  
@@ -57,6 +51,9 @@ Can be found in the main folder.
 - `config.json`: Configurations related to the DWF client-server architecture.
 
 In practice, most of the time only `config.json` must be modified. The fields that probably should be modified: SERVER_URL, STORAGE_PREFIX.
+
+**IMPORTANT:** If you're starting the client in local mode, docker, and on Windows, instead of localhost use the `host.docker.internal` domain.
+So, the SERVER_URL in local mode should be: http://host.docker.internal:4000
 
 
 ## Advanced
