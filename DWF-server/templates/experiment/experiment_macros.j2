@@ -58,7 +58,7 @@
 {% endmacro %}
 
 {% macro experiment_task_row(task, exp) -%}
-    {%- with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" %}
+    {%- with not_only_manual = task.learn_config or task.assemble_config.strategy_id != "manual_file_input" or task.assemble_config.strategy_id != "train_test_input" %}
         {{ "" }}<tr>
             <td>
                 <input type="image" onclick="reorderTask('{{ task.id }}', 'up')" {{ "" -}}

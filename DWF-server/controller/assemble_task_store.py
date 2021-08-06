@@ -10,6 +10,11 @@ def new_assemble_task(task):
             task.assign_to("none")
             task.completed(task.assemble_config['strategy_parameters']['file_path'])
 
+        if task.assemble_config['strategy_id'] == 'train_test_input':
+            task.assign_to("none")
+            task.completed(task.assemble_config['strategy_parameters']['train_path'] + "::" + task.assemble_config['strategy_parameters']['test_path'])
+
+
         a_task = task
         a_es_id = db.new_assemble_task(task)
 
@@ -48,7 +53,7 @@ def update_task(changes, task_id):
 
 def rerun_task(task_id):
     a_task = get_task_by_id(task_id)
-    if a_task.assemble_config['strategy_id'] == "manual_file_input":
+    if a_task.assemble_config['strategy_id'] == "manual_file_input" or a_task.assemble_config['strategy_id'] == "train_test_input":
         return task_id, a_task
 
     a_task_changes = a_task.make_obsolete()

@@ -110,6 +110,9 @@ class Manage(Resource):
 
         if a_conf['strategy_id'] == "manual_file_input":
             exp_sum.add_assemble_result(a_conf['strategy_parameters']['file_path'])
+        
+        if a_conf['strategy_id'] == 'train_test_input':
+            exp_sum.add_assemble_result(a_conf['strategy_parameters']['train_path'] + "::" + a_conf['strategy_parameters']['test_path'])
 
         return exp_sum
 
@@ -261,7 +264,7 @@ class Manage(Resource):
             a_task_es_id, a_task = ats.new_assemble_task(a_task)
             if a_task_es_id:
                 if not learn_configs:
-                    if a_task.assemble_config['strategy_id'] != "manual_file_input":
+                    if a_task.assemble_config['strategy_id'] != "manual_file_input" and a_task.assemble_config['strategy_id'] != "train_test_input":
                         task = Task(exp_id, a_task_es_id, None, index)
                         index += 1
                         if a_task.is_completed():

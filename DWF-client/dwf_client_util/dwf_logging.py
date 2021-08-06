@@ -4,8 +4,11 @@ from dwf_client_util.util import get_module
 from dwf_client_util.server import send_to_endpoint
 import os
 import builtins
+from pathlib import Path
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config.json'
+
+#os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json') 
 
 
 # Custom class to send logs to server via http
