@@ -3,4 +3,8 @@ services:
     dwf_client:
         build: 
             context: .
-        
+        network_mode: "host"
+        volumes:
+            - ../DeepBugHunter:/dwf/DeepBugHunter
+            - ../FeatureAssembler:/dwf/FeatureAssembler
+
