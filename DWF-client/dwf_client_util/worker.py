@@ -4,6 +4,7 @@ from time import sleep
 import sys
 from multiprocessing import Process, Value, Pipe
 from abc import abstractmethod
+from pathlib import Path
 
 import dwf_client_util.util as util
 import dwf_client_util.server as server
@@ -101,15 +102,16 @@ class Pinger(BaseWorker):
 
 
 class TaskWorker(BaseWorker):
-    def __init__(self, client_id, client_status, debug=False):
+    def __init__(self, client_id, client_status, debug=False, save_models = False):
         super(TaskWorker, self).__init__(client_id, "TASK WORKER", debug)
         self.client_status = client_status
         logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
+        self.save_models = save_models
 
     def _process_task(self, task):
         try:
             logging.info(f'New task assigned:\n {task}')
-            task_manager.process_task(task)
+            task_manager.process_task(task, self.save_models)
             logging.info("Task is done.")
             self.client_status.value = ClientStatus.IDLE
 
@@ -136,12 +138,12 @@ class TaskWorker(BaseWorker):
 
 
 class ProcessManager():
-    def __init__(self, client_id, debug=False):
+    def __init__(self, client_id, debug=False, save_models=False):
         self.client_id = client_id
         self.client_status = Value("i", ClientStatus.IDLE)
         self.parent_conn, self.child_conn = Pipe()
         self.pinger = Pinger(client_id, self.child_conn, self.client_status)
-        self.task_worker = TaskWorker(client_id, self.client_status, debug)
+        self.task_worker = TaskWorker(client_id, self.client_status, debug, save_models)
 
     def _are_processes_alive(self, processes):
         for process in processes:

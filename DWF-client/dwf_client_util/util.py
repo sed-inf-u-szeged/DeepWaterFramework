@@ -42,7 +42,8 @@ def load_config(path=CONFIG_PATH):
     with open(path, 'r') as config_file:
         config = json.load(config_file)
 
-    config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
+    if config['STORAGE_PREFIX']:
+        config['STORAGE_PREFIX'] = os.path.normpath(config['STORAGE_PREFIX'])
     return config
 
 
@@ -101,6 +102,15 @@ def get_client_name(default):
         return config['NAME']
 
     return default
+
+def get_simbiota_save_filename(path_str):
+    if "::" in path_str:
+        path_str = path_str.split("::")[0]
+    
+    file_path = Path(path_str)
+    return  file_path.parent.parent.parent.name + '_' + \
+            file_path.parent.parent.name + "_" + \
+            file_path.parent.name  
 
 
 client_info['client_id'] = get_stored_hash()

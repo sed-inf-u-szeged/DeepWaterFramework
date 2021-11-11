@@ -15,6 +15,7 @@
   "FA_PATH": "../FeatureAssembler/",
   "STRATEGIES_PATH": "strategies",
   "STORAGE_PREFIX": "",
+  "SAVE_MODEL_PATH": "../../saved_models",
   "VERSIONING": [
     {
       "PATH": "",

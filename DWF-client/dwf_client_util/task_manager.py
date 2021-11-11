@@ -1,4 +1,6 @@
-from dwf_client_util.util import merge_params, load_cparams, load_config, prepend_prefix, get_module
+from pathlib import Path
+
+from dwf_client_util.util import merge_params, load_cparams, load_config, prepend_prefix, get_module, get_simbiota_save_filename
 
 config = load_config()
 
@@ -43,10 +45,14 @@ def learn(args):
     get_module(config['DBH_PATH'], 'dbh').main(params)
 
 
-def process_task(task):
+def process_task(task, save_model):
     if task['type'] == 'learning':
         current_strategy = task['parameters']['strategy'][0]
         task['parameters']['strategy'][0][1] = fix_paths(current_strategy[0], current_strategy[1])
+
+        if save_model:
+            save_model_path = str((Path(config['SAVE_MODEL_PATH']) / get_simbiota_save_filename(task['parameters']['shared']['csv'])).resolve())
+            task['parameters']['shared']['save_model_path'] = save_model_path
 
     else:
         current_strategy = task['parameters']['strategy']

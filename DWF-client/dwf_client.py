@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--reinit', help='reinitailize client id', action='store_true', default=False)
     parser.add_argument('--debug', help='print traceback along with exceptions', action='store_true', default=False)
     parser.add_argument('--name', help='set name for the worker', default='')
+    parser.add_argument('--save_models', help='save ML models to path given in config.json', action='store_true', default=False)
     args = parser.parse_args()
 
     logging.info("Client started...")
@@ -45,7 +46,7 @@ if __name__ == "__main__":
         logging.info(f"Client id: {client_id}")
         util.client_info['client_id'] = client_id
 
-        process_manager = worker.ProcessManager(client_id, args.debug)
+        process_manager = worker.ProcessManager(client_id, args.debug, args.save_models)
         process_manager.launch()
 
     except ConnectionError as e:
