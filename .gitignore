@@ -8,4 +8,4 @@ venv/
 .idea/
 DWF-client/dwf_client_util/config.json
 DWF-server/config.py
-DWF-client2
+DWF-client/sandbox/*
