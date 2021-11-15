@@ -84,7 +84,11 @@ def strip_prefix(path):
 
 
 def prepend_prefix(path):
-    return os.path.join(config['STORAGE_PREFIX'], os.path.normpath(path).strip(os.sep)).replace('\\', os.sep)
+    if config['STORAGE_PREFIX']:
+        return os.path.join(config['STORAGE_PREFIX'], os.path.normpath(path).strip(os.sep)).replace('\\', os.sep)
+    else:
+        return os.path.normpath(path)
+        #.replace('\\', os.sep)
 
 
 def merge_params(cparams, params):
