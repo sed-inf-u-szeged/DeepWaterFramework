@@ -135,7 +135,7 @@ class Experiment():
         else:
             logging.info(f"Couldn't get experiment '{self.name}'")
 
-    def _add_all_configs(self):
+    def add_all_configs(self):
         is_ok = True
 
         for config in self.learning_configs:
@@ -163,6 +163,8 @@ class Experiment():
         logging.info("Tasks are started.")
         return True
 
+
+
     def start(self):
         self.create()
 
@@ -170,7 +172,7 @@ class Experiment():
             logging.error(f"Can't run experiment: it's not created on server '{self.server.url}'")
             return False
 
-        self._add_all_configs()
+        self.add_all_configs()
 
         if not self.generate_tasks():
             return False
