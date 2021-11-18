@@ -149,7 +149,21 @@ class Experiment():
         return is_ok
 
 
-    def run(self):
+    def generate_tasks(self):
+        if not self.server.generate_tasks(self.id):
+            logging.error(f"Can't generate tasks on server '{self.server.url}'")
+            return False
+        logging.info("Tasks are generated")
+        return True
+
+    def run_tasks(self):
+        if not self.server.run_tasks(self.id):
+            logging.error(f"Can't run tasks on server '{self.server.url}'")
+            return False
+        logging.info("Tasks are started.")
+        return True
+
+    def start(self):
         self.create()
 
         if not self.id:
@@ -158,14 +172,10 @@ class Experiment():
 
         self._add_all_configs()
 
-        if not self.server.generate_tasks(self.id):
-            logging.error(f"Can't generate tasks on server '{self.server.url}'")
+        if not self.generate_tasks():
             return False
-        logging.info("Tasks are generated")
 
-        if not self.server.run_tasks(self.id):
-            logging.error(f"Can't run tasks on server '{self.server.url}'")
+        if not self.run_tasks():
             return False
-        logging.info("Tasks are started.")
 
         return True
