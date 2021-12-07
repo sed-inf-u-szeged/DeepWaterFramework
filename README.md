@@ -29,16 +29,16 @@ For a quick start, follow these steps:
 
 ### On the master node, start the DWF-server
 
-1.  Set the SMB_VOL and SMB_DOMAIN environment variables with a Samba share configuration in the *build_and_run.bat* or *build_and_run.sh* depending on your OS in the DWF-server folder
+1.  Set the SMB_VOL and SMB_DOMAIN environment variables with a Samba share configuration in the *build_and_run.bat* or *build.sh* depending on your OS in the DWF-server folder
 2.  Run the *build_and_run* script you just edited from command line/terminal
 3.  Enter Samba user and password when prompted
 4.  When the docker stack is up and running, go to the following URL to access the DWF server web interface
 
-        http://localhost:4000
+        http://server_url:4000
 
 5. Load the pre-defined dashboard description into Kibana, first go to the Kibana web application at
 
-        http://localhost:5601/app/kibana
+        http://server_url:5601/app/kibana
 
 6. Select Management -> Saved Objects -> Import menu item and load the dashboard descriptor file located in
 
