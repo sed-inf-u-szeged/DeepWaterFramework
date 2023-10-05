@@ -53,6 +53,9 @@ def process_task(task, save_model):
         if save_model:
             save_model_path = str((Path(config['SAVE_MODEL_PATH']) / get_simbiota_save_filename(task['parameters']['shared']['csv'])).resolve())
             task['parameters']['shared']['save_model_path'] = save_model_path
+        else:
+            save_model_path = ""
+            task['parameters']['shared']['save_model_path'] = save_model_path
 
     else:
         current_strategy = task['parameters']['strategy']
