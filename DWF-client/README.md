@@ -12,7 +12,7 @@ The easiest way to setup the client is to use docker. If doing so:
 It is prefered to use DWF Client with miniconda for isolation and better support for older machines.
   1. [Install miniconda](https://docs.conda.io/en/latest/miniconda.html)
   2. In miniconda prompt (Windows) or in shell (Linux):  
-    
+
     conda env create -f env.yml
 
   Alternatively, however it is not recommended, you can also use native pip:
@@ -27,26 +27,36 @@ If the requirements in **Prerequisites for Docker** are fulfilled, you can start
 
     docker-compose up [--scale dwf_client=NUMBER_OF_CLIENTS]
 
-Note that you can run multiple clients by the scale parameter of docker-compose up.
+You can run multiple clients by the scale parameter of docker-compose up.
+
+#### Note
+
+If client is to be ran at SZTE facilities and on the same machine where DWF-server is running, use `docker-compose-on-server-node.yml`:
+
+```
+docker compose -f docker-compose-on-server-node.yml up [--scale dwf_client=NUMBER_OF_CLIENTS]
+```
+
+
 
 ### Standard setup
   1. If using conda, activate the environment first:
-  
+
     conda activate dwf_client
-  
+
   2. Run the client
 
     python dwf_client.py
 
-
 ## Switches
+
 - `--reinit`: Start client with it's state reset (use when server db is wiped).
 - `--debug`: Show traceback along with exception messages.
 - `--name=NAME`: Set client's name to NAME (this is given by the client user, may not be unique server wise)  
 
 ## Configurations
 Can be found in the main folder.
-   
+
 - `client_params.json`: Parameters related to learning and embedding models.
 - `config.json`: Configurations related to the DWF client-server architecture.
 
@@ -71,7 +81,7 @@ Implementing a strategy for assembling or learning tasks is slightly different a
 Assembling is mainly done by the Feature Assembler which looks for the available strategies in the fstrategies subdirectory. To add a new assemling strategy the following steps must be performed:
 
 1. Implement the strategy as a python module with a callable `embed` with the followig form:
-    
+   
         def embed(args, sargs_str):
             # Performing the assemling strategy
             ...
@@ -88,15 +98,15 @@ Assembling is mainly done by the Feature Assembler which looks for the available
 The recommended way to implement a new learning strategy is to do it via the **DeepBugHunter** module (following similar fashion as the scikit learn package):
 
 1. Implement the strategy as a python module with two callables `learn` and `predict`:
-    
+   
         def predict(classifier, test, args, sargs_str, threshold=None):
             ...
             return preds
-
+        
         def learn(train, dev, test, args, sargs_str):
             ...
             return train_result, dev_result, test_result, classifier
-        
+    
     `args` represents the arguments provided by the DeepBugHunter module  
     `sargs_str` is a string containing the arguments corresponding to the strategy. It follows the argparse module's convention, that is: *"--sarg1 value1 --sarg2 value2 ..."*  
     The rest is fairly straightforward, for more information please refer to the already implemented strategies.

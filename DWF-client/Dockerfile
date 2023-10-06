@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.10.3
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT ["/dwf/client/docker-entrypoint.sh"]
 

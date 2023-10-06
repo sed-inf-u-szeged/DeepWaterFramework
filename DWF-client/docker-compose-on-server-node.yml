@@ -1,0 +1,16 @@
+# Use this compose file if you wish to spin up clients on a machine where sedstor is already initalized (mostly because the server is already runnning and has set the connection up). If doing so, don't forget to set STORAGE_PREFIX in config.json to whatever is specified here (by default "/dwf/Deep-Water")
+
+version: "3"
+services:
+    dwf_client:
+        build: 
+            context: .
+        network_mode: "host"
+        volumes:
+            - ../DeepBugHunter:/dwf/DeepBugHunter
+            - ../FeatureAssembler:/dwf/FeatureAssembler
+            - sedstorvol:/dwf/Deep-Water
+volumes:
+    sedstorvol:
+        external: true
+
