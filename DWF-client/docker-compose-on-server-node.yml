@@ -9,8 +9,8 @@ services:
         volumes:
             - ../DeepBugHunter:/dwf/DeepBugHunter
             - ../FeatureAssembler:/dwf/FeatureAssembler
-            - sedstorvol:/dwf/Deep-Water
+            - dwf_stack_sedstorvol:/dwf/Deep-Water
 volumes:
-    sedstorvol:
+    dwf_stack_sedstorvol:
         external: true
 
